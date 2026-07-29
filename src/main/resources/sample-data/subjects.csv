@@ -1,0 +1,13 @@
+name,code,country_code,category,coefficient,core,active
+Mathématiques,MATH,MAR,Scientifique,3.0,true,true
+Physique,PHYS,MAR,Scientifique,2.0,true,true
+Chimie,CHIM,MAR,Scientifique,1.5,true,true
+Sciences de la Vie et de la Terre,SVT,MAR,Scientifique,1.5,true,true
+Arabe,ARAB,MAR,Linguistique,2.0,true,true
+Français,FRAN,MAR,Linguistique,1.5,true,true
+Anglais,ANGL,MAR,Linguistique,1.5,true,true
+Histoire-Géographie,HIST,MAR,Humain,1.0,true,true
+Philosophie,PHIL,MAR,Humain,1.0,true,true
+Informatique,INFO,MAR,Technique,1.0,false,true
+Dessin Technique,DESS,MAR,Technique,1.0,false,true
+Éducation Islamique,EI,MAR,Humain,1.0,true,true

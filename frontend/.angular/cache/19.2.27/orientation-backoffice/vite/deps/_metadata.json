@@ -1,0 +1,91 @@
+{
+  "hash": "b147cb1a",
+  "configHash": "b84456ca",
+  "lockfileHash": "cf317dda",
+  "browserHash": "576f4558",
+  "optimized": {
+    "@angular/common": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "4e8d2161",
+      "needsInterop": false
+    },
+    "@angular/common/http": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
+      "file": "@angular_common_http.js",
+      "fileHash": "3f4fe88b",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "88917bcf",
+      "needsInterop": false
+    },
+    "@angular/forms": {
+      "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
+      "file": "@angular_forms.js",
+      "fileHash": "cd8c0011",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "21cff7c2",
+      "needsInterop": false
+    },
+    "@angular/platform-browser/animations/async": {
+      "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/animations/async.mjs",
+      "file": "@angular_platform-browser_animations_async.js",
+      "fileHash": "ed5f5540",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "477360de",
+      "needsInterop": false
+    },
+    "rxjs": {
+      "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
+      "file": "rxjs.js",
+      "fileHash": "06d90652",
+      "needsInterop": false
+    },
+    "rxjs/webSocket": {
+      "src": "../../../../../../node_modules/rxjs/dist/esm5/webSocket/index.js",
+      "file": "rxjs_webSocket.js",
+      "fileHash": "e3557bda",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "browser-ZI6SVK4A": {
+      "file": "browser-ZI6SVK4A.js"
+    },
+    "chunk-H7YR5YTT": {
+      "file": "chunk-H7YR5YTT.js"
+    },
+    "chunk-HL43VZPD": {
+      "file": "chunk-HL43VZPD.js"
+    },
+    "chunk-QQIT5H5G": {
+      "file": "chunk-QQIT5H5G.js"
+    },
+    "chunk-BSRJHICQ": {
+      "file": "chunk-BSRJHICQ.js"
+    },
+    "chunk-5DDSNOXN": {
+      "file": "chunk-5DDSNOXN.js"
+    },
+    "chunk-DHIKLZ2B": {
+      "file": "chunk-DHIKLZ2B.js"
+    },
+    "chunk-7GTOZ4AS": {
+      "file": "chunk-7GTOZ4AS.js"
+    },
+    "chunk-6CODDGZQ": {
+      "file": "chunk-6CODDGZQ.js"
+    }
+  }
+}

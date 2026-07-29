@@ -1,0 +1,7 @@
+name,code,university_name,faculty_name,type,degree,duration,language,description,max_students,tuition_fee,available
+Licence en Informatique,L-INFO,Université Hassan II de Casablanca,Faculté des Sciences,LICENSE,Licence,3,Français,Formation en informatique et technologies,120,5000,true
+Licence en Mathématiques,L-MATH,Université Hassan II de Casablanca,Faculté des Sciences,LICENSE,Licence,3,Français,Formation en mathématiques fondamentales,80,5000,true
+Licence en Physique,L-PHYS,Université Mohammed V de Rabat,Faculté des Sciences,LICENSE,Licence,3,Français,Formation en physique générale,100,5000,true
+Master en Informatique,M-INFO,Université Cadi Ayyad de Marrakech,Faculté des Sciences,LICENSE,Master,2,Français,Spécialisation en informatique avancée,60,8000,true
+Licence en Médecine,L-MED,Université Sidi Mohamed Ben Abdellah de Fès,Faculté de Médecine,LICENSE,Licence,6,Français,Formation médicale complète,200,3000,true
+Licence en Droit,L-DROIT,Université Abdelmalek Essaâdi de Tanger,Faculté de Droit,LICENSE,Licence,3,Français,Formation juridique générale,150,4000,true

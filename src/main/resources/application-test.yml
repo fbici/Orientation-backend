@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=POSTGRESQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false
+
+  sql:
+    init:
+      mode: never
+
+# Test logging
+logging:
+  level:
+    com.orientation.orientationapp: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG

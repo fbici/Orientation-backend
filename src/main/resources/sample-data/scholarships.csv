@@ -1,0 +1,5 @@
+name,country_code,academic_year,type,provider,description,amount,currency,deadline,status,active
+Bourse au Mérite,MAR,2025-2026,MERIT,Ministère de l'Éducation,Bourse pour les meilleurs élèves,50000,MAD,2025-09-30,ACTIVE,true
+Bourse Gouvernementale,MAR,2025-2026,GOVERNMENT,Gouvernement du Maroc,Bourse gouvernementale complète,80000,MAD,2025-08-31,ACTIVE,true
+Bourse d'Excellence,FRA,2025-2026,INTERNATIONAL,Campus France,Bourse pour étudiants internationaux,6000,EUR,2025-10-15,ACTIVE,true
+Bourse Sociale,MAR,2025-2026,NEED_BASED,Fondation Hassan II,Bourse basée sur les besoins financiers,40000,MAD,2025-09-15,ACTIVE,true

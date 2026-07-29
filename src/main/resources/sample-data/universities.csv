@@ -1,0 +1,9 @@
+name,code,country_code,city,address,phone,email,website,ranking,status,active
+Université Hassan II de Casablanca,UH2C,MAR,Casablanca,Avenue de la Résistance,0522234567,contact@uh2c.ac.ma,https://www.uh2c.ac.ma,1,ACTIVE,true
+Université Mohammed V de Rabat,UM5,MAR,Rabat,Avenue Ibn Battouta,0537777777,contact@um5.ac.ma,https://www.um5.ac.ma,2,ACTIVE,true
+Université Cadi Ayyad de Marrakech,UCA,MAR,Marrakech,Avenue Abdelkrim Khattabi,0524434646,contact@uca.ma,https://www.uca.ma,3,ACTIVE,true
+Université Sidi Mohamed Ben Abdellah de Fès,USMBA,MAR,Fès,Avenue Belghazi,0535637373,contact@usmba.ac.ma,https://www.usmba.ac.ma,4,ACTIVE,true
+Université Abdelmalek Essaâdi de Tanger,UAE,MAR,Tanger,Avenue Abdelmoumen,0539393939,contact@uae.ma,https://www.uae.ma,5,ACTIVE,true
+Université Paris-Saclay,FPS,FRA,Paris-Saclay,Boulevard des Mille et Une Villes,0169854321,contact@universite-paris-saclay.fr,https://www.universite-paris-saclay.fr,1,ACTIVE,true
+Université de Strasbourg,UDS,FRA,Strasbourg,Avenue de l'Université,0368856565,contact@unistra.fr,https://www.unistra.fr,2,ACTIVE,true
+Université de Tunis El Manar,UTM,TUN,Tunis,Charguia II,0021671234567,contact@utm.rnu.tn,https://www.utm.rnu.tn,1,ACTIVE,true

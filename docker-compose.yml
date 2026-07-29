@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: orientation-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: orientation_dev
+      POSTGRES_USER: orientation_user
+      POSTGRES_PASSWORD: orientation_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orientation_user -d orientation_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - orientation-network
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orientation-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/orientation_dev
+      DB_USERNAME: orientation_user
+      DB_PASSWORD: orientation_pass
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-for-production}
+    volumes:
+      - app_uploads:/app/uploads
+      - app_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/v1/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - orientation-network
+
+volumes:
+  postgres_data:
+  app_uploads:
+  app_logs:
+
+networks:
+  orientation-network:
+    driver: bridge

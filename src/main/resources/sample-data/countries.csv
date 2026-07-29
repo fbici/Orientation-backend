@@ -1,0 +1,9 @@
+name,code,official_name,phone_code,currency,active
+Maroc,MAR,Royaume du Maroc,+212,MAD,true
+France,FRA,République Française,+33,EUR,true
+Tunisie,TUN,République Tunisienne,+216,TND,true
+Algérie,DZA,République Algérienne,+213,DZD,true
+Belgique,BEL,Royaume de Belgique,+32,EUR,true
+Canada,CAN,Canada,+1,CAD,true
+Sénégal,SEN,République du Sénégal,+221,XOF,true
+Côte d'Ivoire,CIV,République de Côte d'Ivoire,+225,XOF,true

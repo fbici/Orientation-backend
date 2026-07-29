@@ -1,0 +1,1 @@
+UPDATE users SET password = '$2a$10$W4qU8VaGl.Zwh.BkcEj2veUuQI42dtuEZ0pW6hvbaSeEqY2hNp7aS' WHERE email = 'admin@orientation.com';
