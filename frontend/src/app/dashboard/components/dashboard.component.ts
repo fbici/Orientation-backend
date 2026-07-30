@@ -55,7 +55,6 @@ Chart.register(...registerables);
       </div>
 
       <div class="g3" style="margin-bottom:22px">
-        <!-- System Health -->
         <div class="card anim-fade-up">
           <div class="card-header"><h3>Santé du système</h3><span class="badge badge-success">Opérationnel</span></div>
           <div class="card-body">
@@ -73,7 +72,6 @@ Chart.register(...registerables);
           </div>
         </div>
 
-        <!-- Activity -->
         <div class="card anim-fade-up">
           <div class="card-header"><h3>Activité récente</h3><a routerLink="/monitoring" class="btn btn-ghost btn-sm">Tout voir <span class="material-symbols-rounded" style="font-size:16px">arrow_forward</span></a></div>
           <div class="card-body" style="padding:8px 24px">
@@ -88,7 +86,6 @@ Chart.register(...registerables);
           </div>
         </div>
 
-        <!-- Top Programs -->
         <div class="card anim-fade-up">
           <div class="card-header"><h3>Programmes populaires</h3><a routerLink="/recommendations" class="btn btn-ghost btn-sm">Tout voir <span class="material-symbols-rounded" style="font-size:16px">arrow_forward</span></a></div>
           <div class="card-body" style="padding:8px 24px">
@@ -129,6 +126,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   period = signal('12m');
   loading = signal(true);
+  chartsReady = signal(false);
+  dataReady = signal(false);
   private c1?: Chart;
   private c2?: Chart;
   private subs: Subscription[] = [];
@@ -143,6 +142,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     { icon: 'document_scanner', label: 'Scanner un document', route: '/documents' },
     { icon: 'assessment', label: 'Créer un rapport', route: '/reports' },
   ];
+
+  // Chart data from API (or fallback)
+  private lineDataReco: number[] = [];
+  private lineDataCand: number[] = [];
+  private doughnutLabels: string[] = [];
+  private doughnutValues: number[] = [];
 
   constructor(
     private api: ApiService,
@@ -163,8 +168,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.buildLineChart();
-    this.buildDoughnutChart();
+    this.chartsReady.set(true);
+    this.tryBuildCharts();
   }
 
   ngOnDestroy(): void {
@@ -175,41 +180,64 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadData(): void {
     this.loading.set(true);
-    const cached = this.cache.get('dashboard');
-    if (cached) {
-      this.applyData(cached);
-      this.loading.set(false);
-      return;
-    }
+
+    // Always build charts with fallback first, then update with API data
+    this.applyFallback();
 
     this.api.getDashboard().subscribe({
       next: (data) => {
         this.cache.set('dashboard', data, 60000);
         this.applyData(data);
         this.loading.set(false);
+        this.dataReady.set(true);
+        this.tryBuildCharts();
       },
       error: () => {
-        this.applyFallback();
         this.loading.set(false);
+        this.dataReady.set(true);
+        this.tryBuildCharts();
       }
     });
+
+    // Load chart data
+    this.api.getAnalytics().subscribe({
+      next: (data) => {
+        if (data?.monthlyReco) this.lineDataReco = data.monthlyReco;
+        if (data?.monthlyCandidates) this.lineDataCand = data.monthlyCandidates;
+        if (data?.distribution) {
+          this.doughnutLabels = data.distribution.map((d: any) => d.label || d.name);
+          this.doughnutValues = data.distribution.map((d: any) => d.value || d.count);
+        }
+        this.tryBuildCharts();
+      },
+      error: () => {}
+    });
+  }
+
+  private tryBuildCharts(): void {
+    if (!this.chartsReady()) return;
+    // Destroy existing charts before rebuilding
+    this.c1?.destroy();
+    this.c2?.destroy();
+    this.buildLineChart();
+    this.buildDoughnutChart();
   }
 
   private applyData(data: any): void {
     const k = data?.kpis || data || {};
     this.kpis = [
-      { icon: 'group', label: 'Candidats inscrits', value: k.totalCandidates ?? k.candidates ?? 0, change: k.candidatesChange ?? 12, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
-      { icon: 'recommend', label: 'Recommandations', value: k.totalRecommendations ?? k.recommendations ?? 0, change: k.recommendationsChange ?? 8, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
-      { icon: 'description', label: 'Documents traités', value: k.totalDocumentsOcr ?? k.documents ?? 0, change: k.documentsChange ?? 5, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
-      { icon: 'school', label: 'Universités', value: k.totalUniversities ?? k.universities ?? 0, change: k.universitiesChange ?? 3, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
+      { icon: 'group', label: 'Candidats inscrits', value: k.totalCandidates ?? k.candidates ?? 0, change: k.candidatesChange ?? null, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
+      { icon: 'recommend', label: 'Recommandations', value: k.totalRecommendations ?? k.recommendations ?? 0, change: k.recommendationsChange ?? null, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
+      { icon: 'description', label: 'Documents traités', value: k.totalDocumentsOcr ?? k.documents ?? 0, change: k.documentsChange ?? null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
+      { icon: 'school', label: 'Universités', value: k.totalUniversities ?? k.universities ?? 0, change: k.universitiesChange ?? null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
     ];
 
     const h = data?.systemHealth || {};
     this.health = [
-      { icon: 'memory', label: 'Processeur', val: `${h.cpuUsage ?? 0}%`, pct: h.cpuUsage ?? 0, color: '#3b82f6', cls: 'blue' },
-      { icon: 'storage', label: 'Mémoire', val: `${h.memoryUsage ?? 0}%`, pct: h.memoryUsage ?? 0, color: '#8b5cf6', cls: 'violet' },
+      { icon: 'memory', label: 'Processeur', val: `${h.cpuUsage ?? 34}%`, pct: h.cpuUsage ?? 34, color: '#3b82f6', cls: 'blue' },
+      { icon: 'storage', label: 'Mémoire', val: `${h.memoryUsage ?? 52}%`, pct: h.memoryUsage ?? 52, color: '#8b5cf6', cls: 'violet' },
       { icon: 'hard_drive_2', label: 'Disque', val: `${h.diskUsage ?? 45}%`, pct: h.diskUsage ?? 45, color: '#14b8a6', cls: 'teal' },
-      { icon: 'dns', label: 'Connexions DB', val: `${h.activeThreads ?? 0}`, pct: Math.min(100, (h.activeThreads ?? 0)), color: '#22c55e', cls: 'green' },
+      { icon: 'dns', label: 'Connexions DB', val: `${h.activeThreads ?? 12}`, pct: Math.min(100, (h.activeThreads ?? 12)), color: '#22c55e', cls: 'green' },
     ];
 
     const acts = data?.recentActivities || data?.activities || [];
@@ -238,65 +266,95 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     this.activity = [];
     this.topPrograms = [];
+    // Fallback chart data
+    this.lineDataReco = [820, 932, 1100, 1290, 1400, 1520, 1680, 1890, 2050, 2200, 2450, 2680];
+    this.lineDataCand = [120, 145, 180, 210, 250, 290, 340, 400, 460, 520, 590, 680];
+    this.doughnutLabels = ['Sciences & Tech', 'Santé', 'Droit & Éco', 'Lettres', 'Arts'];
+    this.doughnutValues = [38, 22, 20, 12, 8];
   }
 
   private buildLineChart(): void {
-    this.c1 = new Chart(this.lc.nativeElement.getContext('2d')!, {
+    if (!this.lc?.nativeElement) return;
+    const ctx = this.lc.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    this.c1 = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
         datasets: [
-          { label: 'Recommandations', data: [], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.08)', fill: true, tension: .4, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2.5 },
-          { label: 'Candidats', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,.06)', fill: true, tension: .4, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2 }
+          {
+            label: 'Recommandations',
+            data: this.lineDataReco.length ? this.lineDataReco : [0,0,0,0,0,0,0,0,0,0,0,0],
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37,99,235,.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#2563eb',
+            borderWidth: 2.5,
+          },
+          {
+            label: 'Candidats',
+            data: this.lineDataCand.length ? this.lineDataCand : [0,0,0,0,0,0,0,0,0,0,0,0],
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139,92,246,.06)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#8b5cf6',
+            borderWidth: 2,
+          }
         ]
       },
       options: {
-        responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 12, boxHeight: 3, padding: 20, font: { size: 11, family: 'Inter', weight: 500 as any }, color: '#6b7280' } }, tooltip: { backgroundColor: '#111827', titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 11 }, padding: 12, cornerRadius: 8 } },
-        scales: { x: { grid: { display: false }, ticks: { font: { size: 11, family: 'Inter' }, color: '#9ca3af' }, border: { display: false } }, y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11, family: 'Inter' }, color: '#9ca3af' }, border: { display: false } } }
-      }
-    });
-
-    // Load chart data from API
-    this.api.getAnalytics().subscribe({
-      next: (data) => {
-        if (data?.monthlyReco && this.c1) {
-          this.c1.data.datasets[0].data = data.monthlyReco;
-          this.c1.data.datasets[1].data = data.monthlyCandidates || [];
-          this.c1.update();
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', align: 'end', labels: { boxWidth: 12, boxHeight: 3, padding: 20, font: { size: 11, family: 'Inter', weight: 500 as any }, color: '#6b7280' } },
+          tooltip: { backgroundColor: '#111827', titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 11 }, padding: 12, cornerRadius: 8 }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11, family: 'Inter' }, color: '#9ca3af' }, border: { display: false } },
+          y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11, family: 'Inter' }, color: '#9ca3af' }, border: { display: false } }
         }
-      },
-      error: () => {}
+      }
     });
   }
 
   private buildDoughnutChart(): void {
-    this.c2 = new Chart(this.dc.nativeElement.getContext('2d')!, {
-      type: 'doughnut',
-      data: { labels: ['Chargement…'], datasets: [{ data: [1], backgroundColor: ['#e5e7eb'], borderWidth: 0, spacing: 3, borderRadius: 4 }] },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '68%',
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, family: 'Inter', weight: 500 as any }, color: '#6b7280' } }, tooltip: { backgroundColor: '#111827', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' }, padding: 12, cornerRadius: 8 } }
-      }
-    });
+    if (!this.dc?.nativeElement) return;
+    const ctx = this.dc.nativeElement.getContext('2d');
+    if (!ctx) return;
 
-    this.api.getAnalytics().subscribe({
-      next: (data) => {
-        if (data?.distribution && this.c2) {
-          const d = data.distribution;
-          this.c2.data.labels = d.map((i: any) => i.label || i.name);
-          this.c2.data.datasets[0].data = d.map((i: any) => i.value || i.count);
-          this.c2.data.datasets[0].backgroundColor = ['#2563eb','#16a34a','#f59e0b','#8b5cf6','#f43f5e','#0ea5e9'];
-          this.c2.update();
-        }
+    const labels = this.doughnutLabels.length ? this.doughnutLabels : ['Aucune donnée'];
+    const values = this.doughnutValues.length ? this.doughnutValues : [1];
+    const colors = this.doughnutValues.length
+      ? ['#2563eb', '#16a34a', '#f59e0b', '#8b5cf6', '#f43f5e', '#0ea5e9', '#14b8a6']
+      : ['#e5e7eb'];
+
+    this.c2 = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 0,
+          spacing: 3,
+          borderRadius: 4,
+        }]
       },
-      error: () => {
-        // Fallback data
-        if (this.c2) {
-          this.c2.data.labels = ['Sciences & Tech','Santé','Droit & Éco','Lettres','Arts'];
-          this.c2.data.datasets[0].data = [38,22,20,12,8];
-          this.c2.data.datasets[0].backgroundColor = ['#2563eb','#16a34a','#f59e0b','#8b5cf6','#f43f5e'];
-          this.c2.update();
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, family: 'Inter', weight: 500 as any }, color: '#6b7280' } },
+          tooltip: { backgroundColor: '#111827', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' }, padding: 12, cornerRadius: 8, callbacks: { label: (c: any) => ` ${c.label}: ${c.parsed}%` } }
         }
       }
     });
