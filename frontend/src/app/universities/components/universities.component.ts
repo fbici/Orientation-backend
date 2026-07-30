@@ -22,20 +22,18 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 
       <div class="card">
         <div class="card-header">
-          <div style="display:flex;gap:8px;align-items:center">
-            <span style="font-size:.8125rem;color:var(--n-500)">{{ total() }} universités</span>
-          </div>
+          <span style="font-size:.8125rem;color:var(--n-500)">{{ total() }} universités</span>
           <div style="display:flex;gap:8px">
             <div style="position:relative">
               <span class="material-symbols-rounded" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--n-400)">search</span>
-              <input type="text" class="form-input" style="padding-left:36px;width:220px" placeholder="Rechercher…" [(ngModel)]="search" (ngModelChange)="load()">
+              <input type="text" class="form-input" style="padding-left:36px;width:220px" placeholder="Rechercher..." [(ngModel)]="search" (ngModelChange)="load()">
             </div>
             <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
           </div>
         </div>
         <div class="card-body" style="padding:0">
           @if (loading()) {
-            <div style="padding:48px;text-align:center"><div class="spinner"></div><p style="margin-top:12px;font-size:.8125rem;color:var(--n-500)">Chargement…</p></div>
+            <div style="padding:48px;text-align:center"><div class="spinner"></div><p style="margin-top:12px;font-size:.8125rem;color:var(--n-500)">Chargement...</p></div>
           } @else {
             <table class="data-table">
               <thead>
@@ -50,10 +48,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                       <a [routerLink]="['/universities', u.id]" style="font-weight:600;color:var(--n-900)">{{ u.name }}</a>
                       @if (u.shortName) { <span style="font-size:.75rem;color:var(--n-500);margin-left:6px">{{ u.shortName }}</span> }
                     </td>
-                    <td style="font-size:.8125rem">{{ u.country?.name || '—' }}</td>
-                    <td style="font-size:.8125rem">{{ u.city?.name || '—' }}</td>
+                    <td style="font-size:.8125rem">{{ u.country?.name || '-' }}</td>
+                    <td style="font-size:.8125rem">{{ u.city?.name || '-' }}</td>
                     <td><span class="badge" [class]="u.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'">{{ u.status || 'ACTIVE' }}</span></td>
-                    <td style="font-size:.8125rem;font-weight:600">{{ u.ranking || '—' }}</td>
+                    <td style="font-size:.8125rem;font-weight:600">{{ u.ranking || '-' }}</td>
                     <td style="text-align:right">
                       <div style="display:flex;gap:2px;justify-content:flex-end">
                         <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
@@ -65,8 +63,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                   <tr><td colspan="6" style="text-align:center;padding:48px;color:var(--n-400)">
                     <span class="material-symbols-rounded" style="font-size:48px;display:block;margin-bottom:12px;color:var(--n-300)">school</span>
                     <p style="font-weight:600;color:var(--n-600)">Aucune université</p>
-                    <p style="font-size:.8125rem;margin-bottom:16px">Ajoutez votre première université pour commencer.</p>
-                    <button class="btn btn-primary btn-sm" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Ajouter une université</button>
+                    <p style="font-size:.8125rem;margin-bottom:16px">Ajoutez votre premiere universite pour commencer.</p>
+                    <button class="btn btn-primary btn-sm" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Ajouter une universite</button>
                   </td></tr>
                 }
               </tbody>
@@ -75,7 +73,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
         </div>
         @if (totalPages() > 1) {
           <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--n-100)">
-            <span style="font-size:.8125rem;color:var(--n-500)">{{ total() }} résultats</span>
+            <span style="font-size:.8125rem;color:var(--n-500)">{{ total() }} resultats</span>
             <div style="display:flex;gap:4px">
               <button class="btn btn-ghost btn-sm btn-icon" [disabled]="page()===0" (click)="page.set(page()-1);load()"><span class="material-symbols-rounded" style="font-size:18px">chevron_left</span></button>
               <span style="font-size:.8125rem;color:var(--n-600);padding:5px 12px">{{ page()+1 }} / {{ totalPages() }}</span>
@@ -87,33 +85,33 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
     </div>
 
     <!-- Create/Edit Modal -->
-    <app-modal [open]="showForm()" [title]="editId() ? 'Modifier l\'université' : 'Nouvelle université'" size="600px" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
+    <app-modal [open]="showForm()" [title]="formTitle()" size="600px" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
-        <div class="form-group" style="grid-column:span 2"><label class="form-label">Nom *</label><input type="text" class="form-input" [(ngModel)]="form.name" placeholder="ex: Université d'Abomey-Calavi"></div>
+        <div class="form-group" style="grid-column:span 2"><label class="form-label">Nom *</label><input type="text" class="form-input" [(ngModel)]="form.name" placeholder="ex: Universite d'Abomey-Calavi"></div>
         <div class="form-group"><label class="form-label">Sigle</label><input type="text" class="form-input" [(ngModel)]="form.shortName" placeholder="ex: UAC"></div>
         <div class="form-group"><label class="form-label">Pays *</label>
-          <select class="form-input" [(ngModel)]="form.countryId"><option value="">Sélectionner…</option>@for(c of countries();track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
+          <select class="form-input" [(ngModel)]="form.countryId"><option value="">Selectionner...</option>@for(c of countries();track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
         </div>
         <div class="form-group"><label class="form-label">Ville *</label>
-          <select class="form-input" [(ngModel)]="form.cityId"><option value="">Sélectionner…</option>@for(c of cities();track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
+          <select class="form-input" [(ngModel)]="form.cityId"><option value="">Selectionner...</option>@for(c of cities();track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
         </div>
         <div class="form-group"><label class="form-label">Statut</label>
           <select class="form-input" [(ngModel)]="form.status"><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select>
         </div>
-        <div class="form-group" style="grid-column:span 2"><label class="form-label">Adresse</label><input type="text" class="form-input" [(ngModel)]="form.address" placeholder="Adresse complète"></div>
+        <div class="form-group" style="grid-column:span 2"><label class="form-label">Adresse</label><input type="text" class="form-input" [(ngModel)]="form.address" placeholder="Adresse complete"></div>
         <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" [(ngModel)]="form.email" placeholder="contact@univ.edu"></div>
-        <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" [(ngModel)]="form.phone" placeholder="+229 XX XX XX XX"></div>
-        <div class="form-group"><label class="form-label">Site web</label><input type="url" class="form-input" [(ngModel)]="form.website" placeholder="https://…"></div>
-        <div class="form-group"><label class="form-label">Année de fondation</label><input type="number" class="form-input" [(ngModel)]="form.foundedYear" placeholder="ex: 1970"></div>
-        <div class="form-group" style="grid-column:span 2"><label class="form-label">Description</label><textarea class="form-input" rows="3" [(ngModel)]="form.description" placeholder="Description de l'université…"></textarea></div>
+        <div class="form-group"><label class="form-label">Telephone</label><input type="tel" class="form-input" [(ngModel)]="form.phone" placeholder="+229 XX XX XX XX"></div>
+        <div class="form-group"><label class="form-label">Site web</label><input type="url" class="form-input" [(ngModel)]="form.website" placeholder="https://..."></div>
+        <div class="form-group"><label class="form-label">Annee de fondation</label><input type="number" class="form-input" [(ngModel)]="form.foundedYear" placeholder="ex: 1970"></div>
+        <div class="form-group" style="grid-column:span 2"><label class="form-label">Description</label><textarea class="form-input" rows="3" [(ngModel)]="form.description" placeholder="Description de l'universite..."></textarea></div>
       </div>
     </app-modal>
 
     <!-- Delete Confirmation -->
     <app-confirm-dialog
       [open]="showDelete()"
-      title="Supprimer l'université"
-      [message]="'Êtes-vous sûr de vouloir supprimer « ' + (deleteTarget()?.name || '') + ' » ? Cette action est irréversible.'"
+      title="Supprimer"
+      [message]="deleteMessage()"
       confirmText="Supprimer"
       icon="delete_forever"
       iconColor="#ef4444"
@@ -153,6 +151,15 @@ export class UniversitiesComponent implements OnInit {
     this.api.getCities().subscribe({ next: (r) => this.cities.set(r?.content || r || []), error: () => {} });
   }
 
+  formTitle(): string {
+    return this.editId() ? 'Modifier' : 'Nouvelle universite';
+  }
+
+  deleteMessage(): string {
+    const name = this.deleteTarget()?.name || '';
+    return `Supprimer "${name}" ? Cette action est irreversible.`;
+  }
+
   load(): void {
     this.loading.set(true);
     this.api.getUniversities(this.page(), 20).subscribe({
@@ -162,7 +169,7 @@ export class UniversitiesComponent implements OnInit {
         this.totalPages.set(r?.totalPages || 0);
         this.loading.set(false);
       },
-      error: () => { this.loading.set(false); this.toast.error('Erreur lors du chargement des universités.'); }
+      error: () => { this.loading.set(false); this.toast.error('Erreur lors du chargement.'); }
     });
   }
 
@@ -192,7 +199,7 @@ export class UniversitiesComponent implements OnInit {
       ? this.api.updateUniversity(this.editId()!, this.form)
       : this.api.createUniversity(this.form);
     call.subscribe({
-      next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success(this.editId() ? 'Université modifiée.' : 'Université créée.'); this.load(); },
+      next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success(this.editId() ? 'Universite modifiee.' : 'Universite creee.'); this.load(); },
       error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur lors de la sauvegarde.'); }
     });
   }
@@ -205,7 +212,7 @@ export class UniversitiesComponent implements OnInit {
   doDelete(): void {
     this.deleting.set(true);
     this.api.deleteUniversity(this.deleteTarget()?.id).subscribe({
-      next: () => { this.deleting.set(false); this.showDelete.set(false); this.toast.success('Université supprimée.'); this.load(); },
+      next: () => { this.deleting.set(false); this.showDelete.set(false); this.toast.success('Universite supprimee.'); this.load(); },
       error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur lors de la suppression.'); }
     });
   }

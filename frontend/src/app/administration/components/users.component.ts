@@ -66,7 +66,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       </div>
     </app-modal>
 
-    <app-confirm-dialog [open]="showDel()" title="Supprimer l'utilisateur" [message]="'Supprimer « ' + (delTarget()?.firstName || '') + ' ' + (delTarget()?.lastName || '') + ' » ?'" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
+    <app-confirm-dialog [open]="showDel()" title="Supprimer l&#39;utilisateur" [message]="deleteMsg()" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
   `,
   styles: [`.spinner{width:32px;height:32px;border:3px solid var(--n-200);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}@keyframes spin{to{transform:rotate(360deg)}}`]
 })
@@ -122,4 +122,5 @@ export class UsersComponent implements OnInit {
   initials(u: any): string { return `${(u.firstName?.[0]||'').toUpperCase()}${(u.lastName?.[0]||'').toUpperCase()}`; }
   avatarColor(u: any): string { const h = (u.email||'').split('').reduce((a:number,c:string) => a + c.charCodeAt(0), 0); return this.colors[h % this.colors.length]; }
   roleClass(u: any): string { const r = u.roles?.[0]; if (r === 'SUPER_ADMIN') return 'badge-danger'; if (r === 'ADMIN') return 'badge-warning'; return 'badge-primary'; }
+  deleteMsg(): string { const u = this.delTarget(); return `Supprimer "${u?.firstName || ''} ${u?.lastName || ''}" ?`; }
 }
