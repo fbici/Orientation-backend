@@ -198,6 +198,7 @@ export class LayoutComponent implements OnInit {
       { icon: 'description', label: 'Documents', route: '/documents' },
       { icon: 'upload_file', label: 'Imports de données', route: '/imports' },
       { icon: 'tune', label: 'Règles d\'admission', route: '/rules' },
+      { icon: 'psychology', label: 'Intelligence', route: '/intelligence', roles: ['SUPER_ADMIN', 'ADMIN'] },
       { icon: 'hub', label: 'Knowledge Engine', route: '/knowledge', roles: ['SUPER_ADMIN', 'ADMIN'] },
     ]},
     { title: 'Système', items: [

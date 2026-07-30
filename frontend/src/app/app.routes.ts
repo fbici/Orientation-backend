@@ -20,6 +20,7 @@ export const routes: Routes = [
       { path: 'documents', loadChildren: () => import('./documents/documents.routes').then(m => m.DOCUMENTS_ROUTES) },
       { path: 'imports', loadChildren: () => import('./imports/imports.routes').then(m => m.IMPORTS_ROUTES) },
       { path: 'rules', loadChildren: () => import('./rules/rules.routes').then(m => m.RULES_ROUTES) },
+      { path: 'intelligence', loadChildren: () => import('./intelligence/intelligence.routes').then(m => m.INTELLIGENCE_ROUTES), canActivate: [roleGuard], data: { roles: ['SUPER_ADMIN', 'ADMIN'] } },
       { path: 'knowledge', loadChildren: () => import('./knowledge/knowledge.routes').then(m => m.KNOWLEDGE_ROUTES), canActivate: [roleGuard], data: { roles: ['SUPER_ADMIN', 'ADMIN'] } },
       { path: 'notifications', loadChildren: () => import('./notifications/notifications.routes').then(m => m.NOTIFICATIONS_ROUTES) },
       { path: 'administration', loadChildren: () => import('./administration/administration.routes').then(m => m.ADMINISTRATION_ROUTES), canActivate: [roleGuard], data: { roles: ['SUPER_ADMIN', 'ADMIN'] } },
