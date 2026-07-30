@@ -142,10 +142,9 @@ export class RulesComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     // Load admission criteria from the API
-    this.api.get('/api/v1/guides').subscribe({
+    this.api.getGuides().subscribe({
       next: (res: any) => {
         const guides = res?.content || res || [];
-        // Load criteria for each guide
         this.loadCriteria(guides);
       },
       error: () => {
@@ -202,12 +201,7 @@ export class RulesComponent implements OnInit {
       return;
     }
     this.saving.set(true);
-    // Save to API
-    const endpoint = this.editId() ? `/api/v1/admission-criteria/${this.editId()}` : '/api/v1/admission-criteria';
-    const call = this.editId()
-      ? this.api.get(endpoint).pipe(/* update */)
-      : this.api.get(endpoint).pipe(/* create */);
-    // For now, show success and reload
+    // TODO: connect to admission-criteria API endpoint
     setTimeout(() => {
       this.saving.set(false);
       this.showForm.set(false);
@@ -219,6 +213,4 @@ export class RulesComponent implements OnInit {
   private emptyForm(): any {
     return { name: '', category: '', criterionType: '', operator: '', minValue: null, maxValue: null, description: '', mandatory: true, weight: 1 };
   }
-
-  private get(url: string): any { return this.api.get(url); }
 }
