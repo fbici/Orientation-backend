@@ -52,7 +52,7 @@ import { IntelligenceService, SmartQueryResult } from '../../core/services/intel
         </div>
 
         <!-- Keywords -->
-        @if (result()!.keywords?.length) {
+        @if (result()!.keywords.length) {
           <div class="card" style="margin-bottom:22px">
             <div class="card-header"><h3>Mots-cles identifies</h3></div>
             <div class="card-body">
@@ -64,7 +64,7 @@ import { IntelligenceService, SmartQueryResult } from '../../core/services/intel
         }
 
         <!-- Knowledge found -->
-        @if (result()!.knowledgeNodes?.length) {
+        @if (result()!.knowledgeNodes.length) {
           <div class="card" style="margin-bottom:22px">
             <div class="card-header"><h3>Connaissances trouvees</h3><span class="badge badge-primary">{{ result()!.knowledgeNodes.length }}</span></div>
             <div class="card-body" style="padding:0">
@@ -85,7 +85,7 @@ import { IntelligenceService, SmartQueryResult } from '../../core/services/intel
         }
 
         <!-- Sources -->
-        @if (result()!.sources?.length) {
+        @if (result()!.sources.length) {
           <div class="card" style="margin-bottom:22px">
             <div class="card-header"><h3>Sources utilisees</h3></div>
             <div class="card-body" style="padding:8px 24px">
@@ -100,7 +100,7 @@ import { IntelligenceService, SmartQueryResult } from '../../core/services/intel
         }
 
         <!-- Recommended programs -->
-        @if (result()!.recommendedPrograms?.length) {
+        @if (result()!.recommendedPrograms.length) {
           <div class="card">
             <div class="card-header"><h3>Programmes recommandes</h3></div>
             <div class="card-body" style="padding:8px 24px">
