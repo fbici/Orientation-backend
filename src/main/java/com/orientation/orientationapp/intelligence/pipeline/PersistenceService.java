@@ -43,9 +43,9 @@ public class PersistenceService {
         if (entities.getUniversities() != null) {
             for (var ext : entities.getUniversities()) {
                 if (ext.getName() == null || ext.getName().isBlank()) continue;
-                // Vérifier si l'université existe déjà
-                boolean exists = universityRepository.findByNameContainingIgnoreCase(ext.getName()).stream()
-                        .anyMatch(u -> u.getName().equalsIgnoreCase(ext.getName()));
+                // Verifier si l'universite existe deja
+                boolean exists = universityRepository.findAll().stream()
+                        .anyMatch(u -> u.getName() != null && u.getName().equalsIgnoreCase(ext.getName()));
                 if (!exists) {
                     University uni = new University();
                     uni.setName(ext.getName());

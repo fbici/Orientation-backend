@@ -3,18 +3,17 @@ package com.orientation.orientationapp.intelligence.ocr;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Service OCR pour l'extraction de texte à partir de documents.
+ * Service OCR pour l'extraction de texte a partir de documents.
  *
  * Supporte :
- * - PDF (extraction directe ou OCR via Tesseract)
- * - Images (JPG, PNG, TIFF) via Tesseract
+ * - PDF (extraction basique)
  * - Word (.docx) via Apache POI
  * - Excel (.xlsx) via Apache POI
  * - CSV (lecture directe)
+ * - Images (placeholder pour Tesseract)
  */
 @Slf4j
 @Service
@@ -22,10 +21,6 @@ public class OcrService {
 
     /**
      * Extrait le texte d'un document.
-     *
-     * @param content contenu binaire du fichier
-     * @param fileName nom du fichier (pour déterminer le type)
-     * @return texte extrait
      */
     public String extractText(byte[] content, String fileName) {
         String extension = getExtension(fileName).toLowerCase();
@@ -39,10 +34,7 @@ public class OcrService {
                 case "xlsx", "xls" -> extractFromExcel(content);
                 case "csv" -> extractFromCsv(content);
                 case "txt" -> new String(content, StandardCharsets.UTF_8);
-                default -> {
-                    log.warn("Unsupported file type: {}", extension);
-                    yield new String(content, StandardCharsets.UTF_8);
-                }
+                default -> new String(content, StandardCharsets.UTF_8);
             };
         } catch (Exception e) {
             log.error("OCR failed for {}: {}", fileName, e.getMessage());
@@ -50,34 +42,40 @@ public class OcrService {
         }
     }
 
-    private String extractFromPdf(byte[] content) throws Exception {
-        // Essayer d'abord l'extraction directe (PDF textuel)
-        try (var parser = new org.apache.pdfbox.pdmodel.PDDocument()) {
-            // PDFBox extraction
-            var stripper = new org.apache.pdfbox.text.PDFTextStripper();
-            String text = stripper.getText(org.apache.pdfbox.pdmodel.PDDocument.load(content));
-            if (text != null && !text.trim().isEmpty()) {
-                log.info("PDF direct extraction: {} chars", text.length());
-                return text;
+    private String extractFromPdf(byte[] content) {
+        // PDF text extraction using basic string scanning
+        // In production, add PDFBox dependency for proper extraction
+        String raw = new String(content, StandardCharsets.ISO_8859_1);
+
+        // Try to find text streams in PDF
+        StringBuilder text = new StringBuilder();
+        int idx = 0;
+        while (idx < raw.length()) {
+            int start = raw.indexOf("stream", idx);
+            if (start == -1) break;
+            int end = raw.indexOf("endstream", start);
+            if (end == -1) break;
+            String chunk = raw.substring(start + 6, end).trim();
+            // Try to extract readable text
+            for (char c : chunk.toCharArray()) {
+                if (c >= 32 && c < 127) text.append(c);
             }
-        } catch (Exception e) {
-            log.debug("Direct PDF extraction failed, trying OCR: {}", e.getMessage());
+            text.append(" ");
+            idx = end + 9;
         }
 
-        // Fallback: extraction basique via texte brut
-        String raw = new String(content, StandardCharsets.UTF_8);
-        if (raw.length() > 100) {
-            return raw;
+        String result = text.toString().trim();
+        if (result.length() < 50) {
+            // Fallback: return raw bytes as text
+            result = new String(content, StandardCharsets.UTF_8);
         }
-
-        return "[PDF content - OCR required]";
+        log.info("PDF extraction: {} chars", result.length());
+        return result;
     }
 
     private String extractFromImage(byte[] content) {
-        // Pour l'instant, retourner un placeholder
-        // En production, utiliser Tesseract via tess4j
-        log.info("Image OCR: {} bytes", content.length);
-        return "[Image content - Tesseract OCR required]";
+        log.info("Image OCR: {} bytes (Tesseract required for production)", content.length);
+        return "[Image content - OCR extraction required]";
     }
 
     private String extractFromDocx(byte[] content) throws Exception {

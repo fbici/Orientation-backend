@@ -31,6 +31,7 @@ public class DocumentProcessingPipeline {
     private final DocumentClassificationService classificationService;
     private final KnowledgeGraphService knowledgeGraphService;
     private final SearchIndexService searchIndexService;
+    private final PersistenceService persistenceService;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
