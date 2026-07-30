@@ -193,10 +193,12 @@ export class LayoutComponent implements OnInit {
       { icon: 'monitor_heart', label: 'Monitoring', route: '/monitoring' },
     ]},
     { title: 'Métier', items: [
+      { icon: 'school', label: 'Universités', route: '/universities' },
       { icon: 'recommend', label: 'Recommandations', route: '/recommendations' },
       { icon: 'description', label: 'Documents', route: '/documents' },
       { icon: 'upload_file', label: 'Imports de données', route: '/imports' },
       { icon: 'tune', label: 'Règles d\'admission', route: '/rules' },
+      { icon: 'hub', label: 'Knowledge Engine', route: '/knowledge', roles: ['SUPER_ADMIN', 'ADMIN'] },
     ]},
     { title: 'Système', items: [
       { icon: 'notifications', label: 'Notifications', route: '/notifications' },
