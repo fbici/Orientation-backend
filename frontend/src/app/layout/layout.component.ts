@@ -4,6 +4,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../core/services/auth.service';
 
+interface NavItem {
+  icon: string;
+  label: string;
+  route: string;
+  roles?: string[];
+  badge?: number;
+}
+
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
 @Component({
   selector: 'app-layout',
   standalone: true,
@@ -110,7 +123,7 @@ export class LayoutComponent {
   unread = signal(3);
   q = '';
   initials = computed(() => { const u = this.auth.user(); return (u?.firstName?.[0] ?? '') + (u?.lastName?.[0] ?? ''); });
-  sections = signal([
+  sections = signal<NavSection[]>([
     { title: 'Vue d\'ensemble', items: [
       { icon: 'dashboard', label: 'Tableau de bord', route: '/dashboard' },
       { icon: 'analytics', label: 'Analytique', route: '/analytics' },

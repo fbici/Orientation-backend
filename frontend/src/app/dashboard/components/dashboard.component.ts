@@ -74,7 +74,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         datasets:[{label:'Recommandations',data:[820,932,1100,1290,1400,1520,1680,1890,2050,2200,2450,2680],borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',fill:true,tension:.4,pointRadius:0,pointHoverRadius:5,borderWidth:2.5},
           {label:'Candidats',data:[120,145,180,210,250,290,340,400,460,520,590,680],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.06)',fill:true,tension:.4,pointRadius:0,pointHoverRadius:5,borderWidth:2}]},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{position:'top',align:'end',labels:{boxWidth:12,boxHeight:3,padding:20,font:{size:11,family:'Inter',weight:'500'},color:'#6b7280'}},
+        plugins:{legend:{position:'top',align:'end',labels:{boxWidth:12,boxHeight:3,padding:20,font:{size:11,family:'Inter',weight:500 as any},color:'#6b7280'}},
           tooltip:{backgroundColor:'#111827',titleFont:{family:'Inter',size:12},bodyFont:{family:'Inter',size:11},padding:12,cornerRadius:8}},
         scales:{x:{grid:{display:false},ticks:{font:{size:11,family:'Inter'},color:'#9ca3af'},border:{display:false}},y:{grid:{color:'#f3f4f6'},ticks:{font:{size:11,family:'Inter'},color:'#9ca3af'},border:{display:false}}}}
     });
@@ -82,7 +82,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   private buildDoughnut(): void {
     this.c2 = new Chart(this.dc.nativeElement.getContext('2d')!, {
       type:'doughnut', data:{labels:['Sciences & Tech','Santé','Droit & Éco','Lettres','Arts'],datasets:[{data:[38,22,20,12,8],backgroundColor:['#2563eb','#16a34a','#f59e0b','#8b5cf6','#f43f5e'],borderWidth:0,spacing:3,borderRadius:4}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,usePointStyle:true,pointStyle:'circle',padding:16,font:{size:11,family:'Inter',weight:'500'},color:'#6b7280'}},tooltip:{backgroundColor:'#111827',titleFont:{family:'Inter'},bodyFont:{family:'Inter'},padding:12,cornerRadius:8,callbacks:{label:(c)=>` ${c.label}: ${c.parsed}%`}}}}
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,usePointStyle:true,pointStyle:'circle',padding:16,font:{size:11,family:'Inter',weight:500 as any},color:'#6b7280'}},tooltip:{backgroundColor:'#111827',titleFont:{family:'Inter'},bodyFont:{family:'Inter'},padding:12,cornerRadius:8,callbacks:{label:(c)=>` ${c.label}: ${c.parsed}%`}}}}
     });
   }
 }
