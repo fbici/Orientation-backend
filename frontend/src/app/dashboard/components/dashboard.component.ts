@@ -216,7 +216,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private tryBuildCharts(): void {
     if (!this.chartsReady()) return;
-    // Destroy existing charts before rebuilding
+    if (!this.dataReady()) return;
+    // Only build charts if we have data from API
     this.c1?.destroy();
     this.c2?.destroy();
     this.buildLineChart();
@@ -257,20 +258,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.kpis = [
       { icon: 'group', label: 'Candidats inscrits', value: 0, change: null, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
       { icon: 'recommend', label: 'Recommandations', value: 0, change: null, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
-      { icon: 'description', label: 'Documents traités', value: 0, change: null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
-      { icon: 'school', label: 'Universités', value: 0, change: null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
+      { icon: 'description', label: 'Documents traites', value: 0, change: null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
+      { icon: 'school', label: 'Universites', value: 0, change: null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
     ];
     this.health = [
-      { icon: 'memory', label: 'Processeur', val: '—', pct: 0, color: '#3b82f6', cls: 'blue' },
-      { icon: 'storage', label: 'Mémoire', val: '—', pct: 0, color: '#8b5cf6', cls: 'violet' },
+      { icon: 'memory', label: 'Processeur', val: '-', pct: 0, color: '#3b82f6', cls: 'blue' },
+      { icon: 'storage', label: 'Memoire', val: '-', pct: 0, color: '#8b5cf6', cls: 'violet' },
     ];
     this.activity = [];
     this.topPrograms = [];
-    // Fallback chart data
-    this.lineDataReco = [820, 932, 1100, 1290, 1400, 1520, 1680, 1890, 2050, 2200, 2450, 2680];
-    this.lineDataCand = [120, 145, 180, 210, 250, 290, 340, 400, 460, 520, 590, 680];
-    this.doughnutLabels = ['Sciences & Tech', 'Santé', 'Droit & Éco', 'Lettres', 'Arts'];
-    this.doughnutValues = [38, 22, 20, 12, 8];
+    // No fallback chart data - charts will wait for API
   }
 
   private buildLineChart(): void {
@@ -281,11 +278,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.c1 = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+        labels: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
         datasets: [
           {
             label: 'Recommandations',
-            data: this.lineDataReco.length ? this.lineDataReco : [0,0,0,0,0,0,0,0,0,0,0,0],
+            data: this.lineDataReco,
             borderColor: '#2563eb',
             backgroundColor: 'rgba(37,99,235,.08)',
             fill: true,
@@ -297,7 +294,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
           },
           {
             label: 'Candidats',
-            data: this.lineDataCand.length ? this.lineDataCand : [0,0,0,0,0,0,0,0,0,0,0,0],
+            data: this.lineDataCand,
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139,92,246,.06)',
             fill: true,
