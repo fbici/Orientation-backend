@@ -38,7 +38,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       <div class="form-group"><label class="form-label">Nom *</label><input type="text" class="form-input" [(ngModel)]="form.name"></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="3" [(ngModel)]="form.description"></textarea></div>
     </app-modal>
-    <app-confirm-dialog [open]="showDel()" title="Supprimer" [message]="'Supprimer l\'équipe « ' + (delTarget()?.name || '') + ' » ?'" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
+    <app-confirm-dialog [open]="showDel()" title="Supprimer" [message]="delMsg()" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
   `
 })
 export class TeamsComponent implements OnInit {
@@ -53,5 +53,6 @@ export class TeamsComponent implements OnInit {
   openEdit(t: any): void { this.editId.set(t.id); this.form = { name: t.name, description: t.description }; this.showForm.set(true); }
   save(): void { if (!this.form.name) { this.toast.warning('Nom requis.'); return; } this.saving.set(true); const call = this.editId() ? this.api.updateTeam(this.editId()!, this.form) : this.api.createTeam(this.form); call.subscribe({ next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success('Sauvegardé.'); this.load(); }, error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }
   confirmDel(t: any): void { this.delTarget.set(t); this.showDel.set(true); }
-  doDel(): void { this.deleting.set(true); this.api.deleteTeam(this.delTarget()?.id).subscribe({ next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Supprimé.'); this.load(); }, error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }
+  doDel(): void { this.deleting.set(true); this.api.deleteTeam(this.delTarget()?.id).subscribe({ next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Supprime.'); this.load(); }, error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }
+  delMsg(): string { return `Supprimer "${this.delTarget()?.name || ''}" ?`; }
 }

@@ -74,17 +74,17 @@ import { ModalComponent } from '../../shared/components/modal.component';
 
     <!-- Detail Modal -->
     <app-modal [open]="showDetail()" [title]="'Détail recommandation'" size="700px" [showFooter]="false" (close)="showDetail.set(false)">
-      @if (detail()) {
+      @if (detailData()) {
         <div class="g2" style="margin-bottom:16px">
-          <div><span style="font-size:.75rem;color:var(--n-500)">Score</span><div style="font-size:2rem;font-weight:800;color:var(--brand)">{{ detail().score }}%</div></div>
-          <div><span style="font-size:.75rem;color:var(--n-500)">Éligibilité</span><div><span class="badge" [class]="eligClass(detail().status)">{{ detail().status || '—' }}</span></div></div>
+          <div><span style="font-size:.75rem;color:var(--n-500)">Score</span><div style="font-size:2rem;font-weight:800;color:var(--brand)">{{ detailData().score }}%</div></div>
+          <div><span style="font-size:.75rem;color:var(--n-500)">Éligibilité</span><div><span class="badge" [class]="eligClass(detailData().status)">{{ detailData().status || '—' }}</span></div></div>
         </div>
-        @if (detail().explanation || detail().justification) {
-          <div style="margin-top:16px"><span style="font-size:.75rem;font-weight:600;color:var(--n-600)">Explication</span><p style="font-size:.875rem;color:var(--n-700);line-height:1.6;margin-top:6px">{{ detail().explanation || detail().justification }}</p></div>
+        @if (detailData().explanation || detailData().justification) {
+          <div style="margin-top:16px"><span style="font-size:.75rem;font-weight:600;color:var(--n-600)">Explication</span><p style="font-size:.875rem;color:var(--n-700);line-height:1.6;margin-top:6px">{{ detailData().explanation || detailData().justification }}</p></div>
         }
-        @if (detail().criteria?.length) {
+        @if (detailData().criteria?.length) {
           <div style="margin-top:16px"><span style="font-size:.75rem;font-weight:600;color:var(--n-600)">Critères utilisés</span>
-            <div style="margin-top:8px">@for(c of detail().criteria;track c){<span class="badge badge-gray" style="margin:2px">{{c}}</span>}</div>
+            <div style="margin-top:8px">@for(c of detailData().criteria;track c){<span class="badge badge-gray" style="margin:2px">{{c}}</span>}</div>
           </div>
         }
       }
@@ -102,7 +102,7 @@ export class RecommendationsComponent implements OnInit {
   loading = signal(false);
   generating = signal(false);
   showDetailModal = signal(false);
-  detail = signal<any>(null);
+  detailData = signal<any>(null);
   form = { bacType: '', bacAverage: null as number | null, language: '' };
   private colors = ['#3b82f6','#8b5cf6','#f97316','#14b8a6','#ef4444','#22c55e'];
 
@@ -132,10 +132,10 @@ export class RecommendationsComponent implements OnInit {
   }
 
   viewDetail(r: any): void {
-    this.detail.set(r);
+    this.detailData.set(r);
     if (r.id) {
       this.api.getRecommendationExplanation(r.id).subscribe({
-        next: (exp) => { this.detail.set({ ...r, explanation: exp?.summary || exp?.text || '', criteria: exp?.criteria || [] }); },
+        next: (exp) => { this.detailData.set({ ...r, explanation: exp?.summary || exp?.text || '', criteria: exp?.criteria || [] }); },
         error: () => {}
       });
     }
