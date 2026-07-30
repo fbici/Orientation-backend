@@ -1,7 +1,7 @@
 -- V58: Complete seed - All countries, cities, and real universities
 -- 42 countries, 112 cities, 255 universities with REAL names
 
--- COUNTRIES
+-- COUNTRIES (columns: id, version, name, code, official_name, phone_code, currency, active, created_at, updated_at, created_by, updated_by, deleted)
 INSERT INTO countries (id, version, name, code, official_name, phone_code, currency, active, created_at, updated_at, deleted)
 VALUES
     ('ben00000-0000-4000-a000-000000000000', 0, 'Benin', 'BEN', 'Republique du Benin', '+229', 'XOF', TRUE, NOW(), NOW(), FALSE),
