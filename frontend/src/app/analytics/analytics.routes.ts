@@ -1,8 +1,4 @@
 import { Routes } from '@angular/router';
-
 export const ANALYTICS_ROUTES: Routes = [
-  {
-    path: '',
-    loadComponent: () => import('./components/analytics.component').then(m => m.AnalyticsComponent)
-  }
+  { path: '', loadComponent: () => import('./components/analytics.component').then(m => m.AnalyticsComponent) }
 ];
