@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-recommendations',
@@ -11,72 +12,149 @@ import { FormsModule } from '@angular/forms';
       <div class="page-header">
         <div><h1>Recommandations</h1><p>Moteur d'orientation universitaire intelligent</p></div>
         <div class="page-header-actions">
-          <button class="btn btn-secondary"><span class="material-symbols-rounded">experiment</span>Simuler</button>
-          <button class="btn btn-primary"><span class="material-symbols-rounded">auto_awesome</span>Générer</button>
+          <button class="btn btn-secondary" (click)="showSimulator = !showSimulator"><span class="material-symbols-rounded">experiment</span>Simuler</button>
         </div>
       </div>
-      <div class="g4 stagger" style="margin-bottom:22px">
-        @for (k of kpis; track k.label) {
-          <div class="stat-card anim-fade-up">
-            <div class="stat-icon" [style.background]="k.g"><span class="material-symbols-rounded filled">{{ k.icon }}</span></div>
-            <div class="stat-content"><div class="stat-label">{{ k.label }}</div><div class="stat-value">{{ k.val }}</div></div>
-          </div>
-        }
-      </div>
+
+      <!-- Generate form -->
       <div class="card anim-fade-up" style="margin-bottom:22px">
         <div class="card-header"><h3>Nouvelle recommandation</h3></div>
         <div class="card-body">
-          <div class="g3">
-            <div class="form-group"><label class="form-label">Type de bac</label><select class="form-input"><option>Sciences Expérimentales</option><option>Mathématiques</option><option>Technique</option><option>Littéraire</option></select></div>
-            <div class="form-group"><label class="form-label">Moyenne générale (/20)</label><input type="number" class="form-input" placeholder="ex: 14.5" min="0" max="20" step="0.5"></div>
-            <div class="form-group"><label class="form-label">Pays préféré</label><select class="form-input"><option>Tous les pays</option><option>Bénin</option><option>Sénégal</option><option>France</option><option>Canada</option></select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 20px">
+            <div class="form-group"><label class="form-label">Type de bac</label>
+              <select class="form-input" [(ngModel)]="form.bacType"><option value="">Sélectionner…</option><option>Sciences Expérimentales</option><option>Mathématiques</option><option>Technique</option><option>Littéraire</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Moyenne générale (/20)</label><input type="number" class="form-input" [(ngModel)]="form.bacAverage" placeholder="ex: 14.5" min="0" max="20" step="0.5"></div>
+            <div class="form-group"><label class="form-label">Pays préféré</label>
+              <select class="form-input" [(ngModel)]="form.country"><option value="">Tous les pays</option>@for(c of countries;track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
+            </div>
           </div>
           <div style="display:flex;gap:10px;margin-top:4px">
-            <button class="btn btn-primary"><span class="material-symbols-rounded">auto_awesome</span>Lancer l'analyse</button>
-            <button class="btn btn-secondary"><span class="material-symbols-rounded">science</span>Simuler un scénario</button>
+            <button class="btn btn-primary" (click)="generate()" [disabled]="generating()">
+              @if(generating()){<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>}@else{<span class="material-symbols-rounded">auto_awesome</span>}
+              Lancer l'analyse
+            </button>
           </div>
         </div>
       </div>
+
+      <!-- Results -->
       <div class="card anim-fade-up">
         <div class="card-header">
-          <h3>Dernières recommandations</h3>
-          <div style="display:flex;gap:8px"><input type="text" class="form-input" style="width:200px" placeholder="Filtrer…"><button class="btn btn-secondary btn-sm"><span class="material-symbols-rounded" style="font-size:16px">filter_list</span>Filtres</button></div>
+          <h3>Résultats</h3>
+          <input type="text" class="form-input" style="width:200px" placeholder="Filtrer…" [(ngModel)]="filter">
         </div>
         <div class="card-body" style="padding:0">
-          <table class="data-table">
-            <thead><tr><th>Candidat</th><th>Programme</th><th>Université</th><th>Score</th><th>Éligibilité</th><th>Date</th><th></th></tr></thead>
-            <tbody>
-              @for (r of recs; track r.id) {
-                <tr>
-                  <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" [style.background]="r.ac">{{ r.ini }}</div><span style="font-weight:600">{{ r.name }}</span></div></td>
-                  <td style="font-weight:500">{{ r.prog }}</td>
-                  <td>{{ r.uni }}</td>
-                  <td><div style="display:flex;align-items:center;gap:8px"><div class="progress" style="width:60px"><div class="progress-bar" [class]="r.sc" [style.width.%]="r.score"></div></div><span style="font-weight:700;font-size:.8125rem">{{ r.score }}%</span></div></td>
-                  <td><span class="badge" [class]="r.eCls">{{ r.elig }}</span></td>
-                  <td style="font-size:.8125rem;color:var(--n-500)">{{ r.date }}</td>
-                  <td><div style="display:flex;gap:2px"><button class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded" style="font-size:18px">visibility</span></button><button class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded" style="font-size:18px">info</span></button></div></td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          @if (loading()) {
+            <div style="padding:48px;text-align:center;color:var(--n-400)"><div class="spinner-lg"></div><p style="margin-top:12px;font-size:.8125rem">Chargement…</p></div>
+          } @else {
+            <table class="data-table">
+              <thead><tr><th>Candidat</th><th>Programme</th><th>Université</th><th>Score</th><th>Éligibilité</th><th>Date</th><th></th></tr></thead>
+              <tbody>
+                @for (r of filteredRecs(); track r.id) {
+                  <tr>
+                    <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" [style.background]="r.avatarColor">{{ r.initials }}</div><span style="font-weight:600">{{ r.candidateName }}</span></div></td>
+                    <td style="font-weight:500">{{ r.programName }}</td>
+                    <td>{{ r.universityName }}</td>
+                    <td><div style="display:flex;align-items:center;gap:8px"><div class="progress" style="width:60px"><div class="progress-bar" [class]="scoreColor(r.score)" [style.width.%]="r.score"></div></div><span style="font-weight:700;font-size:.8125rem">{{ r.score }}%</span></div></td>
+                    <td><span class="badge" [class]="eligClass(r.status)">{{ r.status }}</span></td>
+                    <td style="font-size:.8125rem;color:var(--n-500)">{{ r.createdAt | date:'short' }}</td>
+                    <td><button class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded" style="font-size:18px">visibility</span></button></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="7" style="text-align:center;padding:48px;color:var(--n-400)">Aucune recommandation. Lancez une analyse ci-dessus.</td></tr>
+                }
+              </tbody>
+            </table>
+          }
         </div>
       </div>
     </div>
   `,
-  styles: [`:host{display:block}`]
+  styles: [`
+    :host{display:block}
+    .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+    .spinner-lg{width:32px;height:32px;border:3px solid var(--n-200);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  `]
 })
-export class RecommendationsComponent {
-  kpis = [
-    { icon: 'recommend', label: 'Total reco.', val: '18 432', g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
-    { icon: 'check_circle', label: 'Taux admission', val: '78%', g: 'linear-gradient(135deg,#22c55e,#15803d)' },
-    { icon: 'school', label: 'Programmes', val: '486', g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
-    { icon: 'science', label: 'Simulations', val: '1 293', g: 'linear-gradient(135deg,#f97316,#ea580c)' },
-  ];
-  recs = [
-    { id: 1, name: 'Jean Dupont', ini: 'JD', ac: '#3b82f6', prog: 'Génie Informatique', uni: 'UAC', score: 92, sc: 'green', elig: 'Éligible', eCls: 'badge-success', date: '29/07/2026' },
-    { id: 2, name: 'Marie Koudjo', ini: 'MK', ac: '#8b5cf6', prog: 'Médecine Générale', uni: 'UAC', score: 85, sc: 'blue', elig: 'Éligible', eCls: 'badge-success', date: '29/07/2026' },
-    { id: 3, name: 'Paul Agossa', ini: 'PA', ac: '#f97316', prog: 'Droit Privé', uni: 'UNB', score: 72, sc: 'blue', elig: 'Conditionnel', eCls: 'badge-warning', date: '28/07/2026' },
-    { id: 4, name: 'Fatima Bello', ini: 'FB', ac: '#14b8a6', prog: 'Pharmacie', uni: 'UAC', score: 68, sc: 'amber', elig: 'Conditionnel', eCls: 'badge-warning', date: '28/07/2026' },
-    { id: 5, name: 'Ibrahim Touré', ini: 'IT', ac: '#ef4444', prog: 'Génie Civil', uni: 'UAT', score: 45, sc: 'red', elig: 'Non éligible', eCls: 'badge-danger', date: '27/07/2026' },
-  ];
+export class RecommendationsComponent implements OnInit {
+  form = { bacType: '', bacAverage: null as number | null, country: '' };
+  filter = '';
+  generating = signal(false);
+  loading = signal(false);
+  showSimulator = false;
+  recommendations: any[] = [];
+  countries: any[] = [];
+
+  private avatarColors = ['#3b82f6','#8b5cf6','#f97316','#14b8a6','#ef4444','#22c55e','#ec4899'];
+
+  constructor(private api: ApiService) {}
+
+  ngOnInit(): void {
+    this.loadRecs();
+    this.api.getCountries().subscribe({
+      next: (res) => { this.countries = res?.content || res || []; },
+      error: () => {}
+    });
+  }
+
+  loadRecs(): void {
+    this.loading.set(true);
+    this.api.getRecommendations().subscribe({
+      next: (res) => {
+        const items = res?.content || res?.recommendations || res || [];
+        this.recommendations = Array.isArray(items) ? items : [];
+        this.loading.set(false);
+      },
+      error: () => { this.loading.set(false); }
+    });
+  }
+
+  generate(): void {
+    if (!this.form.bacType || !this.form.bacAverage) return;
+    this.generating.set(true);
+    this.api.generateRecommendations({
+      bacType: this.form.bacType,
+      bacAverage: this.form.bacAverage,
+      preferredCountries: this.form.country ? [this.form.country] : undefined
+    }).subscribe({
+      next: (res) => {
+        this.generating.set(false);
+        this.loadRecs();
+      },
+      error: () => { this.generating.set(false); }
+    });
+  }
+
+  filteredRecs(): any[] {
+    if (!this.filter) return this.recommendations;
+    const q = this.filter.toLowerCase();
+    return this.recommendations.filter(r =>
+      (r.candidateName || '').toLowerCase().includes(q) ||
+      (r.programName || '').toLowerCase().includes(q) ||
+      (r.universityName || '').toLowerCase().includes(q)
+    );
+  }
+
+  scoreColor(score: number): string {
+    if (score >= 80) return 'green';
+    if (score >= 60) return 'blue';
+    if (score >= 40) return 'amber';
+    return 'red';
+  }
+
+  eligClass(status: string): string {
+    if (!status) return 'badge-gray';
+    const s = status.toLowerCase();
+    if (s.includes('eligible') && !s.includes('non') && !s.includes('condition')) return 'badge-success';
+    if (s.includes('condition')) return 'badge-warning';
+    if (s.includes('non') || s.includes('reject')) return 'badge-danger';
+    return 'badge-gray';
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '??';
+    return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  }
 }
