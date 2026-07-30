@@ -73,7 +73,7 @@ import { ModalComponent } from '../../shared/components/modal.component';
     </div>
 
     <!-- Detail Modal -->
-    <app-modal [open]="showDetail()" [title]="'Détail recommandation'" size="700px" [showFooter]="false" (close)="showDetail.set(false)">
+    <app-modal [open]="showDetail()" [title]="detailTitle()" size="700px" [showFooter]="false" (close)="showDetailModal.set(false)">
       @if (detailData()) {
         <div class="g2" style="margin-bottom:16px">
           <div><span style="font-size:.75rem;color:var(--n-500)">Score</span><div style="font-size:2rem;font-weight:800;color:var(--brand)">{{ detailData().score }}%</div></div>
@@ -143,6 +143,7 @@ export class RecommendationsComponent implements OnInit {
   }
 
   showDetail(): boolean { return this.showDetailModal(); }
+  detailTitle(): string { return 'Detail recommandation'; }
 
   initials(r: any): string {
     const name = r.candidateName || `${r.candidate?.firstName || ''} ${r.candidate?.lastName || ''}`;
