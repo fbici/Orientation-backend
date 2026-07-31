@@ -127,6 +127,6 @@ class AuthIntegrationTest {
     @DisplayName("GET /auth/me - Non authentifie")
     void getMe_Unauthenticated() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

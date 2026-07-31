@@ -49,9 +49,16 @@ public class SecurityConfig {
 
                 // Auth endpoints - public
                 .requestMatchers("/auth/login").permitAll()
+                .requestMatchers("/auth/register").permitAll()
                 .requestMatchers("/auth/refresh").permitAll()
                 .requestMatchers("/auth/forgot-password").permitAll()
                 .requestMatchers("/auth/reset-password").permitAll()
+
+                // Locations - public (for dropdowns)
+                .requestMatchers("/locations/**").permitAll()
+
+                // Swagger
+                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
                 // Auth endpoints requiring authentication
                 .requestMatchers("/auth/logout").authenticated()
