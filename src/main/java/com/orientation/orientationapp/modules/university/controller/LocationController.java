@@ -4,8 +4,8 @@ import com.orientation.orientationapp.modules.university.entity.City;
 import com.orientation.orientationapp.modules.university.entity.Country;
 import com.orientation.orientationapp.modules.university.repository.CityRepository;
 import com.orientation.orientationapp.modules.university.repository.CountryRepository;
-import com.orientation.orientationapp.modules.university.repository.FacultyRepository;
-import com.orientation.orientationapp.modules.university.repository.ProgramRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,15 +16,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/locations")
 @RequiredArgsConstructor
+@Tag(name = "Locations", description = "Pays et villes pour les formulaires dynamiques")
 public class LocationController {
 
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
 
-    /**
-     * GET /api/v1/locations/countries
-     * Retourne tous les pays actifs
-     */
+    @Operation(summary = "Liste des pays", description = "Retourne tous les pays actifs triés par nom")
     @GetMapping("/countries")
     public ResponseEntity<List<Map<String, Object>>> getCountries() {
         List<Country> countries = countryRepository.findAll().stream()
@@ -37,7 +35,6 @@ public class LocationController {
             map.put("id", c.getId().toString());
             map.put("name", c.getName());
             map.put("code", c.getCode());
-            map.put("officialName", c.getOfficialName());
             map.put("phoneCode", c.getPhoneCode());
             map.put("currency", c.getCurrency());
             return map;
@@ -46,10 +43,7 @@ public class LocationController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * GET /api/v1/locations/countries/{countryId}/cities
-     * Retourne les villes d'un pays
-     */
+    @Operation(summary = "Villes d'un pays", description = "Retourne les villes d'un pays donné")
     @GetMapping("/countries/{countryId}/cities")
     public ResponseEntity<List<Map<String, Object>>> getCitiesByCountry(@PathVariable UUID countryId) {
         List<City> cities = cityRepository.findByCountryId(countryId).stream()
@@ -61,17 +55,13 @@ public class LocationController {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", c.getId().toString());
             map.put("name", c.getName());
-            map.put("countryId", c.getCountry().getId().toString());
             return map;
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * GET /api/v1/locations/cities
-     * Retourne toutes les villes (optionnel: filtrer par pays)
-     */
+    @Operation(summary = "Toutes les villes", description = "Retourne toutes les villes, filtrable par pays")
     @GetMapping("/cities")
     public ResponseEntity<List<Map<String, Object>>> getCities(
             @RequestParam(required = false) UUID countryId) {
