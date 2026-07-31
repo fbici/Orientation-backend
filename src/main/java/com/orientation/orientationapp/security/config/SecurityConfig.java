@@ -33,50 +33,34 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
-            )
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(jwtAccessDeniedHandler)
             )
             .authorizeHttpRequests(authorize -> authorize
-                // H2 Console (dev only)
+                // === PUBLIC ENDPOINTS (no auth required) ===
                 .requestMatchers("/h2-console/**").permitAll()
-
-                // Auth endpoints - public
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/register").permitAll()
                 .requestMatchers("/auth/refresh").permitAll()
                 .requestMatchers("/auth/forgot-password").permitAll()
                 .requestMatchers("/auth/reset-password").permitAll()
-
-                // Locations - public (for dropdowns)
                 .requestMatchers("/locations/**").permitAll()
-
-                // Swagger
-                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-
-                // Auth endpoints requiring authentication
-                .requestMatchers("/auth/logout").authenticated()
-                .requestMatchers("/auth/me").authenticated()
-
-                // Actuator
                 .requestMatchers("/actuator/health").permitAll()
-
-                // CORS preflight
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Swagger/OpenAPI
-                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
+                // Swagger / OpenAPI
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
 
-                // Admin endpoints require ADMIN role
+                // Admin only
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                // All other endpoints require authentication
+                // Everything else requires authentication
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
