@@ -1,8 +1,8 @@
 package com.orientation.orientationapp.intelligence.indexing;
 
 import com.orientation.orientationapp.intelligence.extraction.EntityExtractionService.ExtractedEntities;
-import com.orientation.orientationapp.modules.knowledge.entity.KnowledgeNode;
-import com.orientation.orientationapp.modules.knowledge.repository.KnowledgeNodeRepository;
+import com.orientation.orientationapp.knowledge.entity.KnowledgeNode;
+import com.orientation.orientationapp.knowledge.repository.KnowledgeNodeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,8 @@
 package com.orientation.orientationapp.intelligence.learning;
 
 import com.orientation.orientationapp.modules.recommendation.entity.Recommendation;
-import com.orientation.orientationapp.modules.recommendation.entity.RecommendationFeedback;
-import com.orientation.orientationapp.modules.recommendation.repository.RecommendationFeedbackRepository;
+import com.orientation.orientationapp.knowledge.entity.RecommendationFeedback;
+import com.orientation.orientationapp.knowledge.repository.RecommendationFeedbackRepository;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

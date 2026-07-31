@@ -4,7 +4,7 @@ import com.orientation.orientationapp.intelligence.knowledge.KnowledgeGraphServi
 import com.orientation.orientationapp.intelligence.learning.LearningEngine;
 import com.orientation.orientationapp.intelligence.pipeline.DocumentProcessingPipeline;
 import com.orientation.orientationapp.intelligence.smartquery.SmartQueryEngine;
-import com.orientation.orientationapp.modules.knowledge.entity.KnowledgeNode;
+import com.orientation.orientationapp.knowledge.entity.KnowledgeNode;
 import jakarta.validation.Valid;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

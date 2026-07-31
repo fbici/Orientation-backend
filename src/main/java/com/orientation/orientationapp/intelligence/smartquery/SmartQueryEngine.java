@@ -2,7 +2,7 @@ package com.orientation.orientationapp.intelligence.smartquery;
 
 import com.orientation.orientationapp.intelligence.knowledge.KnowledgeGraphService;
 import com.orientation.orientationapp.intelligence.learning.LearningEngine;
-import com.orientation.orientationapp.modules.knowledge.entity.KnowledgeNode;
+import com.orientation.orientationapp.knowledge.entity.KnowledgeNode;
 import com.orientation.orientationapp.modules.recommendation.entity.Recommendation;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

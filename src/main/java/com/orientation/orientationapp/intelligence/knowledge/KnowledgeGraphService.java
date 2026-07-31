@@ -1,10 +1,10 @@
 package com.orientation.orientationapp.intelligence.knowledge;
 
 import com.orientation.orientationapp.intelligence.extraction.EntityExtractionService.ExtractedEntities;
-import com.orientation.orientationapp.modules.knowledge.entity.KnowledgeNode;
-import com.orientation.orientationapp.modules.knowledge.entity.KnowledgeRelation;
-import com.orientation.orientationapp.modules.knowledge.repository.KnowledgeNodeRepository;
-import com.orientation.orientationapp.modules.knowledge.repository.KnowledgeRelationRepository;
+import com.orientation.orientationapp.knowledge.entity.KnowledgeNode;
+import com.orientation.orientationapp.knowledge.entity.KnowledgeRelation;
+import com.orientation.orientationapp.knowledge.repository.KnowledgeNodeRepository;
+import com.orientation.orientationapp.knowledge.repository.KnowledgeRelationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
