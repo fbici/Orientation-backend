@@ -25,7 +25,7 @@ public class LearningEngine {
         fb.setRecommendationId(recommendationId);
         fb.setCandidateId(candidateId);
         fb.setProgramId(programId);
-        fb.setFeedbackType(RecommendationFeedback.FeedbackType.POSITIVE);
+        fb.setFeedbackType(RecommendationFeedback.FeedbackType.ACCEPTED);
         fb.setRating(BigDecimal.valueOf(5));
         fb.setHelpful(true);
         feedbackRepository.save(fb);
@@ -39,7 +39,7 @@ public class LearningEngine {
         fb.setRecommendationId(recommendationId);
         fb.setCandidateId(candidateId);
         fb.setProgramId(programId);
-        fb.setFeedbackType(RecommendationFeedback.FeedbackType.NEGATIVE);
+        fb.setFeedbackType(RecommendationFeedback.FeedbackType.REJECTED);
         fb.setRating(BigDecimal.valueOf(1));
         fb.setComment(reason);
         fb.setHelpful(false);
@@ -53,7 +53,7 @@ public class LearningEngine {
         fb.setRecommendationId(recommendationId);
         fb.setCandidateId(candidateId);
         fb.setProgramId(programId);
-        fb.setFeedbackType(RecommendationFeedback.FeedbackType.NEUTRAL);
+        fb.setFeedbackType(RecommendationFeedback.FeedbackType.COMMENTED);
         fb.setRating(BigDecimal.valueOf(3));
         fb.setHelpful(true);
         feedbackRepository.save(fb);
@@ -66,8 +66,8 @@ public class LearningEngine {
     public double getAdjustmentFactor(UUID candidateId, UUID programId) {
         List<RecommendationFeedback> fbs = feedbackRepository.findByCandidateId(candidateId);
         if (fbs.isEmpty()) return 1.0;
-        double positive = fbs.stream().filter(f -> f.getFeedbackType() == RecommendationFeedback.FeedbackType.POSITIVE).count();
-        double negative = fbs.stream().filter(f -> f.getFeedbackType() == RecommendationFeedback.FeedbackType.NEGATIVE).count();
+        double positive = fbs.stream().filter(f -> f.getFeedbackType() == RecommendationFeedback.FeedbackType.ACCEPTED).count();
+        double negative = fbs.stream().filter(f -> f.getFeedbackType() == RecommendationFeedback.FeedbackType.REJECTED).count();
         double factor = 1.0 + (positive * 0.1) - (negative * 0.05);
         return Math.max(0.5, Math.min(1.5, factor));
     }
