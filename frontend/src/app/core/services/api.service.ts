@@ -131,8 +131,9 @@ export class ApiService {
   getGradeScales(): Observable<any> { return this.http.get(`${this.b}/grade-scales`); }
 
   // ── Countries / Cities ──
-  getCountries(): Observable<any> { return this.http.get(`${this.b}/countries`); }
-  getCities(): Observable<any> { return this.http.get(`${this.b}/cities`); }
+  getCountries(): Observable<any> { return this.http.get(`${this.b}/locations/countries`); }
+  getCities(): Observable<any> { return this.http.get(`${this.b}/locations/cities`); }
+  getCitiesByCountry(countryId: string): Observable<any> { return this.http.get(`${this.b}/locations/countries/${countryId}/cities`); }
 
   // ── Imports ──
   getImports(page = 0, size = 20): Observable<any> {
