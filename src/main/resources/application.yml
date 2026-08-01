@@ -1,6 +1,6 @@
 spring:
   application:
-    name: orientation-backend
+    name: orientia-backend
   profiles:
     active: dev
   main:

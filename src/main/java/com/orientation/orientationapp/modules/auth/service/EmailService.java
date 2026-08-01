@@ -36,7 +36,7 @@ public class EmailService {
      * Envoie un email de vérification d'adresse.
      */
     public void sendVerificationEmail(String toEmail, String firstName, String verificationToken) {
-        String subject = "Confirmez votre adresse email — Orientation";
+        String subject = "Confirmez votre adresse email — Orientia";
         String verificationUrl = "http://localhost:4200/auth/verify?token=" + verificationToken;
         String html = verificationEmailHtml(firstName, verificationUrl);
         send(toEmail, subject, html);
@@ -46,7 +46,7 @@ public class EmailService {
      * Envoie un email de réinitialisation de mot de passe.
      */
     public void sendPasswordResetEmail(String toEmail, String firstName, String resetToken) {
-        String subject = "Réinitialisation de votre mot de passe — Orientation";
+        String subject = "Réinitialisation de votre mot de passe — Orientia";
         String resetUrl = "http://localhost:4200/auth/reset-password?token=" + resetToken;
         String html = resetPasswordHtml(firstName, resetUrl);
         send(toEmail, subject, html);
@@ -56,7 +56,7 @@ public class EmailService {
      * Envoie un email de bienvenue après vérification.
      */
     public void sendWelcomeEmail(String toEmail, String firstName) {
-        String subject = "Bienvenue sur Orientation !";
+        String subject = "Bienvenue sur Orientia !";
         String html = welcomeHtml(firstName);
         send(toEmail, subject, html);
     }
@@ -132,7 +132,7 @@ public class EmailService {
                   </div>
                   <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;">Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte, ignorez cet email.</p>
                 </div>
-                <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0 0;font-family:Inter,sans-serif;">© Orientation Platform</p>
+                <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0 0;font-family:Inter,sans-serif;">© Orientia</p>
               </div>
             </body>
             </html>

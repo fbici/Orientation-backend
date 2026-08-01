@@ -21,23 +21,9 @@ public class OpenApiConfig {
     public OpenAPI orientationOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Orientation Platform API")
+                        .title("Orientia API")
                         .description("""
-                                API REST de la plateforme intelligente d'orientation universitaire.
-
-                                ## Modules principaux
-                                - **Auth** : Inscription, connexion, gestion des tokens
-                                - **Universités** : CRUD universités, campus, facultés, programmes
-                                - **Candidats** : Profils, relevés de notes, bulletins
-                                - **Recommandations** : Moteur d'orientation intelligent
-                                - **Documents** : Import, OCR, classification automatique
-                                - **Knowledge** : Base de connaissances et Smart Query
-                                - **Administration** : Utilisateurs, rôles, organisations, tenants
-                                - **Backoffice** : Dashboard, monitoring, analytics, rapports
-
-                                ## Authentification
-                                Toutes les API (sauf /auth/login et /auth/register) nécessitent un token JWT.
-                                Ajoutez le header : `Authorization: Bearer <token>`
+                                API REST de la plateforme intelligente d'orientation universitaire Orientia.
                                 """.stripIndent())
                         .version("1.0.0")
                         .contact(new Contact()
