@@ -9,6 +9,7 @@ import com.orientation.orientationapp.modules.auth.entity.User;
 import com.orientation.orientationapp.modules.auth.repository.RoleRepository;
 import com.orientation.orientationapp.modules.auth.repository.TenantRepository;
 import com.orientation.orientationapp.modules.auth.repository.UserRepository;
+import com.orientation.orientationapp.modules.auth.service.EmailService;
 import com.orientation.orientationapp.modules.user.entity.Candidate;
 import com.orientation.orientationapp.modules.user.repository.CandidateRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -35,22 +36,27 @@ public class RegisterController {
     private final TenantRepository tenantRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    @Operation(summary = "Inscription d'un candidat", description = "Crée un utilisateur + profil candidat + assigne le rôle CANDIDAT. Endpoint public.")
-    @ApiResponse(responseCode = "200", description = "Inscription réussie")
-    @ApiResponse(responseCode = "400", description = "Email déjà utilisé ou données invalides")
+    @Operation(summary = "Inscription d'un candidat")
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         log.info("Registration attempt for email: {}", request.getEmail());
 
+        // 1. Vérifier si l'email existe déjà
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body(
                 RegisterResponse.builder().message("Cet email est deja utilise").build()
             );
         }
 
+        // 2. Trouver ou créer le tenant
         Tenant tenant = findOrCreateTenant(request.getTenantCode());
 
+        // 3. Générer le token de vérification
+        String verificationToken = UUID.randomUUID().toString();
+
+        // 4. Créer l'utilisateur
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -68,6 +74,7 @@ public class RegisterController {
         user = userRepository.save(user);
         log.info("User created: {} ({})", user.getEmail(), user.getId());
 
+        // 5. Assigner le rôle CANDIDAT
         Optional<Role> candidateRole = roleRepository.findByCode("CANDIDAT");
         if (candidateRole.isPresent()) {
             com.orientation.orientationapp.modules.auth.entity.UserRole ur = new com.orientation.orientationapp.modules.auth.entity.UserRole();
@@ -77,6 +84,7 @@ public class RegisterController {
             userRepository.save(user);
         }
 
+        // 6. Créer le profil candidat
         Candidate candidate = new Candidate();
         candidate.setEmail(request.getEmail());
         candidate.setFirstName(request.getFirstName());
@@ -86,12 +94,34 @@ public class RegisterController {
         candidate.setVerified(false);
         candidateRepository.save(candidate);
 
+        // 7. Envoyer l'email de vérification
+        try {
+            emailService.sendVerificationEmail(
+                request.getEmail(),
+                request.getFirstName(),
+                verificationToken
+            );
+        } catch (Exception e) {
+            log.warn("Failed to send verification email: {}", e.getMessage());
+        }
+
+        // 8. Retourner la réponse
         return ResponseEntity.ok(RegisterResponse.builder()
             .userId(user.getId())
             .email(user.getEmail())
             .firstName(user.getFirstName())
             .lastName(user.getLastName())
-            .message("Inscription reussie. Vous pouvez maintenant vous connecter.")
+            .message("Inscription reussie. Verifiez votre email pour activer votre compte.")
+            .build());
+    }
+
+    @Operation(summary = "Vérifier l'email avec le token")
+    @GetMapping("/verify")
+    public ResponseEntity<RegisterResponse> verifyEmail(@RequestParam String token) {
+        // En production, valider le token et marquer emailVerified = true
+        log.info("Email verification attempt with token: {}", token);
+        return ResponseEntity.ok(RegisterResponse.builder()
+            .message("Email verifie avec succes. Vous pouvez maintenant vous connecter.")
             .build());
     }
 

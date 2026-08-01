@@ -25,3 +25,8 @@ app:
     allowed-headers: "*"
     allow-credentials: true
     max-age: 3600
+  # SendGrid (mettre la vraie clé API pour envoyer les emails)
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY:}
+    from-email: noreply@orientation.com
+    enabled: ${SENDGRID_ENABLED:false}
