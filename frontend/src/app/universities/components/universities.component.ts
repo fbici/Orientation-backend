@@ -103,7 +103,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
         <div class="form-group">
           <label class="form-label">Ville *</label>
           <select class="form-input" [(ngModel)]="form.cityId" [disabled]="!form.countryId">
-            <option value="">{{ form.countryId ? 'Sélectionner une ville...' : 'Sélectionnez d\'abord un pays' }}</option>
+            <option value="">
+              {{ form.countryId ? 'Sélectionner une ville...' : "Sélectionnez d'abord un pays" }}
+            </option>
+
             @for (c of filteredCities(); track c.id) {
               <option [value]="c.id">{{ c.name }}</option>
             }
