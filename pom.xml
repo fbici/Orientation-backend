@@ -146,6 +146,13 @@
             <version>${mapstruct-lombok.version}</version>
         </dependency>
 
+        <!-- Dotenv — load .env file into System properties -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <!-- Apache Commons CSV (for transcript parsing) -->
         <dependency>
             <groupId>org.apache.commons</groupId>

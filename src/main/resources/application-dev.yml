@@ -28,5 +28,5 @@ app:
   # SendGrid (mettre la vraie clé API pour envoyer les emails)
   sendgrid:
     api-key: ${SENDGRID_API_KEY:}
-    from-email: noreply@orientation.com
+    from-email: ${SENDGRID_FROM_EMAIL:noreply@orientia.com}
     enabled: ${SENDGRID_ENABLED:false}
