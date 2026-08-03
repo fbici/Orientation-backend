@@ -41,8 +41,8 @@ public class Candidate extends BaseEntity {
     @Column(length = 10)
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "country_id", nullable = false, foreignKey = @ForeignKey(name = "fk_candidate_country"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id", foreignKey = @ForeignKey(name = "fk_candidate_country"))
     private Country country;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,7 +52,7 @@ public class Candidate extends BaseEntity {
     @Column(length = 200)
     private String highSchool;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer bacYear;
 
     @Enumerated(EnumType.STRING)
