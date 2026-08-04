@@ -12,16 +12,26 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    defer-datasource-initialization: true
   flyway:
     enabled: false
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
   data:
     redis:
       host: ""
+  sql:
+    init:
+      mode: always
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.websocket.WebSocketAutoConfiguration
 
 # Render fournit le PORT dynamiquement
 server:
@@ -32,7 +42,7 @@ server:
 logging:
   level:
     root: WARN
-    com.orientation.orientationapp: INFO
+    com.orientation.orientationapp: WARN
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
 
