@@ -22,10 +22,15 @@ public class OrientationAppApplication {
                     .ignoreIfMalformed()
                     .ignoreIfMissing()
                     .load();
-            dotenv.entries().forEach(entry ->
-                    System.setProperty(entry.getKey(), entry.getValue())
-            );
-            log.info("Loaded {} variables from .env", dotenv.entries().size());
+            int count = 0;
+            for (io.github.cdimascio.dotenv.DotenvEntry entry : dotenv.entries()) {
+                // Ne pas ecraser les variables d'environnement existantes (ex: PORT de Render)
+                if (System.getenv(entry.getKey()) == null) {
+                    System.setProperty(entry.getKey(), entry.getValue());
+                    count++;
+                }
+            }
+            log.info("Loaded {} variables from .env (skipped existing env vars)", count);
         } catch (Exception e) {
             log.info("No .env file found — using system environment variables");
         }
