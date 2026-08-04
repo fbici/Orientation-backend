@@ -58,6 +58,11 @@ public class SecurityConfig {
                 .requestMatchers("/api-docs/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
 
+                // Static resources (Angular frontend)
+                .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg", "/*.woff2", "/*.woff", "/*.ttf").permitAll()
+                .requestMatchers("/assets/**").permitAll()
+                .requestMatchers("/browser/**").permitAll()
+
                 // Admin only
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
