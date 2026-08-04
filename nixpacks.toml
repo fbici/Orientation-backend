@@ -1,0 +1,9 @@
+# Railway build configuration
+[phases.setup]
+nixPkgs = ["jdk21"]
+
+[phases.build]
+cmds = ["./mvnw clean package -DskipTests"]
+
+[start]
+cmd = "java -jar target/*.jar --spring.profiles.active=prod"
