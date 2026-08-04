@@ -14,13 +14,21 @@ spring:
     show-sql: false
   flyway:
     enabled: false
+  data:
+    redis:
+      host: ""
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
 
 # Render fournit le PORT dynamiquement
 server:
   port: ${PORT:8080}
   address: 0.0.0.0
 
-# Logging réduit en production
+# Logging reduit en production
 logging:
   level:
     root: WARN
@@ -28,7 +36,7 @@ logging:
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
 
-# CORS — autoriser l'app mobile et le frontend Angular
+# CORS
 app:
   cors:
     allowed-origins: http://localhost:4200,http://localhost:3000,http://localhost:8080,http://10.0.2.2,http://127.0.0.1,*
