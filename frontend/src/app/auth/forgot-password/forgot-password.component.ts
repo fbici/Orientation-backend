@@ -18,5 +18,5 @@ import { HttpClient } from '@angular/common/http';
 export class ForgotPasswordComponent {
   email=''; loading=signal(false); error=signal(''); sent=signal(false);
   constructor(private http:HttpClient){}
-  onSubmit(){this.loading.set(true);this.error.set('');this.http.post('/api/v1/auth/forgot-password',{email:this.email}).subscribe({next:()=>{this.sent.set(true);this.loading.set(false)},error:()=>{this.sent.set(true);this.loading.set(false)}});}
+  onSubmit(){this.loading.set(true);this.error.set('');this.http.post('/auth/forgot-password',{email:this.email}).subscribe({next:()=>{this.sent.set(true);this.loading.set(false)},error:()=>{this.sent.set(true);this.loading.set(false)}});}
 }

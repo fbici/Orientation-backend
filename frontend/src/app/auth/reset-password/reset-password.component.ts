@@ -18,5 +18,5 @@ import { HttpClient } from '@angular/common/http';
 export class ResetPasswordComponent {
   password=''; confirm=''; loading=signal(false); error=signal('');
   constructor(private http:HttpClient, private router:Router){}
-  onSubmit(){if(this.password!==this.confirm){this.error.set('Les mots de passe ne correspondent pas.');return;}this.loading.set(true);this.error.set('');this.http.post('/api/v1/auth/reset-password',{password:this.password}).subscribe({next:()=>this.router.navigate(['/auth/login']),error:()=>{this.error.set('Erreur lors de la réinitialisation.');this.loading.set(false);}});}
+  onSubmit(){if(this.password!==this.confirm){this.error.set('Les mots de passe ne correspondent pas.');return;}this.loading.set(true);this.error.set('');this.http.post('/auth/reset-password',{password:this.password}).subscribe({next:()=>this.router.navigate(['/auth/login']),error:()=>{this.error.set('Erreur lors de la réinitialisation.');this.loading.set(false);}});}
 }

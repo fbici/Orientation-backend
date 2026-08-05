@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface SearchResult {
   id: string;
@@ -21,7 +22,7 @@ export interface SearchFilters {
 @Injectable({ providedIn: 'root' })
 export class SearchService {
 
-  private readonly API_URL = '/api/v1';
+  private readonly API_URL = environment.apiUrl;
   private searchSubject = new Subject<string>();
   searchResults = signal<SearchResult[]>([]);
   isSearching = signal(false);

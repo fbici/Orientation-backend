@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface PipelineProgress {
   documentId: string;
@@ -33,7 +34,7 @@ export interface SmartQueryResult {
 
 @Injectable({ providedIn: 'root' })
 export class IntelligenceService {
-  private readonly API = '/api/v1/intelligence';
+  private readonly API = `${environment.apiUrl}/intelligence`;
 
   pipelineProgress = signal<PipelineProgress[]>([]);
   pipelineStatus = signal<string>('idle');

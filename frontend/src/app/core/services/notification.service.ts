@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Notification {
   id: string;
@@ -14,7 +15,7 @@ export interface Notification {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly API = '/api/v1/notifications';
+  private readonly API = `${environment.apiUrl}/notifications`;
 
   notifications = signal<Notification[]>([]);
   unreadCount = signal(0);

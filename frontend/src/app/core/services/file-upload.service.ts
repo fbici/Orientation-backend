@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UploadProgress {
   fileId: string;
@@ -13,7 +14,7 @@ export interface UploadProgress {
 @Injectable({ providedIn: 'root' })
 export class FileUploadService {
 
-  private readonly API_URL = '/api/v1';
+  private readonly API_URL = environment.apiUrl;
   uploads = signal<UploadProgress[]>([]);
 
   constructor(private http: HttpClient) {}
