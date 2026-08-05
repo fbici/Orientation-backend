@@ -27,6 +27,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ProdDataInitializer implements ApplicationRunner {
 
+    private final OrganizationRepository organizationRepository;
     private final TenantRepository tenantRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -37,8 +38,11 @@ public class ProdDataInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        // 0. Organization
+        Organization org = findOrCreateOrganization();
+
         // 1. Tenant par defaut
-        Tenant tenant = findOrCreateTenant();
+        Tenant tenant = findOrCreateTenant(org);
 
         // 2. Roles
         Role superAdmin = findOrCreateRole("SUPER_ADMIN", "Super Administrateur", tenant);
@@ -75,13 +79,28 @@ public class ProdDataInitializer implements ApplicationRunner {
         }
     }
 
-    private Tenant findOrCreateTenant() {
+    private Organization findOrCreateOrganization() {
+        Optional<Organization> existing = organizationRepository.findByCode("ORIENTIA");
+        if (existing.isPresent()) return existing.get();
+
+        Organization org = new Organization();
+        org.setName("Orientia");
+        org.setCode("ORIENTIA");
+        org.setDescription("Platforme d'orientation universitaire");
+        org.setActive(true);
+        Organization saved = organizationRepository.save(org);
+        log.info("Default organization created");
+        return saved;
+    }
+
+    private Tenant findOrCreateTenant(Organization org) {
         Optional<Tenant> existing = tenantRepository.findByCode("default");
         if (existing.isPresent()) return existing.get();
 
         Tenant tenant = new Tenant();
         tenant.setName("Orientia Platform");
         tenant.setCode("default");
+        tenant.setOrganization(org);
         tenant.setActive(true);
         Tenant saved = tenantRepository.save(tenant);
         log.info("Default tenant created");
