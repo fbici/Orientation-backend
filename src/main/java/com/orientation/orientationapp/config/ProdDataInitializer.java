@@ -96,7 +96,6 @@ public class ProdDataInitializer implements ApplicationRunner {
         role.setCode(code);
         role.setName(name);
         role.setDescription(name);
-        role.setTenant(tenant);
         role.setActive(true);
         Role saved = roleRepository.save(role);
         log.info("Role created: {}", code);
