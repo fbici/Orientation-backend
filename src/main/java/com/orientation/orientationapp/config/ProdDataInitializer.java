@@ -122,22 +122,24 @@ public class ProdDataInitializer implements ApplicationRunner {
     }
 
     private void createPermissionsIfNotExist() {
-        String[] perms = {
-            "users.read", "users.write", "users.delete",
-            "roles.read", "roles.write",
-            "universities.read", "universities.write",
-            "candidates.read", "candidates.write",
-            "recommendations.read", "recommendations.write",
-            "documents.read", "documents.write",
-            "settings.read", "settings.write",
-            "dashboard.read", "analytics.read"
+        String[][] perms = {
+            {"users.read", "Users"}, {"users.write", "Users"}, {"users.delete", "Users"},
+            {"roles.read", "Roles"}, {"roles.write", "Roles"},
+            {"universities.read", "Universities"}, {"universities.write", "Universities"},
+            {"candidates.read", "Candidates"}, {"candidates.write", "Candidates"},
+            {"recommendations.read", "Recommendations"}, {"recommendations.write", "Recommendations"},
+            {"documents.read", "Documents"}, {"documents.write", "Documents"},
+            {"settings.read", "Settings"}, {"settings.write", "Settings"},
+            {"dashboard.read", "Dashboard"}, {"analytics.read", "Analytics"}
         };
-        for (String p : perms) {
-            if (permissionRepository.findByCode(p).isEmpty()) {
+        for (String[] p : perms) {
+            if (permissionRepository.findByCode(p[0]).isEmpty()) {
                 Permission perm = new Permission();
-                perm.setCode(p);
-                perm.setName(p.replace(".", " "));
-                perm.setDescription(p);
+                perm.setCode(p[0]);
+                perm.setName(p[0].replace(".", " "));
+                perm.setDescription(p[0]);
+                perm.setCategory(p[1]);
+                perm.setActive(true);
                 permissionRepository.save(perm);
             }
         }
