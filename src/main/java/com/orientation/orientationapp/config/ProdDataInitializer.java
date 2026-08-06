@@ -53,7 +53,8 @@ public class ProdDataInitializer implements ApplicationRunner {
         createPermissionsIfNotExist();
 
         // 4. Admin par defaut
-        if (userRepository.findByEmail("admin@orientia.com").isEmpty()) {
+        Optional<User> existingAdmin = userRepository.findByEmail("admin@orientia.com");
+        if (existingAdmin.isEmpty()) {
             User adminUser = new User();
             adminUser.setEmail("admin@orientia.com");
             adminUser.setPassword(passwordEncoder.encode("Admin@2025"));
@@ -76,6 +77,13 @@ public class ProdDataInitializer implements ApplicationRunner {
             userRepository.save(adminUser);
             log.info("Default admin created: admin@orientia.com / Admin@2025");
         } else {
+            // Corriger le champ deleted si necessaire
+            User admin = existingAdmin.get();
+            if (admin.getDeleted() == null || admin.getDeleted()) {
+                admin.setDeleted(false);
+                userRepository.save(admin);
+                log.info("Fixed admin user deleted flag");
+            }
             log.info("Default admin already exists");
         }
     }
