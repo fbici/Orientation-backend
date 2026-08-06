@@ -46,7 +46,7 @@ public class ProdDataInitializer implements ApplicationRunner {
 
         // 2. Roles
         Role superAdmin = findOrCreateRole("SUPER_ADMIN", "Super Administrateur", tenant);
-        Role admin = findOrCreateRole("ADMIN", "Administrateur", tenant);
+        Role adminRole = findOrCreateRole("ADMIN", "Administrateur", tenant);
         Role candidat = findOrCreateRole("CANDIDAT", "Candidat", tenant);
 
         // 3. Permissions de base
