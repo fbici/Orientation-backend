@@ -86,8 +86,11 @@ app:
     allow-credentials: true
     max-age: 3600
 
+  # Base URL for email links
+  base-url: ${APP_BASE_URL:https://orientation-backend-4lcp.onrender.com}
+
   # SendGrid Email Service
   sendgrid:
     api-key: ${SENDGRID_API_KEY:}
-    from-email: ${SENDGRID_FROM_EMAIL:noreply@orientation.com}
+    from-email: ${SENDGRID_FROM_EMAIL:noreply@orientia.com}
     enabled: ${SENDGRID_ENABLED:false}

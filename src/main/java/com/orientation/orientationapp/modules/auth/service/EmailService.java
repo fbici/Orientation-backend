@@ -24,36 +24,39 @@ public class EmailService {
     @Value("${app.sendgrid.api-key:}")
     private String apiKey;
 
-    @Value("${app.sendgrid.from-email:noreply@orientation.com}")
+    @Value("${app.sendgrid.from-email:noreply@orientia.com}")
     private String fromEmail;
 
     @Value("${app.sendgrid.enabled:false}")
     private boolean enabled;
 
+    @Value("${app.base-url:https://orientation-backend-4lcp.onrender.com}")
+    private String baseUrl;
+
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     /**
-     * Envoie un email de vérification d'adresse.
+     * Envoie un email de verification d'adresse.
      */
     public void sendVerificationEmail(String toEmail, String firstName, String verificationToken) {
-        String subject = "Confirmez votre adresse email — Orientia";
-        String verificationUrl = "http://localhost:4200/auth/verify?token=" + verificationToken;
+        String subject = "Confirmez votre adresse email - Orientia";
+        String verificationUrl = baseUrl + "/auth/verify?token=" + verificationToken;
         String html = verificationEmailHtml(firstName, verificationUrl);
         send(toEmail, subject, html);
     }
 
     /**
-     * Envoie un email de réinitialisation de mot de passe.
+     * Envoie un email de reinitialisation de mot de passe.
      */
     public void sendPasswordResetEmail(String toEmail, String firstName, String resetToken) {
-        String subject = "Réinitialisation de votre mot de passe — Orientia";
-        String resetUrl = "http://localhost:4200/auth/reset-password?token=" + resetToken;
+        String subject = "Reinitialisation de votre mot de passe - Orientia";
+        String resetUrl = baseUrl + "/auth/reset-password?token=" + resetToken;
         String html = resetPasswordHtml(firstName, resetUrl);
         send(toEmail, subject, html);
     }
 
     /**
-     * Envoie un email de bienvenue après vérification.
+     * Envoie un email de bienvenue apres verification.
      */
     public void sendWelcomeEmail(String toEmail, String firstName) {
         String subject = "Bienvenue sur Orientia !";
@@ -123,16 +126,16 @@ public class EmailService {
                 </div>
                 <div style="background:white;padding:36px 32px;border-radius:0 0 16px 16px;font-family:Inter,sans-serif;">
                   <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 24px;">Bonjour <strong>%s</strong>,</p>
-                  <p style="color:#6b7280;font-size:14px;line-height:1.7;margin:0 0 32px;">Merci de vous être inscrit sur <strong>Orientation</strong>. Pour activer votre compte, cliquez sur le bouton ci-dessous :</p>
+                  <p style="color:#6b7280;font-size:14px;line-height:1.7;margin:0 0 32px;">Merci de vous etre inscrit sur <strong>Orientia</strong>. Pour activer votre compte, cliquez sur le bouton ci-dessous :</p>
                   <div style="text-align:center;margin:32px 0;">
                     <a href="%s" style="display:inline-block;background:#2563eb;color:white;padding:14px 40px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;font-family:Inter,sans-serif;">Confirmer mon adresse email</a>
                   </div>
                   <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:24px 0;">
                     <p style="color:#9ca3af;font-size:12px;margin:0;line-height:1.6;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><span style="color:#2563eb;word-break:break-all;">%s</span></p>
                   </div>
-                  <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;">Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte, ignorez cet email.</p>
+                  <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;">Ce lien expire dans 24 heures. Si vous n'avez pas cree de compte, ignorez cet email.</p>
                 </div>
-                <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0 0;font-family:Inter,sans-serif;">© Orientia</p>
+                <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0 0;font-family:Inter,sans-serif;">© Orientia — Plateforme d'orientation universitaire</p>
               </div>
             </body>
             </html>
@@ -147,16 +150,17 @@ public class EmailService {
             <body style="margin:0;padding:0;background:#f3f4f6;">
               <div style="max-width:480px;margin:40px auto;padding:0;">
                 <div style="background:#1e293b;padding:32px;text-align:center;border-radius:16px 16px 0 0;">
-                  <h1 style="color:white;font-size:20px;margin:0;font-family:Inter,sans-serif;">Réinitialisation du mot de passe</h1>
+                  <h1 style="color:white;font-size:20px;margin:0;font-family:Inter,sans-serif;">Reinitialisation du mot de passe</h1>
                 </div>
                 <div style="background:white;padding:36px 32px;border-radius:0 0 16px 16px;font-family:Inter,sans-serif;">
                   <p style="color:#374151;font-size:15px;margin:0 0 24px;">Bonjour <strong>%s</strong>,</p>
-                  <p style="color:#6b7280;font-size:14px;margin:0 0 32px;">Vous avez demandé la réinitialisation de votre mot de passe. Cliquez ci-dessous :</p>
+                  <p style="color:#6b7280;font-size:14px;margin:0 0 32px;">Vous avez demande la reinitialisation de votre mot de passe. Cliquez ci-dessous :</p>
                   <div style="text-align:center;margin:32px 0;">
-                    <a href="%s" style="display:inline-block;background:#2563eb;color:white;padding:14px 40px;border-radius:10px;font-weight:700;font-size:15px;text-decoration-none;">Réinitialiser mon mot de passe</a>
+                    <a href="%s" style="display:inline-block;background:#2563eb;color:white;padding:14px 40px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;">Reinitialiser mon mot de passe</a>
                   </div>
                   <p style="color:#9ca3af;font-size:12px;margin:0;">Ce lien expire dans 1 heure.</p>
                 </div>
+                <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0 0;font-family:Inter,sans-serif;">© Orientia</p>
               </div>
             </body>
             </html>
@@ -171,23 +175,24 @@ public class EmailService {
             <body style="margin:0;padding:0;background:#f3f4f6;">
               <div style="max-width:480px;margin:40px auto;">
                 <div style="background:#2563eb;padding:32px;text-align:center;border-radius:16px 16px 0 0;">
-                  <h1 style="color:white;font-size:22px;margin:0;font-family:Inter,sans-serif;">Bienvenue %s ! 🎉</h1>
+                  <h1 style="color:white;font-size:22px;margin:0;font-family:Inter,sans-serif;">Bienvenue %s !</h1>
                 </div>
                 <div style="background:white;padding:36px 32px;border-radius:0 0 16px 16px;font-family:Inter,sans-serif;">
-                  <p style="color:#6b7280;font-size:14px;line-height:1.7;">Votre compte est activé. Vous pouvez maintenant :</p>
+                  <p style="color:#6b7280;font-size:14px;line-height:1.7;">Votre compte est active. Vous pouvez maintenant :</p>
                   <ul style="color:#374151;font-size:14px;line-height:2.2;padding-left:20px;">
-                    <li>Uploader votre relevé de notes</li>
-                    <li>Explorer les universités</li>
-                    <li>Obtenir des recommandations personnalisées</li>
-                    <li>Simuler différents scénarios d'admission</li>
+                    <li>Uploader votre releve de notes</li>
+                    <li>Explorer les universites</li>
+                    <li>Obtenir des recommandations personnalisees</li>
+                    <li>Simuler differents scenarios d'admission</li>
                   </ul>
                   <div style="text-align:center;margin:32px 0;">
-                    <a href="http://localhost:4200" style="display:inline-block;background:#2563eb;color:white;padding:14px 40px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;">Accéder à la plateforme</a>
+                    <a href="%s" style="display:inline-block;background:#2563eb;color:white;padding:14px 40px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;">Acceder a la plateforme</a>
                   </div>
                 </div>
+                <p style="text-align:center;color:#9ca3af;font-size:11px;margin:24px 0 0;font-family:Inter,sans-serif;">© Orientia — Plateforme d'orientation universitaire</p>
               </div>
             </body>
             </html>
-            """.formatted(firstName);
+            """.formatted(firstName, baseUrl);
     }
 }
