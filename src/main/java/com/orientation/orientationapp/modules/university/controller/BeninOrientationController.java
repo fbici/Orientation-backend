@@ -14,32 +14,43 @@ import java.util.*;
 @Tag(name = "Benin Orientation", description = "Orientation universitaire specifique au Benin")
 public class BeninOrientationController {
 
-    // Donnees officielles des filieres du Benin
+    // Helper pour creer des maps avec plus de 10 entrees
+    private static Map<String, Object> filiere(String code, String name, String faculty, String university,
+            int duration, List<String> series, int bourse, int fpp, int fep,
+            double maths, double physique, double svt, double francais, double total) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("code", code); m.put("name", name); m.put("faculty", faculty); m.put("university", university);
+        m.put("duration", duration); m.put("series", series); m.put("bourse", bourse); m.put("fpp", fpp);
+        m.put("fep", fep); m.put("maths", maths); m.put("physique", physique); m.put("svt", svt);
+        m.put("francais", francais); m.put("total", total);
+        return m;
+    }
+
     private static final List<Map<String, Object>> FILIERES = List.of(
-        Map.of("code", "MED", "name", "Medecine Generale", "faculty", "FSS", "university", "UAC", "duration", 7, "series", List.of("C", "D"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 14.0, "physique", 13.0, "svt", 14.0, "francais", 10.0, "total", 13.5),
-        Map.of("code", "PHAR", "name", "Pharmacie", "faculty", "FSS", "university", "UAC", "duration", 6, "series", List.of("C", "D"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 12.0, "physique", 12.0, "svt", 13.0, "francais", 10.0, "total", 12.5),
-        Map.of("code", "GCIV", "name", "Genie Civil", "faculty", "EPAC", "university", "UAC", "duration", 5, "series", List.of("C"), "bourse", 10, "fpp", 25, "fep", 65, "maths", 14.0, "physique", 13.0, "svt", 8.0, "francais", 8.0, "total", 13.0),
-        Map.of("code", "GINF", "name", "Genie Informatique", "faculty", "EPAC", "university", "UAC", "duration", 5, "series", List.of("C", "D"), "bourse", 10, "fpp", 25, "fep", 65, "maths", 13.0, "physique", 12.0, "svt", 8.0, "francais", 8.0, "total", 12.0),
-        Map.of("code", "GELC", "name", "Genie Electrique", "faculty", "EPAC", "university", "UAC", "duration", 5, "series", List.of("C"), "bourse", 10, "fpp", 25, "fep", 65, "maths", 13.0, "physique", 13.0, "svt", 8.0, "francais", 8.0, "total", 12.5),
-        Map.of("code", "GLOG", "name", "Genie Logiciel", "faculty", "IFRI", "university", "UAC", "duration", 3, "series", List.of("C", "D"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 12.0, "physique", 10.0, "svt", 8.0, "francais", 8.0, "total", 11.0),
-        Map.of("code", "RTEL", "name", "Reseaux et Telecom", "faculty", "IFRI", "university", "UAC", "duration", 3, "series", List.of("C", "D"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 11.0, "physique", 10.0, "svt", 8.0, "francais", 8.0, "total", 10.5),
-        Map.of("code", "MATH", "name", "Mathematiques", "faculty", "FAST", "university", "UAC", "duration", 3, "series", List.of("C"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 14.0, "physique", 11.0, "svt", 8.0, "francais", 8.0, "total", 12.0),
-        Map.of("code", "PHYS", "name", "Physique", "faculty", "FAST", "university", "UAC", "duration", 3, "series", List.of("C"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 12.0, "physique", 14.0, "svt", 8.0, "francais", 8.0, "total", 12.0),
-        Map.of("code", "CHIM", "name", "Chimie", "faculty", "FAST", "university", "UAC", "duration", 3, "series", List.of("C", "D"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 11.0, "physique", 11.0, "svt", 10.0, "francais", 8.0, "total", 10.5),
-        Map.of("code", "BIOL", "name", "Biologie", "faculty", "FAST", "university", "UAC", "duration", 3, "series", List.of("D"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 10.0, "physique", 10.0, "svt", 14.0, "francais", 8.0, "total", 11.0),
-        Map.of("code", "ECON", "name", "Economie", "faculty", "FASEG", "university", "UAC", "duration", 3, "series", List.of("A", "B", "C", "D"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 10.0, "physique", 8.0, "svt", 8.0, "francais", 12.0, "total", 10.0),
-        Map.of("code", "GEST", "name", "Gestion", "faculty", "FASEG", "university", "UAC", "duration", 3, "series", List.of("A", "B", "G2"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 10.0, "physique", 8.0, "svt", 8.0, "francais", 12.0, "total", 10.0),
-        Map.of("code", "DPRV", "name", "Droit Prive", "faculty", "FADESP", "university", "UAC", "duration", 3, "series", List.of("A", "B"), "bourse", 10, "fpp", 25, "fep", 65, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 14.0, "total", 11.0),
-        Map.of("code", "DPUB", "name", "Droit Public", "faculty", "FADESP", "university", "UAC", "duration", 3, "series", List.of("A", "B"), "bourse", 10, "fpp", 25, "fep", 65, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 14.0, "total", 11.0),
-        Map.of("code", "SPOL", "name", "Science Politique", "faculty", "FADESP", "university", "UAC", "duration", 3, "series", List.of("A", "B"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 13.0, "total", 10.5),
-        Map.of("code", "LETT", "name", "Lettres Modernes", "faculty", "FLASH", "university", "UAC", "duration", 3, "series", List.of("A"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 15.0, "total", 11.0),
-        Map.of("code", "PHIL", "name", "Philosophie", "faculty", "FLASH", "university", "UAC", "duration", 3, "series", List.of("A"), "bourse", 25, "fpp", 30, "fep", 45, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 14.0, "total", 10.5),
-        Map.of("code", "SOCIO", "name", "Sociologie", "faculty", "FLASH", "university", "UAC", "duration", 3, "series", List.of("A", "B"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 13.0, "total", 10.0),
-        Map.of("code", "LANG", "name", "Langues Etrangeres", "faculty", "FLASH", "university", "UAC", "duration", 3, "series", List.of("A"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 8.0, "physique", 8.0, "svt", 8.0, "francais", 14.0, "total", 10.5),
-        Map.of("code", "AGRO", "name", "Agronomie", "faculty", "UP", "university", "Universite de Parakou", "duration", 3, "series", List.of("C", "D"), "bourse", 25, "fpp", 30, "fep", 45, "maths", 10.0, "physique", 10.0, "svt", 13.0, "francais", 8.0, "total", 10.5),
-        Map.of("code", "MEDUP", "name", "Medecine (Parakou)", "faculty", "FSS", "university", "Universite de Parakou", "duration", 7, "series", List.of("C", "D"), "bourse", 15, "fpp", 30, "fep", 55, "maths", 13.0, "physique", 12.0, "svt", 13.0, "francais", 10.0, "total", 12.5),
-        Map.of("code", "INFO", "name", "Informatique", "faculty", "UNSTIM", "university", "UNSTIM", "duration", 3, "series", List.of("C", "D"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 12.0, "physique", 11.0, "svt", 8.0, "francais", 8.0, "total", 11.0),
-        Map.of("code", "TCOM", "name", "Techniques de Communication", "faculty", "UNSTIM", "university", "UNSTIM", "duration", 3, "series", List.of("A", "B", "C"), "bourse", 20, "fpp", 30, "fep", 50, "maths", 10.0, "physique", 8.0, "svt", 8.0, "francais", 13.0, "total", 10.0)
+        filiere("MED", "Medecine Generale", "FSS", "UAC", 7, List.of("C","D"), 15, 30, 55, 14.0, 13.0, 14.0, 10.0, 13.5),
+        filiere("PHAR", "Pharmacie", "FSS", "UAC", 6, List.of("C","D"), 15, 30, 55, 12.0, 12.0, 13.0, 10.0, 12.5),
+        filiere("GCIV", "Genie Civil", "EPAC", "UAC", 5, List.of("C"), 10, 25, 65, 14.0, 13.0, 8.0, 8.0, 13.0),
+        filiere("GINF", "Genie Informatique", "EPAC", "UAC", 5, List.of("C","D"), 10, 25, 65, 13.0, 12.0, 8.0, 8.0, 12.0),
+        filiere("GELC", "Genie Electrique", "EPAC", "UAC", 5, List.of("C"), 10, 25, 65, 13.0, 13.0, 8.0, 8.0, 12.5),
+        filiere("GLOG", "Genie Logiciel", "IFRI", "UAC", 3, List.of("C","D"), 15, 30, 55, 12.0, 10.0, 8.0, 8.0, 11.0),
+        filiere("RTEL", "Reseaux et Telecom", "IFRI", "UAC", 3, List.of("C","D"), 15, 30, 55, 11.0, 10.0, 8.0, 8.0, 10.5),
+        filiere("MATH", "Mathematiques", "FAST", "UAC", 3, List.of("C"), 20, 30, 50, 14.0, 11.0, 8.0, 8.0, 12.0),
+        filiere("PHYS", "Physique", "FAST", "UAC", 3, List.of("C"), 20, 30, 50, 12.0, 14.0, 8.0, 8.0, 12.0),
+        filiere("CHIM", "Chimie", "FAST", "UAC", 3, List.of("C","D"), 20, 30, 50, 11.0, 11.0, 10.0, 8.0, 10.5),
+        filiere("BIOL", "Biologie", "FAST", "UAC", 3, List.of("D"), 20, 30, 50, 10.0, 10.0, 14.0, 8.0, 11.0),
+        filiere("ECON", "Economie", "FASEG", "UAC", 3, List.of("A","B","C","D"), 15, 30, 55, 10.0, 8.0, 8.0, 12.0, 10.0),
+        filiere("GEST", "Gestion", "FASEG", "UAC", 3, List.of("A","B","G2"), 15, 30, 55, 10.0, 8.0, 8.0, 12.0, 10.0),
+        filiere("DPRV", "Droit Prive", "FADESP", "UAC", 3, List.of("A","B"), 10, 25, 65, 8.0, 8.0, 8.0, 14.0, 11.0),
+        filiere("DPUB", "Droit Public", "FADESP", "UAC", 3, List.of("A","B"), 10, 25, 65, 8.0, 8.0, 8.0, 14.0, 11.0),
+        filiere("SPOL", "Science Politique", "FADESP", "UAC", 3, List.of("A","B"), 15, 30, 55, 8.0, 8.0, 8.0, 13.0, 10.5),
+        filiere("LETT", "Lettres Modernes", "FLASH", "UAC", 3, List.of("A"), 20, 30, 50, 8.0, 8.0, 8.0, 15.0, 11.0),
+        filiere("PHIL", "Philosophie", "FLASH", "UAC", 3, List.of("A"), 25, 30, 45, 8.0, 8.0, 8.0, 14.0, 10.5),
+        filiere("SOCIO", "Sociologie", "FLASH", "UAC", 3, List.of("A","B"), 20, 30, 50, 8.0, 8.0, 8.0, 13.0, 10.0),
+        filiere("LANG", "Langues Etrangeres", "FLASH", "UAC", 3, List.of("A"), 20, 30, 50, 8.0, 8.0, 8.0, 14.0, 10.5),
+        filiere("AGRO", "Agronomie", "UP", "Universite de Parakou", 3, List.of("C","D"), 25, 30, 45, 10.0, 10.0, 13.0, 8.0, 10.5),
+        filiere("MEDUP", "Medecine (Parakou)", "FSS", "Universite de Parakou", 7, List.of("C","D"), 15, 30, 55, 13.0, 12.0, 13.0, 10.0, 12.5),
+        filiere("INFO", "Informatique", "UNSTIM", "UNSTIM", 3, List.of("C","D"), 20, 30, 50, 12.0, 11.0, 8.0, 8.0, 11.0),
+        filiere("TCOM", "Techniques de Communication", "UNSTIM", "UNSTIM", 3, List.of("A","B","C"), 20, 30, 50, 10.0, 8.0, 8.0, 13.0, 10.0)
     );
 
     @Operation(summary = "Liste de toutes les filieres du Benin avec criteres")
@@ -47,14 +58,11 @@ public class BeninOrientationController {
     public ResponseEntity<List<Map<String, Object>>> getFilieres(
             @RequestParam(required = false) String serie,
             @RequestParam(required = false) String university) {
-        
         List<Map<String, Object>> result = new ArrayList<>();
         for (var f : FILIERES) {
             boolean matchSerie = serie == null || ((List<?>) f.get("series")).contains(serie.toUpperCase());
             boolean matchUni = university == null || f.get("university").toString().toLowerCase().contains(university.toLowerCase());
-            if (matchSerie && matchUni) {
-                result.add(f);
-            }
+            if (matchSerie && matchUni) result.add(f);
         }
         return ResponseEntity.ok(result);
     }
@@ -67,11 +75,9 @@ public class BeninOrientationController {
         double physique = toDouble(request.getOrDefault("physique", 0));
         double svt = toDouble(request.getOrDefault("svt", 0));
         double francais = toDouble(request.getOrDefault("francais", 0));
-        double moyenne = toDouble(request.getOrDefault("moyenne", 0));
 
         List<Map<String, Object>> eligible = new ArrayList<>();
         List<Map<String, Object>> risky = new ArrayList<>();
-        List<Map<String, Object>> notEligible = new ArrayList<>();
 
         for (var f : FILIERES) {
             List<?> series = (List<?>) f.get("series");
@@ -83,14 +89,9 @@ public class BeninOrientationController {
             double seuilFrancais = toDouble(f.get("francais"));
             double seuilTotal = toDouble(f.get("total"));
 
-            // Calculer la moyenne ponderee
             double moyennePonderee = calculerMoyennePonderee(maths, physique, svt, francais, f);
-            
             Map<String, Object> entry = new HashMap<>(f);
             entry.put("moyennePonderee", BigDecimal.valueOf(moyennePonderee).setScale(2, RoundingMode.HALF_UP).doubleValue());
-            entry.put("seuilBourse", seuilTotal + 2.0);
-            entry.put("seuilFpp", seuilTotal);
-            entry.put("seuilFep", seuilTotal - 2.0);
 
             boolean mathsOk = maths >= seuilMaths;
             boolean physiqueOk = physique >= seuilPhysique || serie.equals("A") || serie.equals("B");
@@ -106,87 +107,86 @@ public class BeninOrientationController {
                 entry.put("status", "RISQUE");
                 entry.put("financement", "FEP");
                 risky.add(entry);
-            } else {
-                entry.put("status", "NON_ELIGIBLE");
-                notEligible.add(entry);
             }
         }
 
-        // Trier par moyenne ponderee
         eligible.sort((a, b) -> Double.compare(toDouble(b.get("moyennePonderee")), toDouble(a.get("moyennePonderee"))));
         risky.sort((a, b) -> Double.compare(toDouble(b.get("moyennePonderee")), toDouble(a.get("moyennePonderee"))));
 
+        Map<String, Object> notes = new HashMap<>();
+        notes.put("maths", maths); notes.put("physique", physique); notes.put("svt", svt); notes.put("francais", francais);
+
         Map<String, Object> response = new HashMap<>();
         response.put("serie", serie);
-        response.put("notes", Map.of("maths", maths, "physique", physique, "svt", svt, "francais", francais));
+        response.put("notes", notes);
         response.put("eligible", eligible);
         response.put("risky", risky);
-        response.put("notEligible", notEligible);
-        response.put("totalFilieres", FILIERES.size());
         response.put("nbEligible", eligible.size());
         response.put("nbRisky", risky.size());
-        response.put("conseil", genererConseil(serie, maths, physique, svt, francais, eligible.size()));
-
+        response.put("conseil", genererConseil(serie, eligible.size()));
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Fiches detaillees des universites du Benin")
     @GetMapping("/universites")
     public ResponseEntity<List<Map<String, Object>>> getUniversites() {
-        List<Map<String, Object>> universites = List.of(
-            Map.of("nom", "Universite d'Abomey-Calavi (UAC)", "acronyme", "UAC", "ville", "Abomey-Calavi", "type", "Publique", "nbFacultes", 8, "description", "La plus grande et la plus ancienne universite du Benin. 8 facultes, plus de 50 filieres.", "site", "www.uac.bj", "facultes", List.of("FSS", "EPAC", "FAST", "FASEG", "FADESP", "FLASH", "IFRI", "ENEAM")),
-            Map.of("nom", "Universite de Parakou (UP)", "acronyme", "UP", "ville", "Parakou", "type", "Publique", "nbFacultes", 4, "description", "Universite du nord du Benin. Medecine, agronomie, droit, lettres.", "site", "www.up.bj", "facultes", List.of("FSS", "FLSH", "FAST", "FASEG")),
-            Map.of("nom", "UNSTIM", "acronyme", "UNSTIM", "ville", "Abomey", "type", "Publique", "nbFacultes", 3, "description", "Universite des sciences, technologies, ingenierie et mathematiques.", "site", "www.unstim.bj", "facultes", List.of("FAST", "IUT", "FLSH")),
-            Map.of("nom", "Universite Nationale d'Agriculture (UNA)", "acronyme", "UNA", "ville", "Ketou", "type", "Publique", "nbFacultes", 3, "description", "Specialisee en agronomie et developpement rural.", "site", "www.una.bj", "facultes", List.of("FAST", "FASEP", "IUT")),
-            Map.of("nom", "IUT de Lokossa", "acronyme", "IUT-L", "ville", "Lokossa", "type", "Publique", "nbFacultes", 3, "description", "Formations professionnalisantes en gestion, informatique, genie civil.", "site", "www.iut-lokossa.bj", "facultes", List.of("TC", "GE", "INFO"))
-        );
+        List<Map<String, Object>> universites = new ArrayList<>();
+        universites.add(buildUni("Universite d'Abomey-Calavi (UAC)", "UAC", "Abomey-Calavi", "Publique", 8, "La plus grande universite du Benin. 8 facultes, 50+ filieres.", "www.uac.bj", List.of("FSS","EPAC","FAST","FASEG","FADESP","FLASH","IFRI","ENEAM")));
+        universites.add(buildUni("Universite de Parakou (UP)", "UP", "Parakou", "Publique", 4, "Universite du nord. Medecine, agronomie, droit.", "www.up.bj", List.of("FSS","FLSH","FAST","FASEG")));
+        universites.add(buildUni("UNSTIM", "UNSTIM", "Abomey", "Publique", 3, "Sciences, technologies, ingenierie et mathematiques.", "www.unstim.bj", List.of("FAST","IUT","FLSH")));
+        universites.add(buildUni("Universite Nationale d'Agriculture", "UNA", "Ketou", "Publique", 3, "Agronomie et developpement rural.", "www.una.bj", List.of("FAST","FASEP","IUT")));
+        universites.add(buildUni("IUT de Lokossa", "IUT-L", "Lokossa", "Publique", 3, "Formations professionnalisantes.", "www.iut-lokossa.bj", List.of("TC","GE","INFO")));
         return ResponseEntity.ok(universites);
     }
 
     @Operation(summary = "Informations sur les series du bac")
     @GetMapping("/series")
     public ResponseEntity<List<Map<String, Object>>> getSeries() {
-        return ResponseEntity.ok(List.of(
-            Map.of("code", "C", "nom", "Serie C (Scientifique)", "description", "Ouvre le plus de portes : medecine, ingenierie, sciences, economie, droit", "matieres", List.of("Maths", "Physique", "SVT", "Francais")),
-            Map.of("code", "D", "nom", "Serie D (Sciences Naturelles)", "description", "Avantage pour medecine, pharmacie, agronomie, biologie", "matieres", List.of("Maths", "Physique", "SVT", "Francais")),
-            Map.of("code", "A", "nom", "Serie A (Litteraire)", "description", "Droit, lettres, philosophie, sociologie, langues", "matieres", List.of("Francais", "Philosophie", "Langues", "Histoire-Geo")),
-            Map.of("code", "B", "nom", "Serie B (Economique)", "description", "Economie, gestion, droit des affaires, commerce international", "matieres", List.of("Maths", "Economie", "Francais", "Langues")),
-            Map.of("code", "G2", "nom", "Serie G2 (Gestion)", "description", "Comptabilite, techniques commerciales, management", "matieres", List.of("Maths", "Gestion", "Economie", "Droit"))
-        ));
+        List<Map<String, Object>> series = new ArrayList<>();
+        series.add(buildSerie("C", "Serie C (Scientifique)", "Ouvre le plus de portes : medecine, ingenierie, sciences", List.of("Maths","Physique","SVT","Francais")));
+        series.add(buildSerie("D", "Serie D (Sciences Naturelles)", "Medecine, pharmacie, agronomie, biologie", List.of("Maths","Physique","SVT","Francais")));
+        series.add(buildSerie("A", "Serie A (Litteraire)", "Droit, lettres, philosophie, sociologie, langues", List.of("Francais","Philosophie","Langues","Histoire-Geo")));
+        series.add(buildSerie("B", "Serie B (Economique)", "Economie, gestion, droit des affaires", List.of("Maths","Economie","Francais","Langues")));
+        series.add(buildSerie("G2", "Serie G2 (Gestion)", "Comptabilite, techniques commerciales, management", List.of("Maths","Gestion","Economie","Droit")));
+        return ResponseEntity.ok(series);
     }
 
-    // Methodes utilitaires
-
-    private double calculerMoyennePonderee(double maths, double physique, double svt, double francais, Map<String, Object> filiere) {
-        double coeffMaths = toDouble(filiere.get("maths")) > 0 ? toDouble(filiere.get("maths")) : 1;
-        double coeffPhysique = toDouble(filiere.get("physique")) > 0 ? toDouble(filiere.get("physique")) : 1;
-        double coeffSvt = toDouble(filiere.get("svt")) > 0 ? toDouble(filiere.get("svt")) : 1;
-        double coeffFrancais = toDouble(filiere.get("francais")) > 0 ? toDouble(filiere.get("francais")) : 1;
-        
-        double total = (maths * coeffMaths + physique * coeffPhysique + svt * coeffSvt + francais * coeffFrancais) 
-                       / (coeffMaths + coeffPhysique + coeffSvt + coeffFrancais);
-        return total;
+    private Map<String, Object> buildUni(String nom, String acro, String ville, String type, int nb, String desc, String site, List<String> fac) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("nom", nom); m.put("acronyme", acro); m.put("ville", ville); m.put("type", type);
+        m.put("nbFacultes", nb); m.put("description", desc); m.put("site", site); m.put("facultes", fac);
+        return m;
     }
 
-    private String getFinancement(double moyenne, Map<String, Object> filiere) {
-        double seuil = toDouble(filiere.get("total"));
+    private Map<String, Object> buildSerie(String code, String nom, String desc, List<String> mat) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("code", code); m.put("nom", nom); m.put("description", desc); m.put("matieres", mat);
+        return m;
+    }
+
+    private double calculerMoyennePonderee(double maths, double physique, double svt, double francais, Map<String, Object> f) {
+        double cm = Math.max(toDouble(f.get("maths")), 1);
+        double cp = Math.max(toDouble(f.get("physique")), 1);
+        double cs = Math.max(toDouble(f.get("svt")), 1);
+        double cf = Math.max(toDouble(f.get("francais")), 1);
+        return (maths * cm + physique * cp + svt * cs + francais * cf) / (cm + cp + cs + cf);
+    }
+
+    private String getFinancement(double moyenne, Map<String, Object> f) {
+        double seuil = toDouble(f.get("total"));
         if (moyenne >= seuil + 2.0) return "BOURSE";
         if (moyenne >= seuil) return "FPP";
         return "FEP";
     }
 
-    private String genererConseil(String serie, double maths, double physique, double svt, double francais, int nbEligible) {
-        if (nbEligible == 0) {
-            return "Aucune filiere trouvee pour votre profil. Essayez le FEP pour augmenter vos chances.";
-        }
-        if (nbEligible <= 3) {
-            return "Peu de filieres accessibles. Concentrez-vous sur celles-ci et envisagez le FPP.";
-        }
-        return "Bon profil ! Vous avez " + nbEligible + " filieres accessibles. Priorisez celles avec bourse.";
+    private String genererConseil(String serie, int nb) {
+        if (nb == 0) return "Aucune filiere trouvee. Essayez le FEP ou changez de serie.";
+        if (nb <= 3) return "Peu de filieres. Concentrez-vous sur celles-ci et envisagez le FPP.";
+        return "Bon profil ! " + nb + " filieres accessibles. Priorisez celles avec bourse.";
     }
 
-    private double toDouble(Object value) {
-        if (value instanceof Number) return ((Number) value).doubleValue();
-        try { return Double.parseDouble(value.toString()); } catch (Exception e) { return 0; }
+    private double toDouble(Object v) {
+        if (v instanceof Number) return ((Number) v).doubleValue();
+        try { return Double.parseDouble(v.toString()); } catch (Exception e) { return 0; }
     }
 }
