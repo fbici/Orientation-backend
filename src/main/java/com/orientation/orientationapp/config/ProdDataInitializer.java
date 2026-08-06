@@ -66,6 +66,7 @@ public class ProdDataInitializer implements ApplicationRunner {
             adminUser.setAccountLocked(false);
             adminUser.setFailedLoginAttempts(0);
             adminUser.setMfaEnabled(false);
+            adminUser.setDeleted(false);
 
             UserRole ur = new UserRole();
             ur.setUser(adminUser);
