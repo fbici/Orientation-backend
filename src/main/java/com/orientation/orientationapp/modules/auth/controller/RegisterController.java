@@ -67,6 +67,7 @@ public class RegisterController {
             user.setAccountLocked(false);
             user.setFailedLoginAttempts(0);
             user.setMfaEnabled(false);
+            user.setDeleted(false);
 
             user = userRepository.save(user);
             log.info("User created: {} ({})", user.getEmail(), user.getId());
@@ -82,7 +83,7 @@ public class RegisterController {
                 log.info("Role CANDIDAT assigned to {}", user.getEmail());
             }
 
-            // 5. Créer le profil candidat (sans country_id pour l'instant)
+            // 5. Créer le profil candidat
             try {
                 Candidate candidate = new Candidate();
                 candidate.setEmail(request.getEmail());
@@ -91,18 +92,23 @@ public class RegisterController {
                 candidate.setPhone(request.getPhone());
                 candidate.setStatus(CandidateStatus.ACTIVE);
                 candidate.setVerified(false);
+                candidate.setDeleted(false);
                 candidateRepository.save(candidate);
                 log.info("Candidate profile created: {}", candidate.getEmail());
             } catch (Exception e) {
                 log.warn("Failed to create candidate profile: {}", e.getMessage());
             }
 
-            // 6. Envoyer l'email de vérification (non-bloquant)
+            // 6. Envoyer l'email de verification (non-bloquant)
+            String verificationToken = UUID.randomUUID().toString();
             try {
+                // Stocker le token dans un champ temporaire ou une table dediee
+                user.setMfaSecret(verificationToken); // Reutilisation temporaire
+                userRepository.save(user);
                 emailService.sendVerificationEmail(
                     request.getEmail(),
                     request.getFirstName(),
-                    UUID.randomUUID().toString()
+                    verificationToken
                 );
             } catch (Exception e) {
                 log.warn("Failed to send verification email: {}", e.getMessage());
@@ -129,8 +135,36 @@ public class RegisterController {
     @GetMapping("/verify")
     public ResponseEntity<RegisterResponse> verifyEmail(@RequestParam String token) {
         log.info("Email verification attempt with token: {}", token);
-        return ResponseEntity.ok(RegisterResponse.builder()
-            .message("Email verifie avec succes. Vous pouvez maintenant vous connecter.")
+        
+        // Chercher l'utilisateur avec ce token
+        Optional<User> userOpt = userRepository.findAll().stream()
+            .filter(u -> token.equals(u.getMfaSecret()))
+            .findFirst();
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setEmailVerified(true);
+            user.setMfaSecret(null); // Nettoyer le token
+            userRepository.save(user);
+            
+            // Aussi mettre a jour le candidat
+            candidateRepository.findByEmail(user.getEmail()).ifPresent(c -> {
+                c.setVerified(true);
+                candidateRepository.save(c);
+            });
+            
+            log.info("Email verified for: {}", user.getEmail());
+            return ResponseEntity.ok(RegisterResponse.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .message("Email verifie avec succes. Vous pouvez maintenant vous connecter.")
+                .build());
+        }
+        
+        return ResponseEntity.badRequest().body(RegisterResponse.builder()
+            .message("Token invalide ou expire.")
             .build());
     }
 

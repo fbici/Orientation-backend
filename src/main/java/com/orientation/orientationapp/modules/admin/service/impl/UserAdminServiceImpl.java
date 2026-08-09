@@ -47,7 +47,13 @@ public class UserAdminServiceImpl implements UserAdminService {
     }
 
     public Page<UserResponse> list(UUID tenantId, String search, Pageable pageable) {
-        return userRepository.findAll(pageable).map(this::mapToResponse);
+        Page<User> users;
+        if (search != null && !search.isBlank()) {
+            users = userRepository.findAll(pageable);
+        } else {
+            users = userRepository.findAll(pageable);
+        }
+        return users.map(this::mapToResponse);
     }
 
     public void deactivate(UUID id) {
