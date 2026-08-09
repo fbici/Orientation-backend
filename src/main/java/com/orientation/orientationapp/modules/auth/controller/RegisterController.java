@@ -74,18 +74,22 @@ public class RegisterController {
             user = userRepository.save(user);
             log.info("User created: {} ({})", user.getEmail(), user.getId());
 
-            // 4. Assigner le rôle CANDIDAT
+            // 4. Assigner le rôle CANDIDAT (une seule fois)
             Optional<Role> candidateRole = roleRepository.findByCode("CANDIDAT");
             if (candidateRole.isPresent()) {
-                var ur = new com.orientation.orientationapp.modules.auth.entity.UserRole();
-                ur.setUser(user);
-                ur.setRole(candidateRole.get());
-                user.getUserRoles().add(ur);
-                userRepository.save(user);
-                log.info("Role CANDIDAT assigned to {}", user.getEmail());
+                boolean alreadyHasRole = user.getUserRoles().stream()
+                    .anyMatch(ur -> ur.getRole().getCode().equals("CANDIDAT"));
+                if (!alreadyHasRole) {
+                    var ur = new com.orientation.orientationapp.modules.auth.entity.UserRole();
+                    ur.setUser(user);
+                    ur.setRole(candidateRole.get());
+                    user.getUserRoles().add(ur);
+                    userRepository.save(user);
+                    log.info("Role CANDIDAT assigned to {}", user.getEmail());
+                }
             }
 
-            // 5. Créer le profil candidat
+            // 5. Créer le profil candidat (sans pays/ville pour l'instant)
             try {
                 Candidate candidate = new Candidate();
                 candidate.setEmail(request.getEmail());
@@ -95,40 +99,23 @@ public class RegisterController {
                 candidate.setStatus(CandidateStatus.ACTIVE);
                 candidate.setVerified(false);
                 candidate.setDeleted(false);
-                // Pays et ville si fournis
-                if (request.getCountryId() != null && !request.getCountryId().isBlank()) {
-                    try {
-                        java.util.UUID countryUuid = java.util.UUID.fromString(request.getCountryId());
-                        Country country = new Country();
-                        country.setId(countryUuid);
-                        candidate.setCountry(country);
-                    } catch (Exception ignored) {}
-                }
-                if (request.getCityId() != null && !request.getCityId().isBlank()) {
-                    try {
-                        java.util.UUID cityUuid = java.util.UUID.fromString(request.getCityId());
-                        City city = new City();
-                        city.setId(cityUuid);
-                        candidate.setCity(city);
-                    } catch (Exception ignored) {}
-                }
                 candidateRepository.save(candidate);
                 log.info("Candidate profile created: {}", candidate.getEmail());
             } catch (Exception e) {
                 log.warn("Failed to create candidate profile: {}", e.getMessage());
             }
 
-            // 6. Envoyer l'email de verification (non-bloquant)
+            // 6. Envoyer l'email de verification
             String verificationToken = UUID.randomUUID().toString();
             try {
-                // Stocker le token dans un champ temporaire ou une table dediee
-                user.setMfaSecret(verificationToken); // Reutilisation temporaire
+                user.setMfaSecret(verificationToken);
                 userRepository.save(user);
                 emailService.sendVerificationEmail(
                     request.getEmail(),
                     request.getFirstName(),
                     verificationToken
                 );
+                log.info("Verification email sent to {}", request.getEmail());
             } catch (Exception e) {
                 log.warn("Failed to send verification email: {}", e.getMessage());
             }
