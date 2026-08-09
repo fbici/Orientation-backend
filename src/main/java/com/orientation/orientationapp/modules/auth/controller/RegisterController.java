@@ -71,25 +71,24 @@ public class RegisterController {
             user.setMfaEnabled(false);
             user.setDeleted(false);
 
-            user = userRepository.save(user);
-            log.info("User created: {} ({})", user.getEmail(), user.getId());
-
-            // 4. Assigner le rôle CANDIDAT (une seule fois)
+            // 4. Assigner le rôle CANDIDAT AVANT le premier save
             Optional<Role> candidateRole = roleRepository.findByCode("CANDIDAT");
             if (candidateRole.isPresent()) {
-                boolean alreadyHasRole = user.getUserRoles().stream()
-                    .anyMatch(ur -> ur.getRole().getCode().equals("CANDIDAT"));
-                if (!alreadyHasRole) {
-                    var ur = new com.orientation.orientationapp.modules.auth.entity.UserRole();
-                    ur.setUser(user);
-                    ur.setRole(candidateRole.get());
-                    user.getUserRoles().add(ur);
-                    userRepository.save(user);
-                    log.info("Role CANDIDAT assigned to {}", user.getEmail());
-                }
+                var ur = new com.orientation.orientationapp.modules.auth.entity.UserRole();
+                ur.setUser(user);
+                ur.setRole(candidateRole.get());
+                user.getUserRoles().add(ur);
             }
 
-            // 5. Créer le profil candidat (sans pays/ville pour l'instant)
+            // 5. Generer le token de verification AVANT le save
+            String verificationToken = UUID.randomUUID().toString();
+            user.setMfaSecret(verificationToken);
+
+            // 6. Sauvegarder une seule fois (user + role + token)
+            user = userRepository.save(user);
+            log.info("User created with role and token: {} ({})", user.getEmail(), user.getId());
+
+            // 7. Créer le profil candidat
             try {
                 Candidate candidate = new Candidate();
                 candidate.setEmail(request.getEmail());
@@ -105,11 +104,8 @@ public class RegisterController {
                 log.warn("Failed to create candidate profile: {}", e.getMessage());
             }
 
-            // 6. Envoyer l'email de verification
-            String verificationToken = UUID.randomUUID().toString();
+            // 8. Envoyer l'email de verification
             try {
-                user.setMfaSecret(verificationToken);
-                userRepository.save(user);
                 emailService.sendVerificationEmail(
                     request.getEmail(),
                     request.getFirstName(),

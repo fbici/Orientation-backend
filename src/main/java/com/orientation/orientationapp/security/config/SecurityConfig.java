@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .requestMatchers("/browser/**").permitAll()
 
                 // Admin only
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()
