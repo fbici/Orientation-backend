@@ -12,6 +12,8 @@ import com.orientation.orientationapp.modules.auth.repository.UserRepository;
 import com.orientation.orientationapp.modules.auth.service.EmailService;
 import com.orientation.orientationapp.modules.user.entity.Candidate;
 import com.orientation.orientationapp.modules.user.repository.CandidateRepository;
+import com.orientation.orientationapp.modules.university.entity.Country;
+import com.orientation.orientationapp.modules.university.entity.City;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -93,6 +95,23 @@ public class RegisterController {
                 candidate.setStatus(CandidateStatus.ACTIVE);
                 candidate.setVerified(false);
                 candidate.setDeleted(false);
+                // Pays et ville si fournis
+                if (request.getCountryId() != null && !request.getCountryId().isBlank()) {
+                    try {
+                        java.util.UUID countryUuid = java.util.UUID.fromString(request.getCountryId());
+                        Country country = new Country();
+                        country.setId(countryUuid);
+                        candidate.setCountry(country);
+                    } catch (Exception ignored) {}
+                }
+                if (request.getCityId() != null && !request.getCityId().isBlank()) {
+                    try {
+                        java.util.UUID cityUuid = java.util.UUID.fromString(request.getCityId());
+                        City city = new City();
+                        city.setId(cityUuid);
+                        candidate.setCity(city);
+                    } catch (Exception ignored) {}
+                }
                 candidateRepository.save(candidate);
                 log.info("Candidate profile created: {}", candidate.getEmail());
             } catch (Exception e) {

@@ -27,6 +27,10 @@ public class RegisterRequest {
 
     private String phone;
 
-    // Tenant optionnel - si non fourni, utiliser le tenant par defaut
+    // Tenant optionnel
     private String tenantCode;
+
+    // Localisation
+    private String countryId;
+    private String cityId;
 }
