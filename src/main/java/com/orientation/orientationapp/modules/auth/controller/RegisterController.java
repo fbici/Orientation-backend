@@ -133,7 +133,7 @@ public class RegisterController {
 
     @Operation(summary = "Vérifier l'email avec le token")
     @GetMapping("/verify")
-    public ResponseEntity<RegisterResponse> verifyEmail(@RequestParam String token) {
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         log.info("Email verification attempt with token: {}", token);
         
         // Chercher l'utilisateur avec ce token
@@ -141,10 +141,11 @@ public class RegisterController {
             .filter(u -> token.equals(u.getMfaSecret()))
             .findFirst();
         
+        String html;
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             user.setEmailVerified(true);
-            user.setMfaSecret(null); // Nettoyer le token
+            user.setMfaSecret(null);
             userRepository.save(user);
             
             // Aussi mettre a jour le candidat
@@ -154,18 +155,82 @@ public class RegisterController {
             });
             
             log.info("Email verified for: {}", user.getEmail());
-            return ResponseEntity.ok(RegisterResponse.builder()
-                .userId(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .message("Email verifie avec succes. Vous pouvez maintenant vous connecter.")
-                .build());
+            html = successHtml(user.getFirstName(), user.getEmail());
+        } else {
+            html = errorHtml();
         }
         
-        return ResponseEntity.badRequest().body(RegisterResponse.builder()
-            .message("Token invalide ou expire.")
-            .build());
+        return ResponseEntity.ok()
+            .header("Content-Type", "text/html; charset=UTF-8")
+            .body(html);
+    }
+
+    private String successHtml(String firstName, String email) {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Email verifie - Orientia</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Inter', -apple-system, sans-serif; background: #f3f4f6; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+                .card { background: white; border-radius: 20px; padding: 48px; max-width: 440px; width: 90%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+                .icon { width: 72px; height: 72px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+                .icon svg { width: 36px; height: 36px; color: #22c55e; }
+                h1 { font-size: 24px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+                p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+                .email { font-weight: 700; color: #2563eb; }
+                .btn { display: inline-block; background: #2563eb; color: white; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; margin-top: 24px; }
+                .footer { margin-top: 32px; color: #9ca3af; font-size: 12px; }
+            </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h1>Email verifie !</h1>
+                    <p>Bienvenue <strong>%s</strong>,</p>
+                    <p>Votre adresse <span class="email">%s</span> a ete confirmee avec succes.</p>
+                    <p>Vous pouvez maintenant vous connecter a l'application Orientia.</p>
+                    <a href="https://orientation-backend-4lcp.onrender.com" class="btn">Ouvrir Orientia</a>
+                    <p class="footer">© Orientia — Plateforme d'orientation universitaire</p>
+                </div>
+            </body>
+            </html>
+            """.formatted(firstName != null ? firstName : "Utilisateur", email != null ? email : "");
+    }
+
+    private String errorHtml() {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Lien invalide - Orientia</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Inter', -apple-system, sans-serif; background: #f3f4f6; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+                .card { background: white; border-radius: 20px; padding: 48px; max-width: 440px; width: 90%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+                .icon { width: 72px; height: 72px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+                .icon svg { width: 36px; height: 36px; color: #ef4444; }
+                h1 { font-size: 24px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+                p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+                .footer { margin-top: 32px; color: #9ca3af; font-size: 12px; }
+            </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                    </div>
+                    <h1>Lien invalide</h1>
+                    <p>Ce lien de verification est invalide ou a expire.</p>
+                    <p>Veuillez vous inscrire a nouveau ou contacter le support.</p>
+                    <p class="footer">© Orientia — Plateforme d'orientation universitaire</p>
+                </div>
+            </body>
+            </html>
+            """;
     }
 
     private Tenant findOrCreateTenant(String tenantCode) {

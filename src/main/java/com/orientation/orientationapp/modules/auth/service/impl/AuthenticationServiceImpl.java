@@ -62,6 +62,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new RuntimeException("Account is disabled.");
             }
 
+            // Verifier que l'email est verifie
+            if (!user.getEmailVerified()) {
+                throw new RuntimeException("EMAIL_NOT_VERIFIED");
+            }
+
             user.setFailedLoginAttempts(0);
             user.setAccountLocked(false);
             user.setLockedUntil(null);
