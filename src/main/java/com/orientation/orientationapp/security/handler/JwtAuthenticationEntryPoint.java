@@ -30,13 +30,29 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         log.error("Unauthorized access attempt: {}", authException.getMessage());
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        
+        // Extraire le message d'erreur original
+        String errorMessage = "Authentication required. Please provide a valid JWT token.";
+        Throwable cause = authException.getCause();
+        if (cause != null && cause.getMessage() != null) {
+            errorMessage = cause.getMessage();
+        } else if (authException.getMessage() != null) {
+            errorMessage = authException.getMessage();
+        }
+        
+        // Determiner le status code
+        int status = HttpServletResponse.SC_UNAUTHORIZED;
+        if ("EMAIL_NOT_VERIFIED".equals(errorMessage)) {
+            status = HttpServletResponse.SC_FORBIDDEN;
+        }
+        
+        response.setStatus(status);
 
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", LocalDateTime.now().toString());
-        errorResponse.put("status", 401);
-        errorResponse.put("error", "Unauthorized");
-        errorResponse.put("message", "Authentication required. Please provide a valid JWT token.");
+        errorResponse.put("status", status);
+        errorResponse.put("error", status == 403 ? "Forbidden" : "Unauthorized");
+        errorResponse.put("message", errorMessage);
         errorResponse.put("path", request.getServletPath());
 
         objectMapper.writeValue(response.getOutputStream(), errorResponse);
