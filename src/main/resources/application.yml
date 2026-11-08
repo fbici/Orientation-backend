@@ -92,7 +92,9 @@ app:
     max-age: 3600
 
   # Base URL for email links
-  base-url: ${APP_BASE_URL:https://orientation-backend-4lcp.onrender.com}
+  base-url: ${APP_BASE_URL:}
+
+  password-reset-url: ${PASSWORD_RESET_URL:}
 
   # SendGrid Email Service
   sendgrid:

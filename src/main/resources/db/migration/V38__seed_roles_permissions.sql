@@ -39,11 +39,6 @@ SELECT
     gen_random_uuid(), 0, 'cc000000-0000-0000-0000-000000000001', p.id, NOW(), NOW(), FALSE
 FROM permissions p WHERE p.deleted = FALSE;
 
--- Default admin user (password: admin123)
-INSERT INTO users (id, version, email, password, first_name, last_name, tenant_id, status, enabled, created_at, updated_at, deleted)
-VALUES
-    ('ee000000-0000-0000-0000-000000000001', 0, 'admin@orientation.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjqQeEfzUkGpGvVTQEHX1lK1qQFY.ue', 'Admin', 'System', 'bb000000-0000-0000-0000-000000000001', 'ACTIVE', TRUE, NOW(), NOW(), FALSE);
-
--- Assign Super Admin role
-INSERT INTO user_roles (id, version, user_id, role_id, created_at, updated_at, deleted)
-VALUES ('ff000000-0000-0000-0000-000000000001', 0, 'ee000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001', NOW(), NOW(), FALSE);
+-- Fresh-deployment security revision: no administrator or password is seeded.
+-- Provision the first administrator explicitly with BOOTSTRAP_* environment values.
+-- This changes the V38 checksum: only initialize a NEW EMPTY database with this release.

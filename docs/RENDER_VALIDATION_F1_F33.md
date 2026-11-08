@@ -1,3 +1,5 @@
+> Historique de la mission precedente. Pour le service retire et le nouveau deploiement sur base vierge, consulter [le nouveau guide](RENDER_NOUVEAU_DEPLOIEMENT.md).
+
 # Orientia - Validation du backend Render existant
 
 Ce document prepare une mise a jour du service existant. Il ne cree aucun service,

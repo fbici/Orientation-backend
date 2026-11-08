@@ -52,8 +52,9 @@ logging:
 
 # CORS
 app:
+  base-url: ${APP_BASE_URL}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://orientation-backend-4lcp.onrender.com}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
     allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
@@ -67,5 +68,5 @@ app:
     timeout-seconds: ${OCR_TIMEOUT_SECONDS:45}
   sendgrid:
     api-key: ${SENDGRID_API_KEY:}
-    from-email: ${SENDGRID_FROM_EMAIL:noreply@orientia.com}
+    from-email: ${SENDGRID_FROM_EMAIL:}
     enabled: ${SENDGRID_ENABLED:false}

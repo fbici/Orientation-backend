@@ -59,7 +59,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orientation_prod
       DB_USERNAME: ${DB_USERNAME:-orientation_user}
       DB_PASSWORD: ${DB_PASSWORD:-orientation_pass}
-      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-very-long-secret-key-at-least-256-bits-long-for-production}
+      JWT_SECRET: ${JWT_SECRET:?Set a new private JWT_SECRET}
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
     volumes:
