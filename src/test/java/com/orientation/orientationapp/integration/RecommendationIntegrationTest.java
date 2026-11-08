@@ -20,9 +20,9 @@ class RecommendationIntegrationTest {
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    @DisplayName("GET /recommendations - Liste des recommandations")
-    void listRecommendations_ReturnsList() throws Exception {
+    @DisplayName("GET /recommendations - A real persisted identity is required")
+    void syntheticSecurityContextCannotReadCandidateHistory() throws Exception {
         mockMvc.perform(get("/recommendations").param("page", "0").param("size", "10"))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 }

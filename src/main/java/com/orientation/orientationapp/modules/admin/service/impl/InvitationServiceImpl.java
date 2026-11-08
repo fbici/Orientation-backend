@@ -25,12 +25,19 @@ import java.util.UUID;
 public class InvitationServiceImpl implements InvitationService {
 
     private final InvitationRepository invitationRepository;
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
     private final TenantRepository tenantRepository;
     private final UserAdminRepository userAdminRepository;
 
     @Override
     @Transactional
     public Invitation create(CreateInvitationRequest request, String invitedByUserId) {
+        access.require("USER_CREATE");
+        access.tenant(request.getTenantId());
+        access.personalUser(invitedByUserId);
+        access.require("USER_CREATE");
+        access.tenant(request.getTenantId());
+        access.personalUser(invitedByUserId);
         Tenant tenant = tenantRepository.findById(request.getTenantId())
                 .orElseThrow(() -> new RuntimeException("Tenant not found: " + request.getTenantId()));
 
@@ -51,21 +58,22 @@ public class InvitationServiceImpl implements InvitationService {
                 .build();
 
         Invitation saved = invitationRepository.save(invitation);
-        log.info("Invitation created for {} by {}", request.getEmail(), inviter.getEmail());
         return saved;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Invitation getById(UUID id) {
-        return invitationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invitation not found: " + id));
+        var invitation=invitationRepository.findById(id)
+                .orElseThrow(com.orientation.orientationapp.security.service.ResourceAccess::denied);
+        access.sameTenant(invitation.getTenant().getId());access.require("USER_READ");return invitation;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Invitation> list(UUID tenantId, Pageable pageable) {
-        return invitationRepository.findByTenantId(tenantId, pageable);
+        access.require("USER_READ");
+        return invitationRepository.findByTenantId(access.tenant(tenantId), pageable);
     }
 
     @Override
@@ -74,6 +82,10 @@ public class InvitationServiceImpl implements InvitationService {
         Invitation invitation = invitationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invitation not found: " + id));
 
+        access.require("USER_UPDATE");
+        access.sameTenant(invitation.getTenant().getId());
+        access.require("USER_UPDATE");
+        access.sameTenant(invitation.getTenant().getId());
         if (invitation.getStatus() == Invitation.InvitationStatus.ACCEPTED) {
             throw new RuntimeException("Cannot resend accepted invitation");
         }
@@ -83,7 +95,6 @@ public class InvitationServiceImpl implements InvitationService {
         invitation.setStatus(Invitation.InvitationStatus.PENDING);
         invitation.setRevokedAt(null);
         invitationRepository.save(invitation);
-        log.info("Invitation resent for {}", invitation.getEmail());
     }
 
     @Override
@@ -91,6 +102,10 @@ public class InvitationServiceImpl implements InvitationService {
     public void revoke(UUID id) {
         Invitation invitation = invitationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invitation not found: " + id));
+        access.require("USER_UPDATE");
+        access.sameTenant(invitation.getTenant().getId());
+        access.require("USER_UPDATE");
+        access.sameTenant(invitation.getTenant().getId());
         invitation.setStatus(Invitation.InvitationStatus.REVOKED);
         invitation.setRevokedAt(Instant.now());
         invitationRepository.save(invitation);
@@ -102,6 +117,10 @@ public class InvitationServiceImpl implements InvitationService {
         Invitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid invitation token"));
 
+        var current=access.current();
+        access.personalUser(userId);
+        if (!invitation.getEmail().equalsIgnoreCase(current.getEmail()))
+            throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
         if (invitation.getStatus() != Invitation.InvitationStatus.PENDING) {
             throw new RuntimeException("Invitation is not pending");
         }
@@ -115,7 +134,6 @@ public class InvitationServiceImpl implements InvitationService {
         invitation.setStatus(Invitation.InvitationStatus.ACCEPTED);
         invitation.setAcceptedAt(Instant.now());
         invitationRepository.save(invitation);
-        log.info("Invitation accepted by user {}", userId);
         return invitation;
     }
 
@@ -124,6 +142,10 @@ public class InvitationServiceImpl implements InvitationService {
     public void decline(UUID id) {
         Invitation invitation = invitationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invitation not found: " + id));
+        access.require("USER_UPDATE");
+        access.sameTenant(invitation.getTenant().getId());
+        access.require("USER_UPDATE");
+        access.sameTenant(invitation.getTenant().getId());
         invitation.setStatus(Invitation.InvitationStatus.DECLINED);
         invitationRepository.save(invitation);
     }

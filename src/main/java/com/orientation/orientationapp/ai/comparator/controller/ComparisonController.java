@@ -31,4 +31,9 @@ public class ComparisonController {
             @RequestParam UUID universityB) {
         return ResponseEntity.ok(comparisonService.compareUniversities(universityA, universityB));
     }
+    @PostMapping("/programs")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','CANDIDAT')")
+    public ComparisonResult compare(@jakarta.validation.Valid @RequestBody com.orientation.orientationapp.ai.comparator.dto.CompareRequest request) {
+        return comparisonService.compare(request);
+    }
 }

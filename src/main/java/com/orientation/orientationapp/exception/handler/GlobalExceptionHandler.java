@@ -115,11 +115,23 @@ public class GlobalExceptionHandler {
                 .body(BaseResponse.error("The requested resource was not found."));
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<BaseResponse<Void>> handleStatus(org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(BaseResponse.error(ex.getReason()));
+    }
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<BaseResponse<Void>> handleAuthentication() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(BaseResponse.error("Invalid credentials or session"));
+    }
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<BaseResponse<Void>> handleInvalidIdentifier() {
+        return ResponseEntity.badRequest().body(BaseResponse.error("Invalid request parameter"));
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<Void>> handleGenericException(
             Exception ex, HttpServletRequest request) {
 
-        log.error("Unexpected error: {} - Path: {}", ex.getMessage(), request.getServletPath(), ex);
+        log.error("Request failed with {}", ex.getClass().getSimpleName());
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

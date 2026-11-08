@@ -4,7 +4,7 @@ spring:
   profiles:
     active: dev
   main:
-    allow-bean-definition-overriding: true
+    allow-bean-definition-overriding: false
 
   # JPA / Hibernate
   jpa:
@@ -45,8 +45,8 @@ server:
 logging:
   level:
     root: INFO
-    com.orientation.orientationapp: DEBUG
-    org.springframework.security: DEBUG
+    com.orientation.orientationapp: INFO
+    org.springframework.security: WARN
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
   pattern:
@@ -69,9 +69,14 @@ springdoc:
 
 # Custom application properties
 app:
+  bootstrap:
+    enabled: ${BOOTSTRAP_ENABLED:false}
+    email: ${BOOTSTRAP_EMAIL:}
+    password: ${BOOTSTRAP_PASSWORD:}
+    tenant-code: ${BOOTSTRAP_TENANT_CODE:}
   jwt:
-    secret: ${JWT_SECRET:change-this-to-a-very-long-secret-key-at-least-256-bits-long-for-production}
-    expiration: 86400000  # 24 hours
+    secret: ${JWT_SECRET}
+    expiration: 900000
     refresh-expiration: 604800000  # 7 days
     header: Authorization
     prefix: "Bearer "

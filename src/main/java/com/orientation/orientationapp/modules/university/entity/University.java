@@ -16,9 +16,15 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "universities", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_university_name_country", columnNames = {"name", "country_id"})
+        @UniqueConstraint(name = "uk_university_name_country_tenant", columnNames = {"name", "country_id", "tenant_id"})
 })
 public class University extends BaseEntity {
+    @Column(nullable=false) @Builder.Default private Boolean verified=false;
+
+    private java.util.UUID tenantId;
+    @Column(length=30) private String institutionType;
+    @Column(length=500) private String sourceUrl;
+
 
     @Column(nullable = false, length = 200)
     private String name;

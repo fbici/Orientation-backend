@@ -42,13 +42,13 @@ public class LocalOcrEngine implements OcrEngine {
         return OcrResult.builder()
                 .rawText(rawText)
                 .cleanedText(cleanText(rawText))
-                .confidence(0.85)
+                .confidence(1.0)
                 .detectedLanguage("fr")
                 .pageCount(1)
                 .pages(List.of(OcrResult.OcrPage.builder()
                         .pageNumber(1)
                         .text(rawText)
-                        .confidence(0.85)
+                        .confidence(1.0)
                         .build()))
                 .blocks(extractBlocks(rawText))
                 .paragraphs(extractParagraphs(rawText))
@@ -78,10 +78,12 @@ public class LocalOcrEngine implements OcrEngine {
 
     private String extractTextFromStream(InputStream inputStream, String mimeType) {
         try {
-            return new String(inputStream.readAllBytes());
+            byte[] bytes=inputStream.readNBytes(10*1024*1024+1);
+            if(bytes.length>10*1024*1024) throw new java.io.IOException();
+            return java.nio.charset.StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT).decode(java.nio.ByteBuffer.wrap(bytes)).toString();
         } catch (Exception e) {
-            log.error("Failed to extract text", e);
-            return "";
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,"Invalid text document");
         }
     }
 
@@ -96,7 +98,7 @@ public class LocalOcrEngine implements OcrEngine {
             blocks.add(OcrResult.OcrBlock.builder()
                     .type("TEXT")
                     .text(text)
-                    .confidence(0.85)
+                    .confidence(1.0)
                     .build());
         }
         return blocks;

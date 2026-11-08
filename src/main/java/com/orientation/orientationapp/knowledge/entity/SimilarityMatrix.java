@@ -19,10 +19,10 @@ public class SimilarityMatrix extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String entityType;
 
-    @Column(nullable = false)
+    @Column(name = "entity_id_a", nullable = false)
     private UUID entityIdA;
 
-    @Column(nullable = false)
+    @Column(name = "entity_id_b", nullable = false)
     private UUID entityIdB;
 
     @Column(nullable = false, precision = 5, scale = 4)

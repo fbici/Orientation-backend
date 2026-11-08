@@ -1,106 +1,80 @@
 package com.orientation.orientationapp.storage.service;
-
-import com.orientation.orientationapp.exception.BusinessException;
 import com.orientation.orientationapp.storage.config.StorageConfig;
-import jakarta.annotation.PostConstruct;
+import com.orientation.orientationapp.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.support.*;
+import jakarta.annotation.PostConstruct;
+import java.nio.file.*;
+import java.io.*;
+import java.util.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.UUID;
-
-@Slf4j
-@Service
-@RequiredArgsConstructor
+@Service @RequiredArgsConstructor
 public class StorageServiceImpl implements StorageService {
-
     private final StorageConfig storageConfig;
     private Path uploadLocation;
-
-    @PostConstruct
-    public void init() {
-        this.uploadLocation = Paths.get(storageConfig.getUploadDir()).toAbsolutePath().normalize();
-
+    @PostConstruct public void init() {
         try {
-            Files.createDirectories(this.uploadLocation);
-            log.info("Storage directory created at: {}", this.uploadLocation);
-        } catch (IOException ex) {
-            throw new BusinessException("Could not create storage directory", "STORAGE_ERROR", ex);
-        }
+            Path configured=Path.of(storageConfig.getUploadDir()).toAbsolutePath().normalize();
+            Files.createDirectories(configured);
+            if (Files.isSymbolicLink(configured)) throw new IOException("Invalid storage root");
+            uploadLocation=configured.toRealPath();
+        } catch (IOException|RuntimeException ex) { throw failure("Storage is unavailable"); }
     }
-
-    @Override
-    public String store(MultipartFile file) {
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
-
-        if (file.isEmpty()) {
-            throw new BusinessException("Cannot store empty file", "EMPTY_FILE");
-        }
-
-        if (originalFilename.contains("..")) {
-            throw new BusinessException("Cannot store file with relative path outside current directory", "INVALID_PATH");
-        }
-
-        // Validate file type
-        String contentType = file.getContentType();
-        String[] allowedTypes = storageConfig.getAllowedTypes().split(",");
-        boolean isAllowed = Arrays.stream(allowedTypes)
-                .anyMatch(type -> type.trim().equals(contentType));
-
-        if (!isAllowed) {
-            throw new BusinessException("File type not allowed: " + contentType, "INVALID_FILE_TYPE");
-        }
-
-        // Validate file size
-        if (file.getSize() > storageConfig.getMaxSize()) {
-            throw new BusinessException("File size exceeds maximum allowed size", "FILE_TOO_LARGE");
-        }
-
-        // Generate unique filename
-        String extension = "";
-        if (originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-        String uniqueFilename = UUID.randomUUID().toString() + extension;
-
-        try {
-            Path targetLocation = this.uploadLocation.resolve(uniqueFilename);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-            log.info("File stored successfully: {}", uniqueFilename);
-            return uniqueFilename;
-        } catch (IOException ex) {
-            throw new BusinessException("Could not store file: " + originalFilename, "STORAGE_ERROR", ex);
-        }
+    private BusinessException failure(String message) { return new BusinessException(message,"STORAGE_ERROR"); }
+    @Override public void validate(MultipartFile file) {
+        if (file==null || file.isEmpty() || file.getSize()>storageConfig.getMaxSize()) throw failure("Invalid file size");
+        String type=file.getContentType();
+        if (type==null || Arrays.stream(storageConfig.getAllowedTypes().split(",")).noneMatch(type::equals))
+            throw failure("Unsupported file type");
+        try (InputStream in=file.getInputStream()) {
+            byte[] header=in.readNBytes(8);
+            boolean valid=switch(type) {
+                case "application/pdf" -> header.length>=5 && new String(header,0,5,java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF-");
+                case "image/png" -> Arrays.equals(header,new byte[]{(byte)137,80,78,71,13,10,26,10});
+                case "image/jpeg" -> header.length>=3 && (header[0]&255)==255 && (header[1]&255)==216 && (header[2]&255)==255;
+                default -> false;
+            };
+            if (!valid) throw failure("File signature does not match its declared type");
+        } catch (IOException ex) { throw failure("Cannot read file"); }
     }
-
-    @Override
-    public Path load(String filename) {
-        return uploadLocation.resolve(filename).normalize();
-    }
-
-    @Override
-    public void delete(String filename) {
-        try {
-            Path file = load(filename);
-            Files.deleteIfExists(file);
-            log.info("File deleted successfully: {}", filename);
-        } catch (IOException ex) {
-            log.error("Could not delete file: {}", filename, ex);
-            throw new BusinessException("Could not delete file", "STORAGE_ERROR", ex);
+    @Override public String store(MultipartFile file) {
+        validate(file);
+        String extension=switch(file.getContentType()) {
+            case "application/pdf" -> ".pdf";case "image/png" -> ".png";case "image/jpeg" -> ".jpg";
+            default -> throw failure("Unsupported file type");
+        };
+        String filename=UUID.randomUUID()+extension;Path path=load(filename);
+        OutputStream output;
+        try { output=Files.newOutputStream(path,StandardOpenOption.CREATE_NEW); }
+        catch(IOException ex) { throw failure("Cannot create stored file"); }
+        try (OutputStream out=output; InputStream in=file.getInputStream()) {
+            byte[] buffer=new byte[8192];long size=0;int count;
+            while((count=in.read(buffer))!=-1) {
+                size+=count;if(size>storageConfig.getMaxSize()) throw failure("Invalid file size");
+                out.write(buffer,0,count);
+            }
+        } catch(IOException|RuntimeException ex) {
+            try { Files.deleteIfExists(path); } catch(IOException cleanup) { ex.addSuppressed(cleanup); }
+            throw failure("Cannot store file");
         }
+        if (TransactionSynchronizationManager.isSynchronizationActive())
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCompletion(int status) {
+                    if(status!=STATUS_COMMITTED) delete(filename);
+                }
+            });
+        return filename;
     }
-
-    @Override
-    public boolean exists(String filename) {
-        return Files.exists(load(filename));
+    @Override public Path load(String filename) {
+        if (filename==null || !filename.matches("[0-9a-fA-F-]{36}\\.(pdf|png|jpg)")) throw failure("Invalid file reference");
+        Path path=uploadLocation.resolve(filename).normalize();
+        if (!path.startsWith(uploadLocation) || Files.isSymbolicLink(path)) throw failure("Invalid file reference");
+        return path;
     }
+    @Override public void delete(String filename) {
+        try { Files.deleteIfExists(load(filename)); } catch(IOException ex) { throw failure("Cannot remove stored file"); }
+    }
+    @Override public boolean exists(String filename) { return Files.isRegularFile(load(filename),LinkOption.NOFOLLOW_LINKS); }
 }

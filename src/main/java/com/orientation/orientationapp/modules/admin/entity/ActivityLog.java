@@ -30,9 +30,11 @@ public class ActivityLog extends BaseEntity {
     @Column(columnDefinition = "text")
     private String description;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String oldValues;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String newValues;
 

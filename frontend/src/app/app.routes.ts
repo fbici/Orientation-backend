@@ -12,6 +12,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
     children: [
+      { path: 'campuses', loadComponent: () => import('./catalog/catalog.component').then(m => m.CatalogComponent), data: {resource:'campuses',kind:'CAMPUS',title:'Campus'} },
+      { path: 'faculties', loadComponent: () => import('./catalog/catalog.component').then(m => m.CatalogComponent), data: {resource:'faculties',kind:'FACULTY',title:'Facultés'} },
+      { path: 'programs', loadComponent: () => import('./catalog/catalog.component').then(m => m.CatalogComponent), data: {resource:'programs',kind:'PROGRAM',title:'Formations'} },
+      { path: 'scholarships', loadComponent: () => import('./catalog/catalog.component').then(m => m.CatalogComponent), data: {resource:'scholarships',kind:'SCHOLARSHIP',title:'Bourses'} },
+      { path: 'guides', loadComponent: () => import('./catalog/guides.component').then(m => m.GuidesComponent) },
       { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES), canActivate: [roleGuard], data: { roles: ['SUPER_ADMIN', 'ADMIN'] } },
       { path: 'analytics', loadChildren: () => import('./analytics/analytics.routes').then(m => m.ANALYTICS_ROUTES), canActivate: [roleGuard], data: { roles: ['SUPER_ADMIN', 'ADMIN'] } },
       { path: 'monitoring', loadChildren: () => import('./monitoring/monitoring.routes').then(m => m.MONITORING_ROUTES), canActivate: [roleGuard], data: { roles: ['SUPER_ADMIN', 'ADMIN'] } },

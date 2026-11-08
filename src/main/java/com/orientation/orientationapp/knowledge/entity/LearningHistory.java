@@ -32,6 +32,7 @@ public class LearningHistory extends BaseEntity {
     @Column(precision = 5, scale = 2)
     private BigDecimal scoreAfter;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String context;
 

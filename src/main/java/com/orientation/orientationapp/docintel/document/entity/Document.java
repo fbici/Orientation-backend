@@ -18,6 +18,9 @@ import java.util.Set;
 @Entity
 @Table(name = "doc_documents")
 public class Document extends BaseEntity {
+    @Column(length=1000) private String processingError;
+    private java.time.Instant processedAt;
+
 
     @Column(nullable = false, length = 500)
     private String title;
@@ -60,6 +63,7 @@ public class Document extends BaseEntity {
     @Column(length = 500)
     private String description;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String tags;
 

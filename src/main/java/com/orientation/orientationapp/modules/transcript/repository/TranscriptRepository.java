@@ -11,8 +11,11 @@ import java.util.UUID;
 
 @Repository
 public interface TranscriptRepository extends JpaRepository<Transcript, UUID> {
+    org.springframework.data.domain.Page<Transcript> findByCandidateId(UUID id,org.springframework.data.domain.Pageable pageable);
+    @org.springframework.data.jpa.repository.Query("select t from Transcript t where t.candidate.tenant.id=:tenant")
+    org.springframework.data.domain.Page<Transcript> findScoped(@org.springframework.data.repository.query.Param("tenant") UUID tenant,org.springframework.data.domain.Pageable pageable);
+
     List<Transcript> findByCandidateId(UUID candidateId);
     List<Transcript> findByAcademicYearId(UUID academicYearId);
-    Optional<Transcript> findByCandidateIdAndAcademicYearId(UUID candidateId, UUID academicYearId);
     List<Transcript> findByStatus(TranscriptStatus status);
 }

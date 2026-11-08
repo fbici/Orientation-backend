@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface FacultyRepository extends JpaRepository<Faculty, UUID> {
+public interface FacultyRepository extends JpaRepository<Faculty, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Faculty> {
     List<Faculty> findByCampusId(UUID campusId);
     Optional<Faculty> findByNameAndCampusId(String name, UUID campusId);
     boolean existsByNameAndCampusId(String name, UUID campusId);

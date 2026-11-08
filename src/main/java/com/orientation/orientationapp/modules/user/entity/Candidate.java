@@ -22,6 +22,18 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "candidates")
 public class Candidate extends BaseEntity {
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(columnDefinition="jsonb")
+    private String academicData;
+    private Instant academicConfirmedAt;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="user_id") @com.fasterxml.jackson.annotation.JsonIgnore
+    private com.orientation.orientationapp.modules.auth.entity.User user;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="tenant_id") @com.fasterxml.jackson.annotation.JsonIgnore
+    private com.orientation.orientationapp.modules.auth.entity.Tenant tenant;
+
 
     @Column(nullable = false, length = 255, unique = true)
     private String email;

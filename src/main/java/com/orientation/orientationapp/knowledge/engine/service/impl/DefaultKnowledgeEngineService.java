@@ -1,61 +1,30 @@
 package com.orientation.orientationapp.knowledge.engine.service.impl;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import com.orientation.orientationapp.knowledge.engine.service.KnowledgeEngineService;
-import com.orientation.orientationapp.knowledge.entity.KnowledgeNode;
+import com.orientation.orientationapp.intelligence.indexing.SearchIndexService;
+import com.orientation.orientationapp.intelligence.knowledge.KnowledgeGraphService;
 import com.orientation.orientationapp.knowledge.repository.KnowledgeNodeRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
-
-@Slf4j
-@Service
-@RequiredArgsConstructor
+@Service @RequiredArgsConstructor @Transactional(readOnly=true)
 public class DefaultKnowledgeEngineService implements KnowledgeEngineService {
-
-    private final KnowledgeNodeRepository knowledgeNodeRepository;
-
-    @Override
-    public void rebuildIndex() {
-        log.info("Rebuilding knowledge index...");
-        // In production, this would index all entities from the database
-        log.info("Knowledge index rebuilt successfully");
-    }
-
-    @Override
-    public Map<String, Object> getStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalNodes", knowledgeNodeRepository.count());
-        stats.put("nodeTypes", knowledgeNodeRepository.findActiveByNodeType("UNIVERSITY").size());
-        return stats;
-    }
-
-    @Override
-    public Map<String, Object> getNode(String entityType, UUID entityId) {
-        return knowledgeNodeRepository.findByEntityTypeAndEntityId(entityType, entityId)
-                .stream()
-                .findFirst()
-                .map(node -> Map.<String, Object>of(
-                        "id", node.getId(),
-                        "type", node.getNodeType(),
-                        "name", node.getName(),
-                        "entityType", node.getEntityType()
-                ))
-                .orElse(Map.of());
-    }
-
-    @Override
-    public List<Map<String, Object>> getNodesByType(String nodeType) {
-        return knowledgeNodeRepository.findActiveByNodeType(nodeType).stream()
-                .map(node -> Map.<String, Object>of(
-                        "id", node.getId(),
-                        "name", node.getName(),
-                        "type", node.getNodeType()
-                ))
-                .toList();
-    }
+ private final KnowledgeGraphService graph;
+ private final SearchIndexService index;
+ private final KnowledgeNodeRepository nodes;
+ @Override @Transactional public void rebuildIndex(){index.rebuild();}
+ @Override public Map<String,Object> getStatistics() {
+  var counts=new LinkedHashMap<String,Long>();
+  for(String type:List.of("UNIVERSITY","CAMPUS","FACULTY","PROGRAM","SCHOLARSHIP","ADMISSION_CRITERION","SCHOLARSHIP_CRITERION","GUIDE_VERSION","ACADEMIC_FACT"))
+   counts.put(type,nodes.count(graph.visible().and((r,q,cb)->cb.equal(r.get("entityType"),type))));
+  return Map.of("totalNodes",nodes.count(graph.visible()),"nodeTypes",counts,"searchMode","TEXT","embeddingsAvailable",false);
+ }
+ @Override public Map<String,Object> getNode(String type,UUID id) {
+  return nodes.findAll(graph.visible().and((r,q,cb)->cb.and(cb.equal(r.get("entityType"),type),cb.equal(r.get("entityId"),id))),
+   org.springframework.data.domain.PageRequest.of(0,1)).stream().findFirst().map(graph::view).orElse(Map.of());
+ }
+ @Override public List<Map<String,Object>> getNodesByType(String type) {
+  return nodes.findAll(graph.visible().and((r,q,cb)->cb.equal(r.get("nodeType"),type)),org.springframework.data.domain.PageRequest.of(0,100))
+   .stream().map(graph::view).toList();
+ }
 }

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
 @Slf4j
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="app.realtime.scheduled-broadcasts",havingValue="true",matchIfMissing=true)
 @Controller
 @RequiredArgsConstructor
 public class MonitoringSocketController {

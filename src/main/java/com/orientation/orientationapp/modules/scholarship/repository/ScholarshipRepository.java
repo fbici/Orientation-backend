@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ScholarshipRepository extends JpaRepository<Scholarship, UUID> {
+public interface ScholarshipRepository extends JpaRepository<Scholarship, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Scholarship> {
     List<Scholarship> findByCountryIdAndAcademicYearId(UUID countryId, UUID academicYearId);
     List<Scholarship> findByCountryId(UUID countryId);
     List<Scholarship> findByType(ScholarshipType type);

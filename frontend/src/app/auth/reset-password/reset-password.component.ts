@@ -1,14 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-reset-password', standalone: true, imports: [FormsModule, RouterLink, CommonModule],
   template: `
     <div class="lp"><div class="bp"><div class="bi"><div class="bl"><div class="bicon"><span class="material-symbols-rounded filled">school</span></div><span class="btitle">Orientation</span></div><p class="bdesc">Choisissez un nouveau mot de passe sécurisé.</p></div></div>
     <div class="fp"><div class="fc"><h2>Nouveau mot de passe</h2><p class="fs">Choisissez un mot de passe fort pour votre compte</p>
-    <form (ngSubmit)="onSubmit()"><div class="form-group"><label class="form-label">Nouveau mot de passe</label><input type="password" class="form-input" [(ngModel)]="password" name="password" placeholder="Minimum 8 caractères" required></div>
+    <form (ngSubmit)="onSubmit()"><div class="form-group"><label class="form-label">Nouveau mot de passe</label><input type="password" class="form-input" [(ngModel)]="password" name="password" minlength="12" maxlength="72" placeholder="Minimum 12 caractères" required></div>
     <div class="form-group"><label class="form-label">Confirmer</label><input type="password" class="form-input" [(ngModel)]="confirm" name="confirm" placeholder="Retapez le mot de passe" required></div>
     @if(error()){<div class="alert alert-error"><span class="material-symbols-rounded" style="font-size:18px">error</span><span>{{error()}}</span></div>}
     <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading()">@if(loading()){<span class="spinner"></span>} Réinitialiser</button></form>
@@ -17,6 +17,10 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ResetPasswordComponent {
   password=''; confirm=''; loading=signal(false); error=signal('');
-  constructor(private http:HttpClient, private router:Router){}
-  onSubmit(){if(this.password!==this.confirm){this.error.set('Les mots de passe ne correspondent pas.');return;}this.loading.set(true);this.error.set('');this.http.post('/auth/reset-password',{password:this.password}).subscribe({next:()=>this.router.navigate(['/auth/login']),error:()=>{this.error.set('Erreur lors de la réinitialisation.');this.loading.set(false);}});}
+  private token: string;
+  constructor(private auth: AuthService, private router: Router, route: ActivatedRoute) {
+    this.token = route.snapshot.queryParamMap.get('token') || '';
+    if (this.token) this.router.navigate([], { queryParams: { token: null }, queryParamsHandling: 'merge', replaceUrl: true });
+  }
+  onSubmit(){if(!this.token || this.password.length<12 || new TextEncoder().encode(this.password).length>72){this.error.set("Lien invalide ou mot de passe hors limites (12 ? 72 octets).");return;}if(this.password!==this.confirm){this.error.set('Les mots de passe ne correspondent pas.');return;}this.loading.set(true);this.error.set('');this.auth.resetPassword(this.token,this.password).subscribe({next:()=>this.router.navigate(['/auth/login']),error:()=>{this.error.set('Erreur lors de la réinitialisation.');this.loading.set(false);}});}
 }

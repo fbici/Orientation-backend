@@ -9,7 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface OrientationGuideRepository extends JpaRepository<OrientationGuide, UUID> {
+public interface OrientationGuideRepository extends JpaRepository<OrientationGuide, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<OrientationGuide> {
+    Optional<OrientationGuide> findByCountryIdAndAcademicYearIdAndTenantId(UUID countryId, UUID academicYearId, UUID tenantId);
     Optional<OrientationGuide> findByCountryIdAndAcademicYearId(UUID countryId, UUID academicYearId);
     List<OrientationGuide> findByCountryId(UUID countryId);
 }

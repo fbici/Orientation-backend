@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface ImportHistoryRecordRepository extends JpaRepository<ImportHistoryRecord, UUID> {
+public interface ImportHistoryRecordRepository extends JpaRepository<ImportHistoryRecord, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<ImportHistoryRecord> {
     Page<ImportHistoryRecord> findByDataType(String dataType, Pageable pageable);
     Page<ImportHistoryRecord> findByStatus(ImportHistoryRecord.ImportStatus status, Pageable pageable);
     Page<ImportHistoryRecord> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);

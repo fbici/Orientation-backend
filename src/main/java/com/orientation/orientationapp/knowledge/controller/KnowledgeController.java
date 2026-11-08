@@ -24,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KnowledgeController {
 
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
     private final KnowledgeEngineService knowledgeEngineService;
     private final SemanticSearchService semanticSearchService;
     private final SimilarityEngineService similarityEngineService;
@@ -46,16 +47,16 @@ public class KnowledgeController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<?> search(
-            @RequestParam String query,
-            @RequestParam(required = false) String type,
-            @RequestParam(defaultValue = "10") int limit) {
-        if (type != null) {
-            return ResponseEntity.ok(semanticSearchService.search(query, type, limit));
-        }
-        return ResponseEntity.ok(semanticSearchService.search(query, limit));
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','CANDIDAT')")
+    public ResponseEntity<?> search(@RequestParam String query,@RequestParam(required=false) String type,
+            @RequestParam(defaultValue="10") int limit,@RequestParam(defaultValue="0") int page,
+            @RequestParam(required=false) UUID countryId,@RequestParam(required=false) UUID programId,
+            @RequestParam(required=false) UUID universityId,@RequestParam(required=false) UUID academicYearId,
+            @RequestParam(required=false) UUID sourceId) {
+        return ResponseEntity.ok(semanticSearchService.searchFiltered(query,type,limit,page,countryId,programId,universityId,academicYearId,sourceId));
     }
+    @GetMapping("/capabilities")
+    public Map<String,Object> capabilities() {return Map.of("searchMode","TEXT","embeddingsAvailable",false,"humanValidationRequired",true);}
 
     @GetMapping("/similar")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
@@ -94,6 +95,7 @@ public class KnowledgeController {
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<Map<String, String>> recordFeedback(@RequestBody Map<String, Object> request) {
         UUID candidateId = UUID.fromString((String) request.get("candidateId"));
+        access.candidate(candidateId);
         UUID programId = UUID.fromString((String) request.get("programId"));
         String feedbackType = (String) request.get("feedbackType");
         BigDecimal rating = request.get("rating") != null ? new BigDecimal(request.get("rating").toString()) : null;

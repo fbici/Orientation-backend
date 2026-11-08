@@ -31,7 +31,10 @@ import java.util.*;
 @RequiredArgsConstructor
 public class IntelligenceController {
 
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
     private final DocumentProcessingPipeline pipeline;
+    private final com.orientation.orientationapp.docintel.document.service.DocumentService documents;
+    private final com.orientation.orientationapp.storage.service.StorageService storage;
     private final SmartQueryEngine smartQueryEngine;
     private final KnowledgeGraphService knowledgeGraphService;
     private final LearningEngine learningEngine;
@@ -45,15 +48,10 @@ public class IntelligenceController {
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<DocumentProcessingPipeline.PipelineResult> processDocument(
             @RequestParam("file") MultipartFile file) {
-        try {
-            log.info("Processing document: {} ({} bytes)", file.getOriginalFilename(), file.getSize());
-            DocumentProcessingPipeline.PipelineResult result = pipeline.processDocument(
-                    UUID.randomUUID(), file.getBytes(), file.getOriginalFilename());
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Document processing failed", e);
-            return ResponseEntity.badRequest().build();
-        }
+        access.require("DOCUMENT_MANAGE");
+        storage.validate(file);
+        var document=documents.upload(file,null,null,null,null);
+        return ResponseEntity.ok(pipeline.processStoredDocument(document.getId()));
     }
 
     /**
@@ -67,7 +65,7 @@ public class IntelligenceController {
     @PostMapping("/smart-query")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<SmartQueryEngine.SmartQueryResult> smartQuery(@Valid @RequestBody SmartQueryRequest request) {
-        log.info("Smart Query: {}", request.getQuery());
+        log.debug("Smart query requested");
         SmartQueryEngine.SmartQueryResult result = smartQueryEngine.query(request.getQuery());
         return ResponseEntity.ok(result);
     }
@@ -77,9 +75,9 @@ public class IntelligenceController {
      */
     @GetMapping("/knowledge")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<List<KnowledgeNode>> searchKnowledge(@RequestParam String q) {
+    public ResponseEntity<?> searchKnowledge(@RequestParam String q) {
         List<KnowledgeNode> nodes = knowledgeGraphService.search(q);
-        return ResponseEntity.ok(nodes);
+        return ResponseEntity.ok(nodes.stream().map(knowledgeGraphService::view).toList());
     }
 
     /**
@@ -87,9 +85,9 @@ public class IntelligenceController {
      */
     @GetMapping("/knowledge/{id}/related")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<List<KnowledgeNode>> getRelatedNodes(@PathVariable UUID id) {
+    public ResponseEntity<?> getRelatedNodes(@PathVariable UUID id) {
         List<KnowledgeNode> nodes = knowledgeGraphService.getRelatedNodes(id);
-        return ResponseEntity.ok(nodes);
+        return ResponseEntity.ok(nodes.stream().map(knowledgeGraphService::view).toList());
     }
 
     /**
@@ -98,7 +96,8 @@ public class IntelligenceController {
     @PostMapping("/feedback")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<Void> recordFeedback(@Valid @RequestBody FeedbackRequest request) {
-        log.info("Feedback: recommendation={} action={}", request.getRecommendationId(), request.getAction());
+        access.candidate(request.getCandidateId());
+        log.debug("Recommendation feedback received");
 
         if ("ACCEPTED".equals(request.getAction())) {
             learningEngine.recordAcceptance(request.getRecommendationId(), request.getCandidateId(), request.getProgramId());
@@ -117,6 +116,7 @@ public class IntelligenceController {
     @GetMapping("/history/{candidateId}")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<?> getLearningHistory(@PathVariable UUID candidateId) {
+        access.candidate(candidateId);
         return ResponseEntity.ok(learningEngine.getHistory(candidateId));
     }
 

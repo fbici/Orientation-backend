@@ -1,63 +1,69 @@
-name: CI/CD Pipeline
+name: Validate Orientia backend and backoffice
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop, 'validation/**']
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: orientation_test
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: orientia_f1
+          POSTGRES_USER: orientia_f1
+          # Ephemeral CI fixture only; never a production credential.
+          POSTGRES_PASSWORD: ci-isolated-fixture-only
         ports:
-          - 5432:5432
+          - 5432/tcp
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U orientia_f1 -d orientia_f1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin'
+          distribution: temurin
           cache: maven
-
-      - name: Build with Maven
-        run: mvn clean compile
-
-      - name: Run tests
-        run: mvn test
-
-      - name: Package
-        run: mvn package -DskipTests
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: orientation-backend
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install local OCR tools
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra
+      - name: Verify backoffice
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: |
+          npm ci --prefix frontend
+          npm --prefix frontend test -- --watch=false --browsers=ChromeHeadless
+          npm --prefix frontend run build:prod
+          mkdir -p src/main/resources/static
+          cp -R frontend/dist/orientation-backoffice/browser/. src/main/resources/static/
+      - name: Verify and package with isolated PostgreSQL
+        env:
+          F1_TEST_DB_PASSWORD: ci-isolated-fixture-only
+          TEST_PG_PORT: ${{ job.services.postgres.ports[5432] }}
+        run: >-
+          mvn -B
+          -Df1.jdbc.url=jdbc:postgresql://127.0.0.1:${TEST_PG_PORT}/orientia_f1
+          -Df1.jdbc.schema=ci_f1_${{ github.run_number }}
+          -Df2.tesseract=/usr/bin/tesseract
+          -Df2.tessdata=/usr/share/tesseract-ocr/5/tessdata
+          verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: orientia-validated-backend
           path: target/*.jar
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to production
-        run: echo "Deploy to production server"
-        # Add deployment steps here
+# Deliberately no deploy job or Render deploy hook. Render settings are external.

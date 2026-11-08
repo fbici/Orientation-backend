@@ -22,14 +22,14 @@ public class NotificationController {
     @GetMapping
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<Page<Notification>> getNotifications(
-            @RequestParam String userId,
+            @RequestParam(required=false) String userId,
             Pageable pageable) {
         return ResponseEntity.ok(notificationService.getByUser(userId, pageable));
     }
 
     @GetMapping("/unread-count")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<Map<String, Long>> getUnreadCount(@RequestParam String userId) {
+    public ResponseEntity<Map<String, Long>> getUnreadCount(@RequestParam(required=false) String userId) {
         return ResponseEntity.ok(Map.of("count", notificationService.getUnreadCount(userId)));
     }
 
@@ -42,7 +42,7 @@ public class NotificationController {
 
     @PostMapping("/read-all")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<Map<String, String>> markAllAsRead(@RequestParam String userId) {
+    public ResponseEntity<Map<String, String>> markAllAsRead(@RequestParam(required=false) String userId) {
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(Map.of("message", "All notifications marked as read"));
     }

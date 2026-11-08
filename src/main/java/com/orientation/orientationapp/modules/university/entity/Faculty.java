@@ -17,6 +17,8 @@ import java.util.Set;
         @UniqueConstraint(name = "uk_faculty_name_campus", columnNames = {"name", "campus_id"})
 })
 public class Faculty extends BaseEntity {
+    @Column(nullable=false) @Builder.Default private Boolean verified=false;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "campus_id", nullable = false, foreignKey = @ForeignKey(name = "fk_faculty_campus"))

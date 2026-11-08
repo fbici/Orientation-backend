@@ -30,92 +30,11 @@ public class HistoricalEngine {
     /**
      * Compute historical score based on real data.
      */
-    public BigDecimal computeHistoricalScore(AcademicProfile profile, UUID programId) {
-        Program program = programRepository.findById(programId).orElse(null);
-        if (program == null) return BigDecimal.valueOf(50);
+    /** No observed admission outcomes are persisted; no statistical value can be returned. */
+    public BigDecimal computeHistoricalScore(AcademicProfile profile, UUID programId) { return null; }
+    public BigDecimal computeAdmissionProbability(AcademicProfile profile, UUID programId, UUID guideVersionId) { return null; }
+    public BigDecimal computeScholarshipScore(AcademicProfile profile, UUID scholarshipId) { return null; }
 
-        BigDecimal score = BigDecimal.valueOf(50);
-
-        // Factor 1: Program availability
-        if (Boolean.TRUE.equals(program.getAvailable())) {
-            score = score.add(BigDecimal.valueOf(10));
-        } else {
-            score = score.subtract(BigDecimal.valueOf(20));
-        }
-
-        // Factor 2: Capacity
-        if (program.getMaxStudents() != null && program.getMaxStudents() > 0) {
-            score = score.add(BigDecimal.valueOf(5));
-        }
-
-        // Factor 3: University ranking
-        University university = program.getFaculty().getCampus().getUniversity();
-        if (university.getRanking() != null && university.getRanking() <= 10) {
-            score = score.add(BigDecimal.valueOf(10));
-        }
-
-        return score.min(BigDecimal.valueOf(100)).max(BigDecimal.ZERO);
-    }
-
-    /**
-     * Compute admission probability based on historical patterns.
-     */
-    public BigDecimal computeAdmissionProbability(AcademicProfile profile, UUID programId, UUID guideVersionId) {
-        List<AdmissionCriterion> criteria = admissionCriterionRepository
-                .findByGuideVersionIdAndProgramId(guideVersionId, programId);
-
-        if (criteria.isEmpty()) {
-            return BigDecimal.valueOf(50);
-        }
-
-        long metCount = 0;
-        long totalWeight = 0;
-
-        for (AdmissionCriterion criterion : criteria) {
-            if (criterion.getMandatory()) {
-                totalWeight += 10;
-                // Simplified: check if profile meets basic criteria
-                if (profile.getBacAverage() != null && criterion.getMinValue() != null) {
-                    if (profile.getBacAverage().compareTo(criterion.getMinValue()) >= 0) {
-                        metCount += 10;
-                    }
-                }
-            }
-        }
-
-        if (totalWeight == 0) return BigDecimal.valueOf(50);
-
-        return BigDecimal.valueOf((double) metCount / totalWeight * 100)
-                .setScale(2, RoundingMode.HALF_UP);
-    }
-
-    /**
-     * Get scholarship eligibility score.
-     */
-    public BigDecimal computeScholarshipScore(AcademicProfile profile, UUID scholarshipId) {
-        Scholarship scholarship = scholarshipRepository.findById(scholarshipId).orElse(null);
-        if (scholarship == null) return BigDecimal.ZERO;
-
-        BigDecimal score = BigDecimal.valueOf(50);
-
-        // Factor: merit-based scholarships reward high averages
-        if (scholarship.getType().name().contains("MERIT")) {
-            if (profile.getBacAverage() != null && profile.getBacAverage().compareTo(BigDecimal.valueOf(16)) >= 0) {
-                score = score.add(BigDecimal.valueOf(30));
-            }
-        }
-
-        // Factor: available slots
-        if (scholarship.getRemainingSlots() != null && scholarship.getRemainingSlots() > 0) {
-            score = score.add(BigDecimal.valueOf(10));
-        }
-
-        return score.min(BigDecimal.valueOf(100));
-    }
-
-    /**
-     * Get university statistics for scoring.
-     */
     public Map<String, Object> getUniversityStats(UUID universityId) {
         Map<String, Object> stats = new HashMap<>();
         University university = universityRepository.findById(universityId).orElse(null);

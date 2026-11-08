@@ -28,6 +28,9 @@ import java.util.*;
 public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
+    private final com.orientation.orientationapp.storage.service.StorageService storage;
+    private final DocumentVersionRepository documentVersionRepository;
     private final DocumentPageRepository documentPageRepository;
     private final DocumentMetadataRepository documentMetadataRepository;
     private final DocumentExtractionRepository documentExtractionRepository;
@@ -39,154 +42,62 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     @Transactional
     public Document upload(MultipartFile file, String title, String description, String tenantId, String userId) {
+        access.require("DOCUMENT_MANAGE");storage.validate(file);
+        var current=access.current();
+        String original=file.getOriginalFilename()==null?"document":file.getOriginalFilename();
+        original=original.replaceAll("[\\r\\n\\p{Cntrl}]","_");
+        if(original.length()>200) original=original.substring(0,200);
+        String safeTitle=title==null || title.isBlank()?original:title.strip();
+        if(safeTitle.length()>500 || (description!=null && description.length()>20000))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,"Document metadata exceeds its limit");
         try {
-            String checksum = calculateChecksum(file.getBytes());
-
-            Document document = Document.builder()
-                    .title(title != null ? title : file.getOriginalFilename())
-                    .originalFileName(file.getOriginalFilename())
-                    .storedFileName(UUID.randomUUID() + "_" + file.getOriginalFilename())
-                    .mimeType(file.getContentType())
-                    .fileSize(file.getSize())
-                    .checksum(checksum)
-                    .status("PROCESSING")
-                    .tenantId(tenantId)
-                    .uploadedBy(userId)
-                    .uploadedAt(Instant.now())
-                    .description(description)
-                    .build();
-
-            document = documentRepository.save(document);
-
-            // Create version
-            DocumentVersion version = DocumentVersion.builder()
-                    .document(document)
-                    .versionNumber(1)
-                    .storedFileName(document.getStoredFileName())
-                    .fileSize(document.getFileSize())
-                    .checksum(document.getChecksum())
-                    .uploadedBy(userId)
-                    .uploadedAt(Instant.now())
-                    .active(true)
-                    .build();
-
-            // Perform OCR
-            log.info("Performing OCR for document: {}", document.getId());
-            var ocrEngine = ocrEngineRegistry.getEngineForMimeType(file.getContentType());
-            OcrResult ocrResult = ocrEngine.performOcr(file.getInputStream(), file.getContentType());
-
-            // Store extraction results
-            DocumentExtraction extraction = DocumentExtraction.builder()
-                    .document(document)
-                    .fullText(ocrResult.getRawText())
-                    .cleanedText(ocrResult.getCleanedText())
-                    .ocrConfidence(BigDecimal.valueOf(ocrResult.getConfidence()))
-                    .detectedLanguage(ocrResult.getDetectedLanguage())
-                    .blockCount(ocrResult.getBlocks().size())
-                    .paragraphCount(ocrResult.getParagraphs().size())
-                    .tableCount(ocrResult.getTables().size())
-                    .imageCount(ocrResult.getImages().size())
-                    .ocrEngine(ocrResult.getEngineUsed())
-                    .extractionScore(BigDecimal.valueOf(ocrResult.getConfidence()))
-                    .qualityScore(BigDecimal.valueOf(ocrResult.getConfidence() * 100))
-                    .build();
-
-            // Store pages
-            List<DocumentPage> pages = new ArrayList<>();
-            for (OcrResult.OcrPage ocrPage : ocrResult.getPages()) {
-                DocumentPage page = DocumentPage.builder()
-                        .document(document)
-                        .pageNumber(ocrPage.getPageNumber())
-                        .rawText(ocrPage.getText())
-                        .cleanedText(ocrPage.getText())
-                        .ocrConfidence(BigDecimal.valueOf(ocrPage.getConfidence()))
-                        .build();
-                pages.add(page);
-            }
-
-            // Classify document
-            Map<String, Object> metadata = Map.of(
-                    "title", document.getTitle(),
-                    "mimeType", document.getMimeType()
-            );
-            ClassificationResult classification = documentClassifier.classify(ocrResult.getRawText(), metadata);
-
-            DocumentClassification docClassification = DocumentClassification.builder()
-                    .document(document)
-                    .primaryType(classification.getPrimaryType())
-                    .primaryConfidence(classification.getPrimaryConfidence())
-                    .classificationEngine(classification.getClassificationEngine())
-                    .classificationScore(classification.getPrimaryConfidence())
-                    .build();
-
-            // Store metadata
-            DocumentMetadata docMetadata = DocumentMetadata.builder()
-                    .document(document)
-                    .title(document.getTitle())
-                    .pageCount(ocrResult.getPageCount())
-                    .language(ocrResult.getDetectedLanguage())
-                    .checksum(document.getChecksum())
-                    .build();
-
-            // Update document
-            document.setDocumentType(classification.getPrimaryType());
-            document.setStatus("COMPLETED");
-            document.setPageCount(ocrResult.getPageCount());
-            document.setOcrScore(BigDecimal.valueOf(ocrResult.getConfidence()));
-            document.setQualityScore(BigDecimal.valueOf(ocrResult.getConfidence() * 100));
-            document.setLanguage(ocrResult.getDetectedLanguage());
-
-            // Save all
-            documentRepository.save(document);
-            documentPageRepository.saveAll(pages);
-            documentExtractionRepository.save(extraction);
-            documentClassificationRepository.save(docClassification);
-            documentMetadataRepository.save(docMetadata);
-
-            // Audit
-            DocumentAudit audit = DocumentAudit.builder()
-                    .document(document)
-                    .action("UPLOAD")
-                    .userId(userId)
-                    .performedAt(Instant.now())
-                    .details("Document uploaded and processed")
-                    .build();
-            documentAuditRepository.save(audit);
-
-            log.info("Document uploaded and processed: {} ({})", document.getTitle(), document.getId());
+            Document document=Document.builder().title(safeTitle).originalFileName(original)
+                .storedFileName(storage.store(file)).mimeType(file.getContentType()).fileSize(file.getSize())
+                .checksum(calculateChecksum(file.getBytes())).status("UPLOADED")
+                .tenantId(access.tenant(null).toString()).uploadedBy(current.getId().toString())
+                .uploadedAt(Instant.now()).description(description).build();
+            documentRepository.saveAndFlush(document);
+            documentVersionRepository.saveAndFlush(DocumentVersion.builder().document(document).versionNumber(1)
+                .storedFileName(document.getStoredFileName()).fileSize(document.getFileSize()).checksum(document.getChecksum())
+                .uploadedBy(current.getId().toString()).uploadedAt(Instant.now()).active(true).build());
+            documentAuditRepository.save(DocumentAudit.builder().document(document).action("UPLOAD")
+                .userId(current.getId().toString()).performedAt(Instant.now()).details("Source stored; processing not yet run").build());
             return document;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload document", e);
+        } catch(IOException ex) {
+            throw new com.orientation.orientationapp.exception.BusinessException("Document storage failed","STORAGE_ERROR");
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public Document getById(UUID id) {
-        return documentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Document not found: " + id));
+        Document document=documentRepository.findById(id)
+                .orElseThrow(com.orientation.orientationapp.security.service.ResourceAccess::denied);
+        access.document(document.getTenantId(),document.getUploadedBy(),false);
+        return document;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Document> list(String search, String tenantId, Document.DocumentType type, Pageable pageable) {
-        if (search != null) {
-            return documentRepository.search(search, pageable);
-        }
-        if (tenantId != null) {
-            return documentRepository.findByTenantId(tenantId, pageable);
-        }
-        if (type != null) {
-            return documentRepository.findByDocumentType(type, pageable);
-        }
-        return documentRepository.findAll(pageable);
+        UUID tenant=access.tenant(tenantId==null ? null : UUID.fromString(tenantId));
+        String owner=access.current().getId().toString();
+        boolean tenantReader=access.authority("DOCUMENT_READ");
+        return documentRepository.findAll((root,query,cb) -> {
+            var conditions=new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+            conditions.add(cb.equal(root.get("tenantId"),tenant.toString()));
+            if (!tenantReader) conditions.add(cb.equal(root.get("uploadedBy"),owner));
+            if (type!=null) conditions.add(cb.equal(root.get("documentType"),type));
+            if (search!=null && !search.isBlank()) conditions.add(cb.like(cb.lower(root.get("title")),"%"+search.toLowerCase()+"%"));
+            return cb.and(conditions.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        },pageable);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
         Document document = getById(id);
+        access.document(document.getTenantId(),document.getUploadedBy(),true);
         document.setDeleted(true);
         documentRepository.save(document);
     }
@@ -194,22 +105,20 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> getStatistics(String tenantId) {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalDocuments", documentRepository.count());
-        stats.put("documentsByType", Arrays.stream(Document.DocumentType.values())
-                .collect(java.util.stream.Collectors.toMap(
-                        type -> type.name(),
-                        type -> documentRepository.countByDocumentType(type)
-                )));
+        var scoped=list(null,tenantId,null,org.springframework.data.domain.Pageable.unpaged()).getContent();
+        Map<String,Object> stats=new HashMap<>();
+        stats.put("totalDocuments",scoped.size());
+        stats.put("documentsByType",Arrays.stream(Document.DocumentType.values()).collect(
+            java.util.stream.Collectors.toMap(Enum::name,t -> scoped.stream().filter(d -> d.getDocumentType()==t).count())));
         return stats;
     }
 
     @Override
     @Transactional(readOnly = true)
     public byte[] download(UUID id) {
-        // In production, this would read from file storage
-        Document document = getById(id);
-        throw new RuntimeException("File storage not implemented yet");
+        Document document=getById(id);
+        try { return java.nio.file.Files.readAllBytes(storage.load(document.getStoredFileName())); }
+        catch (java.io.IOException ex) { throw new com.orientation.orientationapp.exception.BusinessException("Stored document unavailable","STORAGE_ERROR"); }
     }
 
     private String calculateChecksum(byte[] data) {

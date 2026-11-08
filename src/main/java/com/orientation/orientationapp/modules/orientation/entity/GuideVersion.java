@@ -20,6 +20,8 @@ import java.util.Set;
         @UniqueConstraint(name = "uk_guide_version_number", columnNames = {"orientation_guide_id", "version_number"})
 })
 public class GuideVersion extends BaseEntity {
+    private java.util.UUID documentVersionId;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "orientation_guide_id", nullable = false, foreignKey = @ForeignKey(name = "fk_guide_version_guide"))

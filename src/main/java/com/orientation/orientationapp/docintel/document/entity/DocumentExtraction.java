@@ -39,9 +39,11 @@ public class DocumentExtraction extends BaseEntity {
 
     private Integer imageCount;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String tablesJson;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String structureJson;
 

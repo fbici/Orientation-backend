@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UniversityRepository extends JpaRepository<University, UUID> {
+public interface UniversityRepository extends JpaRepository<University, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<University> {
     List<University> findByCountryId(UUID countryId);
     List<University> findByCityId(UUID cityId);
     List<University> findByStatus(UniversityStatus status);

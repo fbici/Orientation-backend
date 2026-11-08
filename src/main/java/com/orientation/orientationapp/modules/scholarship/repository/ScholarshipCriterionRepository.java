@@ -12,4 +12,5 @@ public interface ScholarshipCriterionRepository extends JpaRepository<Scholarshi
     List<ScholarshipCriterion> findByGuideVersionId(UUID guideVersionId);
     List<ScholarshipCriterion> findByScholarshipId(UUID scholarshipId);
     List<ScholarshipCriterion> findByGuideVersionIdAndScholarshipId(UUID guideVersionId, UUID scholarshipId);
+    java.util.Optional<ScholarshipCriterion> findBySourceFactId(UUID factId);
 }

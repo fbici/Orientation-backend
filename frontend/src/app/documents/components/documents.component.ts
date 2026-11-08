@@ -1,194 +1,152 @@
-import { Component, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../core/services/api.service';
-import { ToastService } from '../../shared/components/toast.service';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
-import { ModalComponent } from '../../shared/components/modal.component';
-
+import { Component, OnInit, signal } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterLink, Router } from "@angular/router";
+import { ApiService } from "../../core/services/api.service";
 @Component({
-  selector: 'app-documents',
+  selector: "app-documents",
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent, ModalComponent],
-  template: `
-    <div class="anim-fade-up">
-      <div class="page-header">
-        <div><h1>Documents</h1><p>Intelligence documentaire — OCR, classification, extraction</p></div>
-        <div class="page-header-actions">
-          <button class="btn btn-primary" (click)="fileInput.click()"><span class="material-symbols-rounded">upload_file</span>Uploader</button>
-          <input #fileInput type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xlsx" style="display:none" (change)="onUpload($event)">
-        </div>
+  imports: [CommonModule, RouterLink],
+  template: ` <div class="anim-fade-up">
+    <div class="page-header">
+      <div>
+        <h1>Documents et imports de guides</h1>
+        <p>
+          PDF texte, PDF scannés, PNG et JPEG · extraction locale puis revue
+          humaine.
+        </p>
       </div>
-
-      @if (uploading()) {
-        <div class="alert alert-info" style="margin-bottom:20px"><div class="spinner-sm"></div><span>Upload et traitement en cours…</span></div>
-      }
-
-      <div class="g4 stagger" style="margin-bottom:22px">
-        @for (k of kpis; track k.label) {
-          <div class="stat-card anim-fade-up">
-            <div class="stat-icon" [style.background]="k.g"><span class="material-symbols-rounded filled">{{ k.icon }}</span></div>
-            <div class="stat-content"><div class="stat-label">{{ k.label }}</div><div class="stat-value">{{ k.val }}</div></div>
-          </div>
-        }
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <span style="font-size:.8125rem;color:var(--n-500)">{{ documents().length }} documents</span>
-          <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
-        </div>
-        <div class="card-body" style="padding:0">
-          @if (loading()) {
-            <div style="padding:48px;text-align:center"><div class="spinner"></div></div>
-          } @else {
-            <table class="data-table">
-              <thead><tr><th>Document</th><th>Type</th><th>Classification</th><th>OCR</th><th>Statut</th><th>Date</th><th style="text-align:right">Actions</th></tr></thead>
-              <tbody>
-                @for (d of documents(); track d.id) {
-                  <tr>
-                    <td>
-                      <div style="display:flex;align-items:center;gap:10px">
-                        <span class="material-symbols-rounded" [style.color]="fileColor(d)" style="font-size:20px">{{ fileIcon(d) }}</span>
-                        <div><div style="font-weight:600;font-size:.875rem;color:var(--n-900)">{{ d.fileName || d.name }}</div><div style="font-size:.6875rem;color:var(--n-500)">{{ d.fileSize || '—' }}</div></div>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-gray">{{ d.fileType || d.mimeType || '—' }}</span></td>
-                    <td style="font-size:.8125rem">{{ d.classification || '—' }}</td>
-                    <td><span class="badge" [class]="d.ocrStatus === 'COMPLETED' ? 'badge-success' : d.ocrStatus === 'PROCESSING' ? 'badge-info' : 'badge-gray'">{{ d.ocrStatus || 'En attente' }}</span></td>
-                    <td><span class="badge" [class]="d.status === 'PROCESSED' ? 'badge-success' : 'badge-info'">{{ d.status || 'Nouveau' }}</span></td>
-                    <td style="font-size:.8125rem;color:var(--n-500)">{{ d.createdAt | date:'short' }}</td>
-                    <td style="text-align:right">
-                      <div style="display:flex;gap:2px;justify-content:flex-end">
-                        <button class="btn btn-ghost btn-icon btn-sm" (click)="viewDetail(d)"><span class="material-symbols-rounded" style="font-size:18px">visibility</span></button>
-                        <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(d)"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
-                      </div>
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr><td colspan="7" style="text-align:center;padding:48px;color:var(--n-400)">
-                    <span class="material-symbols-rounded" style="font-size:48px;display:block;margin-bottom:12px;color:var(--n-300)">description</span>
-                    <p style="font-weight:600;color:var(--n-600)">Aucun document</p>
-                    <p style="font-size:.8125rem;margin-bottom:16px">Uploadez des documents pour lancer l'OCR et la classification.</p>
-                    <button class="btn btn-primary btn-sm" (click)="fileInput.click()"><span class="material-symbols-rounded">upload_file</span>Uploader un document</button>
-                  </td></tr>
-                }
-              </tbody>
-            </table>
-          }
-        </div>
-      </div>
+      <label class="btn btn-primary"
+        >Importer un document<input
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg"
+          hidden
+          [disabled]="uploading()"
+          (change)="upload($event)"
+      /></label>
     </div>
-
-    <!-- Detail Modal -->
-    <app-modal [open]="showDetail()" [title]="detail()?.fileName || 'Document'" size="700px" [showFooter]="false" (close)="showDetail.set(false)">
-      @if (detail()) {
-        <div class="g2" style="margin-bottom:20px">
-          <div><span style="font-size:.75rem;color:var(--n-500);display:block;margin-bottom:2px">Type</span><span style="font-weight:600">{{ detail().fileType || detail().mimeType }}</span></div>
-          <div><span style="font-size:.75rem;color:var(--n-500);display:block;margin-bottom:2px">Classification</span><span style="font-weight:600">{{ detail().classification || '—' }}</span></div>
-          <div><span style="font-size:.75rem;color:var(--n-500);display:block;margin-bottom:2px">OCR</span><span class="badge" [class]="detail().ocrStatus === 'COMPLETED' ? 'badge-success' : 'badge-info'">{{ detail().ocrStatus || 'En attente' }}</span></div>
-          <div><span style="font-size:.75rem;color:var(--n-500);display:block;margin-bottom:2px">Uploadé le</span><span>{{ detail().createdAt | date:'medium' }}</span></div>
-        </div>
-        @if (detail().extractedText) {
-          <div style="margin-top:16px"><span style="font-size:.75rem;font-weight:600;color:var(--n-600);display:block;margin-bottom:8px">Texte extrait (OCR)</span>
-            <div style="background:var(--n-50);padding:16px;border-radius:var(--radius-sm);font-size:.8125rem;color:var(--n-700);line-height:1.6;max-height:300px;overflow-y:auto;white-space:pre-wrap">{{ detail().extractedText }}</div>
-          </div>
-        }
-        @if (detail().entities?.length) {
-          <div style="margin-top:16px"><span style="font-size:.75rem;font-weight:600;color:var(--n-600);display:block;margin-bottom:8px">Entités détectées</span>
-            <div style="display:flex;flex-wrap:wrap;gap:6px">@for(e of detail().entities;track e){<span class="badge badge-primary">{{e}}</span>}</div>
-          </div>
-        }
-      }
-    </app-modal>
-
-    <app-confirm-dialog [open]="showDel()" title="Supprimer le document" [message]="'Supprimer « ' + (delTarget()?.fileName || '') + ' » ?'" icon="delete_forever" iconColor="#ef4444" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
-  `,
-  styles: [`
-    .spinner{width:32px;height:32px;border:3px solid var(--n-200);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
-    .spinner-sm{width:16px;height:16px;border:2px solid var(--n-300);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .alert{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius-sm);font-size:.8125rem}
-    .alert-info{background:var(--sky-50);color:var(--sky-600);border:1px solid rgba(14,165,233,.15)}
-  `]
+    @if (error()) {
+      <div class="alert alert-error" role="alert">{{ error() }}</div>
+    }
+    @if (uploading()) {
+      <p role="status">Enregistrement sécurisé du document…</p>
+    }
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Document</th>
+            <th>État</th>
+            <th>Pages</th>
+            <th>Importé le</th>
+            <th>Revue</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr>
+              <td colspan="5">Chargement…</td>
+            </tr>
+          } @else {
+            @for (d of rows(); track d.id) {
+              <tr>
+                <td>
+                  {{ d.title || d.originalFileName }}<br /><small>{{
+                    d.mimeType
+                  }}</small>
+                </td>
+                <td>{{ d.status }}</td>
+                <td>{{ d.pageCount ?? "—" }}</td>
+                <td>{{ d.uploadedAt | date: "short" }}</td>
+                <td>
+                  <a
+                    class="btn btn-secondary btn-sm"
+                    [routerLink]="['/documents', d.id, 'review']"
+                    >Ouvrir</a
+                  >
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">
+                  Aucun document enregistré pour votre périmètre.
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="page-header-actions">
+      <button
+        class="btn btn-secondary"
+        [disabled]="page === 0"
+        (click)="page = page - 1; load()"
+      >
+        Précédent</button
+      ><span>Page {{ page + 1 }} · {{ total }} documents</span
+      ><button
+        class="btn btn-secondary"
+        [disabled]="(page + 1) * 20 >= total"
+        (click)="page = page + 1; load()"
+      >
+        Suivant</button
+      ><button class="btn btn-ghost" (click)="load()">Actualiser</button>
+    </div>
+  </div>`,
 })
 export class DocumentsComponent implements OnInit {
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-  documents = signal<any[]>([]);
+  rows = signal<any[]>([]);
   loading = signal(false);
   uploading = signal(false);
-  deleting = signal(false);
-  showDetail = signal(false);
-  showDel = signal(false);
-  detail = signal<any>(null);
-  delTarget = signal<any>(null);
-  kpis = [
-    { icon: 'description', label: 'Total', val: '0', g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
-    { icon: 'check_circle', label: 'Traités', val: '0', g: 'linear-gradient(135deg,#22c55e,#15803d)' },
-    { icon: 'pending', label: 'En cours', val: '0', g: 'linear-gradient(135deg,#f97316,#ea580c)' },
-    { icon: 'error', label: 'Erreurs', val: '0', g: 'linear-gradient(135deg,#ef4444,#dc2626)' },
-  ];
-
-  constructor(private api: ApiService, private toast: ToastService) {}
-  ngOnInit(): void { this.load(); }
-
-  load(): void {
+  error = signal("");
+  page = 0;
+  total = 0;
+  constructor(
+    private api: ApiService,
+    private router: Router,
+  ) {}
+  ngOnInit() {
+    this.load();
+  }
+  load() {
     this.loading.set(true);
-    this.api.getDocuments().subscribe({
+    this.error.set("");
+    this.api.getDocuments(this.page).subscribe({
       next: (r) => {
-        const items = r?.content || r || [];
-        this.documents.set(Array.isArray(items) ? items : []);
-        this.kpis[0].val = String(this.documents().length);
-        this.kpis[1].val = String(this.documents().filter(d => d.status === 'PROCESSED' || d.ocrStatus === 'COMPLETED').length);
-        this.kpis[2].val = String(this.documents().filter(d => d.ocrStatus === 'PROCESSING').length);
-        this.kpis[3].val = String(this.documents().filter(d => d.status === 'ERROR').length);
+        this.rows.set(r.content);
+        this.total = r.totalElements;
         this.loading.set(false);
       },
-      error: () => { this.loading.set(false); }
+      error: (e) => {
+        this.loading.set(false);
+        this.error.set(e.error?.message || "Documents indisponibles.");
+      },
     });
   }
-
-  onUpload(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    this.uploading.set(true);
-    this.api.uploadDocument(file).subscribe({
-      next: () => { this.uploading.set(false); this.toast.success('Document uploadé. Traitement en cours…'); this.load(); if (this.fileInput) this.fileInput.nativeElement.value = ''; },
-      error: (e) => { this.uploading.set(false); this.toast.error(e.error?.message || 'Erreur upload.'); if (this.fileInput) this.fileInput.nativeElement.value = ''; }
-    });
-  }
-
-  viewDetail(d: any): void {
-    this.detail.set(d);
-    // Load extractions if available
-    if (d.id) {
-      this.api.getDocumentExtractions(d.id).subscribe({ next: (r) => { this.detail.set({ ...d, entities: r?.entities || [] }); }, error: () => {} });
+  upload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const f = input.files?.[0];
+    if (!f) return;
+    if (f.size > 10 * 1024 * 1024) {
+      this.error.set("Taille maximale : 10 Mo.");
+      input.value = "";
+      return;
     }
-    this.showDetail.set(true);
-  }
-
-  confirmDel(d: any): void { this.delTarget.set(d); this.showDel.set(true); }
-  doDel(): void {
-    this.deleting.set(true);
-    this.api.deleteDocument(this.delTarget()?.id).subscribe({
-      next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Document supprimé.'); this.load(); },
-      error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); }
+    this.uploading.set(true);
+    this.error.set("");
+    this.api.uploadDocument(f).subscribe({
+      next: (r) => {
+        this.uploading.set(false);
+        input.value = "";
+        this.router.navigate(["/documents", r.id, "review"]);
+      },
+      error: (e) => {
+        this.uploading.set(false);
+        input.value = "";
+        this.error.set(
+          e.error?.message || "Import refusé. Vérifiez le format et la taille.",
+        );
+      },
     });
-  }
-
-  fileIcon(d: any): string {
-    const t = (d.fileType || d.mimeType || '').toLowerCase();
-    if (t.includes('pdf')) return 'picture_as_pdf';
-    if (t.includes('image') || t.includes('jpg') || t.includes('png')) return 'image';
-    if (t.includes('excel') || t.includes('xlsx') || t.includes('csv')) return 'table_chart';
-    return 'description';
-  }
-
-  fileColor(d: any): string {
-    const t = (d.fileType || d.mimeType || '').toLowerCase();
-    if (t.includes('pdf')) return '#ef4444';
-    if (t.includes('image')) return '#3b82f6';
-    if (t.includes('excel') || t.includes('csv')) return '#16a34a';
-    return '#6b7280';
   }
 }

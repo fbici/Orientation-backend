@@ -1,44 +1,24 @@
 package com.orientation.orientationapp.ai.chat.controller;
-
-import com.orientation.orientationapp.ai.chat.model.ChatMessage;
-import com.orientation.orientationapp.ai.chat.model.ChatSession;
+import com.orientation.orientationapp.ai.chat.model.*;
 import com.orientation.orientationapp.ai.chat.service.ChatService;
+import com.orientation.orientationapp.ai.history.DecisionHistoryService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import java.util.UUID;
-
-@Slf4j
-@RestController
-@RequestMapping("/ai/chat")
-@RequiredArgsConstructor
+@RestController @RequestMapping("/ai/chat") @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','CANDIDAT')")
 public class ChatController {
-
-    private final ChatService chatService;
-
-    @PostMapping("/sessions")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<ChatSession> createSession() {
-        return ResponseEntity.ok(chatService.createSession("current-user"));
-    }
-
-    @PostMapping("/sessions/{sessionId}/messages")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<ChatMessage> sendMessage(
-            @PathVariable UUID sessionId,
-            @RequestBody Map<String, String> request) {
-
-        ChatMessage response = chatService.sendMessage(sessionId, "current-user", request.get("message"));
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/sessions/{sessionId}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
-    public ResponseEntity<ChatSession> getSession(@PathVariable UUID sessionId) {
-        return ResponseEntity.ok(chatService.getSession(sessionId));
-    }
+ private final ChatService chat;
+ private final DecisionHistoryService history;
+ @PostMapping("/sessions") public ChatSession create(@RequestParam(required=false) UUID candidateId){return chat.createSessionFor(candidateId);}
+ @PostMapping("/sessions/{id}/messages") public ChatMessage ask(@PathVariable UUID id,@Valid @RequestBody AskRequest request){return chat.ask(id,request);}
+ @GetMapping("/sessions/{id}") public ChatSession get(@PathVariable UUID id){return chat.getSession(id);}
+ @GetMapping("/sessions/{id}/messages") public org.springframework.data.domain.Page<DecisionHistoryService.View> messages(@PathVariable UUID id,@RequestParam(defaultValue="0")int page,@RequestParam(defaultValue="20")int size){
+  chat.getSession(id);return history.children(id,page,size);
+ }
+ @GetMapping("/sessions") public org.springframework.data.domain.Page<DecisionHistoryService.View> sessions(@RequestParam(required=false)UUID candidateId,@RequestParam(defaultValue="0")int page,@RequestParam(defaultValue="20")int size){
+  return history.history(candidateId,"CHAT_SESSION",page,size);
+ }
 }

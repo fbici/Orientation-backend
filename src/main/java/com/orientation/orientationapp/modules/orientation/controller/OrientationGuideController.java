@@ -1,42 +1,13 @@
 package com.orientation.orientationapp.modules.orientation.controller;
-
-import com.orientation.orientationapp.modules.orientation.entity.OrientationGuide;
-import com.orientation.orientationapp.modules.orientation.repository.OrientationGuideRepository;
+import com.orientation.orientationapp.modules.orientation.service.GuideCatalogueService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.data.domain.Page;
 import java.util.*;
-
-/**
- * API REST pour les guides d'orientation.
- *
- * GET /api/v1/guides - Liste paginée
- * GET /api/v1/guides/{id} - Détail
- */
-@RestController
-@RequestMapping("/guides")
-@RequiredArgsConstructor
+@RestController @RequestMapping("/guides") @RequiredArgsConstructor
 public class OrientationGuideController {
-
-    private final OrientationGuideRepository guideRepository;
-
-    @GetMapping
-    public ResponseEntity<Page<OrientationGuide>> list(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(guideRepository.findAll(
-            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
-        ));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<OrientationGuide> getById(@PathVariable UUID id) {
-        return guideRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+ private final GuideCatalogueService catalogue;
+ @GetMapping public Page<Map<String,Object>> list(@RequestParam(defaultValue="0")int page,@RequestParam(defaultValue="20")int size,@RequestParam(required=false)UUID countryId,@RequestParam(required=false)UUID academicYearId,@RequestParam(required=false)String search){return catalogue.list(page,size,countryId,academicYearId,search);}
+ @GetMapping("/{id}") public Map<String,Object> get(@PathVariable UUID id){return catalogue.get(id);}
+ @GetMapping("/{id}/versions") public List<Map<String,Object>> versions(@PathVariable UUID id){return catalogue.versions(id);}
 }

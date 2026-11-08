@@ -25,4 +25,5 @@ public class RankedRecommendation {
     private String difficultyLevel;
     private Explanation explanation;
     private boolean eligible;
+    private com.orientation.orientationapp.recengine.eligibility.model.EligibilityStatus eligibilityStatus;
 }

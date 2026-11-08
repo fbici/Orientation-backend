@@ -21,15 +21,22 @@ public class DashboardServiceImpl implements DashboardService {
     private final CandidateRepository candidateRepository;
     private final ProgramRepository programRepository;
 
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
+
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly=true)
     public DashboardResponse getExecutiveDashboard() {
+        access.require("STATISTICS_READ");
+        return build(access.global() ? null : access.tenant(null));
+    }
+    private DashboardResponse build(java.util.UUID tenant) {
         log.info("Building executive dashboard");
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
         DashboardResponse.KpiSummary kpis = DashboardResponse.KpiSummary.builder()
-                .totalCandidates(candidateRepository.count())
+                .totalCandidates(tenant==null ? candidateRepository.count() : candidateRepository.countByTenant_IdAndUserIsNotNull(tenant))
                 .totalRecommendations(0L)
                 .totalGuidesImported(0L)
                 .totalDocumentsOcr(0L)
@@ -74,6 +81,10 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardResponse getDashboardByTenant(String tenantId) {
-        return getExecutiveDashboard();
+        access.require("STATISTICS_READ");
+        final java.util.UUID requested;
+        try { requested=java.util.UUID.fromString(tenantId); }
+        catch(IllegalArgumentException ex) { throw com.orientation.orientationapp.security.service.ResourceAccess.denied(); }
+        return build(access.tenant(requested));
     }
 }

@@ -1,0 +1,40 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    clean-disabled: true
+  batch:
+    jdbc:
+      initialize-schema: never
+    job:
+      enabled: false
+  sql:
+    init:
+      mode: never
+  cache:
+    type: simple
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+logging:
+  level:
+    root: WARN
+    org.hibernate.SQL: WARN
+app:
+  jwt:
+    secret: f1-test-only-signing-material-not-for-any-real-environment-0123456789
+    expiration: 900000
+    refresh-expiration: 604800000
+  bootstrap:
+    enabled: false
+  sendgrid:
+    enabled: false
+  realtime:
+    scheduled-broadcasts: false

@@ -20,6 +20,7 @@ public class TranscriptLine extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "transcript_id", nullable = false, foreignKey = @ForeignKey(name = "fk_transcript_line_transcript"))
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Transcript transcript;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

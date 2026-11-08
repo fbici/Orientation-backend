@@ -5,6 +5,7 @@ import com.orientation.orientationapp.ai.comparator.model.ComparisonResult;
 import java.util.UUID;
 
 public interface ComparisonService {
+    ComparisonResult compare(com.orientation.orientationapp.ai.comparator.dto.CompareRequest request);
 
     /**
      * Compare two programs.

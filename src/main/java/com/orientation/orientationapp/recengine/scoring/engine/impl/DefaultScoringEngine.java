@@ -1,231 +1,73 @@
 package com.orientation.orientationapp.recengine.scoring.engine.impl;
 
 import com.orientation.orientationapp.recengine.profile.model.AcademicProfile;
-import com.orientation.orientationapp.recengine.scoring.model.CompositeScore;
-import com.orientation.orientationapp.recengine.scoring.model.ScoreDetail;
-import lombok.extern.slf4j.Slf4j;
+import com.orientation.orientationapp.recengine.scoring.model.*;
+import com.orientation.orientationapp.recengine.profile.normalization.GradeNormalizer;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.*;
+import java.math.*;
+import java.util.*;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-@Slf4j
+/** Deterministic compatibility. Missing dimensions remain uncomputed. */
 @Component
 public class DefaultScoringEngine {
-
-    private static final Map<String, BigDecimal> WEIGHTS = Map.of(
-            "academic", BigDecimal.valueOf(0.30),
-            "subject", BigDecimal.valueOf(0.20),
-            "scholarship", BigDecimal.valueOf(0.10),
-            "competency", BigDecimal.valueOf(0.15),
-            "preference", BigDecimal.valueOf(0.10),
-            "country", BigDecimal.valueOf(0.05),
-            "language", BigDecimal.valueOf(0.05),
-            "historical", BigDecimal.valueOf(0.05)
-    );
-
-    public CompositeScore computeScore(AcademicProfile profile, Map<String, Object> programData) {
-        List<ScoreDetail> components = new ArrayList<>();
-
-        // Academic Score
-        ScoreDetail academicScore = computeAcademicScore(profile);
-        components.add(academicScore);
-
-        // Subject Score
-        ScoreDetail subjectScore = computeSubjectScore(profile, programData);
-        components.add(subjectScore);
-
-        // Competency Score
-        ScoreDetail competencyScore = computeCompetencyScore(profile, programData);
-        components.add(competencyScore);
-
-        // Preference Score
-        ScoreDetail preferenceScore = computePreferenceScore(profile, programData);
-        components.add(preferenceScore);
-
-        // Country Score
-        ScoreDetail countryScore = computeCountryScore(profile, programData);
-        components.add(countryScore);
-
-        // Language Score
-        ScoreDetail languageScore = computeLanguageScore(profile, programData);
-        components.add(languageScore);
-
-        // Historical Score (placeholder)
-        ScoreDetail historicalScore = ScoreDetail.builder()
-                .scoreType("historical")
-                .score(BigDecimal.valueOf(50))
-                .weight(WEIGHTS.get("historical"))
-                .explanation("Données historiques limitées")
-                .computed(true)
-                .build();
-        components.add(historicalScore);
-
-        // Compute composite score
-        BigDecimal finalScore = components.stream()
-                .map(s -> s.getScore().multiply(s.getWeight()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
-
-        BigDecimal confidence = computeConfidence(components);
-
-        return CompositeScore.builder()
-                .finalScore(finalScore)
-                .confidence(confidence)
-                .components(components)
-                .summary(buildSummary(finalScore, confidence))
-                .build();
+    private final Map<String,BigDecimal> weights;
+    public DefaultScoringEngine(){this(new BigDecimal(".50"),new BigDecimal(".20"),new BigDecimal(".15"),new BigDecimal(".10"),new BigDecimal(".05"));}
+    @Autowired public DefaultScoringEngine(
+        @Value("${app.recommendations.weights.academic:0.50}") BigDecimal academic,
+        @Value("${app.recommendations.weights.subject:0.20}") BigDecimal subject,
+        @Value("${app.recommendations.weights.preference:0.15}") BigDecimal preference,
+        @Value("${app.recommendations.weights.country:0.10}") BigDecimal country,
+        @Value("${app.recommendations.weights.language:0.05}") BigDecimal language) {
+        var configured=new LinkedHashMap<String,BigDecimal>();
+        configured.put("academic",academic);configured.put("subject",subject);configured.put("preference",preference);
+        configured.put("country",country);configured.put("language",language);
+        if(configured.values().stream().anyMatch(w->w==null||w.signum()<0) ||
+           configured.values().stream().reduce(BigDecimal.ZERO,BigDecimal::add).signum()==0)
+            throw new IllegalArgumentException("Scoring weights must be nonnegative with a positive total");
+        weights=Collections.unmodifiableMap(configured);
     }
-
-    private ScoreDetail computeAcademicScore(AcademicProfile profile) {
-        BigDecimal score = BigDecimal.ZERO;
-        String explanation = "";
-
-        if (profile.getBacAverage() != null) {
-            // Normalize to 0-100
-            score = profile.getBacAverage().multiply(BigDecimal.valueOf(5));
-            if (score.compareTo(BigDecimal.valueOf(100)) > 0) {
-                score = BigDecimal.valueOf(100);
+    public CompositeScore computeScore(AcademicProfile profile,Map<String,Object> programme) {
+        var parts=new ArrayList<ScoreDetail>();
+        add(parts,"academic",percentage(profile.getGeneralAverage(),profile.getGradeScale()),"Recorded average / configured scale");
+        BigDecimal subjects=null;
+        var relevant=programme.get("subjectCodes");
+        if(relevant instanceof Collection<?> codes && !codes.isEmpty() && profile.getSubjectGrades()!=null) {
+            var values=new ArrayList<BigDecimal>();boolean complete=true;
+            for(var code:codes) {
+                var scale=profile.getSubjectGradeScales()==null?profile.getGradeScale():profile.getSubjectGradeScales().get(code);
+                var value=percentage(profile.getSubjectGrades().get(code),scale);
+                if(value==null){complete=false;break;}values.add(value);
             }
-
-            if (profile.getBacAverage().compareTo(BigDecimal.valueOf(16)) >= 0) {
-                explanation = "Moyenne excellente (" + profile.getBacAverage() + "/20)";
-            } else if (profile.getBacAverage().compareTo(BigDecimal.valueOf(14)) >= 0) {
-                explanation = "Bonne moyenne (" + profile.getBacAverage() + "/20)";
-            } else if (profile.getBacAverage().compareTo(BigDecimal.valueOf(12)) >= 0) {
-                explanation = "Moyenne correcte (" + profile.getBacAverage() + "/20)";
-            } else {
-                explanation = "Moyenne insuffisante (" + profile.getBacAverage() + "/20)";
-            }
+            if(complete)subjects=values.stream().reduce(BigDecimal.ZERO,BigDecimal::add)
+                    .divide(BigDecimal.valueOf(values.size()),MathContext.DECIMAL128);
         }
-
-        return ScoreDetail.builder()
-                .scoreType("academic")
-                .score(score)
-                .weight(WEIGHTS.get("academic"))
-                .explanation(explanation)
-                .computed(true)
-                .build();
+        add(parts,"subject",subjects,"Only subjects explicitly referenced by published criteria");
+        add(parts,"preference",match(profile.getPreferredFields(),programme.get("studyField")),"Exact declared field preference");
+        add(parts,"country",match(profile.getPreferredCountries(),programme.get("country")),"Exact declared destination preference");
+        add(parts,"language",match(profile.getPreferredLanguages()!=null?profile.getPreferredLanguages():
+                profile.getLanguage()==null?null:List.of(profile.getLanguage()),programme.get("language")),"Exact declared language preference");
+        var known=parts.stream().filter(ScoreDetail::isComputed).toList();
+        var denominator=known.stream().map(ScoreDetail::getWeight).reduce(BigDecimal.ZERO,BigDecimal::add);
+        var total=weights.values().stream().reduce(BigDecimal.ZERO,BigDecimal::add);
+        BigDecimal score=denominator.signum()==0?null:known.stream().map(p->p.getScore().multiply(p.getWeight()))
+                .reduce(BigDecimal.ZERO,BigDecimal::add).divide(denominator,MathContext.DECIMAL128);
+        return CompositeScore.builder().finalScore(score)
+                .confidence(denominator.multiply(BigDecimal.valueOf(100)).divide(total,MathContext.DECIMAL128))
+                .components(parts).summary("Compatibility; confidence is data coverage, never admission probability").build();
     }
-
-    private ScoreDetail computeSubjectScore(AcademicProfile profile, Map<String, Object> programData) {
-        BigDecimal score = BigDecimal.valueOf(50);
-        String explanation = "Score moyen par matière";
-
-        if (profile.getStrongSubjects() != null && !profile.getStrongSubjects().isEmpty()) {
-            score = score.add(BigDecimal.valueOf(profile.getStrongSubjects().size() * 5));
-            explanation = profile.getStrongSubjects().size() + " matières fortes identifiées";
-        }
-
-        if (score.compareTo(BigDecimal.valueOf(100)) > 0) {
-            score = BigDecimal.valueOf(100);
-        }
-
-        return ScoreDetail.builder()
-                .scoreType("subject")
-                .score(score)
-                .weight(WEIGHTS.get("subject"))
-                .explanation(explanation)
-                .computed(true)
-                .build();
+    private void add(List<ScoreDetail> parts,String type,BigDecimal value,String explanation) {
+        parts.add(ScoreDetail.builder().scoreType(type).score(value).weight(weights.get(type)).computed(value!=null)
+                .explanation(value==null?"Not computed: missing reliable data":explanation).build());
     }
-
-    private ScoreDetail computeCompetencyScore(AcademicProfile profile, Map<String, Object> programData) {
-        BigDecimal score = BigDecimal.valueOf(50);
-        String explanation = "Compétences évaluées";
-
-        if (profile.getCompetencyScores() != null && !profile.getCompetencyScores().isEmpty()) {
-            BigDecimal maxCompetency = profile.getCompetencyScores().values().stream()
-                    .max(BigDecimal::compareTo)
-                    .orElse(BigDecimal.ZERO);
-            score = maxCompetency.multiply(BigDecimal.valueOf(10));
-            if (score.compareTo(BigDecimal.valueOf(100)) > 0) {
-                score = BigDecimal.valueOf(100);
-            }
-            explanation = "Compétence dominante: " + profile.getDominantCompetency();
-        }
-
-        return ScoreDetail.builder()
-                .scoreType("competency")
-                .score(score)
-                .weight(WEIGHTS.get("competency"))
-                .explanation(explanation)
-                .computed(true)
-                .build();
+    private BigDecimal match(List<String> preferences,Object actual) {
+        if(preferences==null||preferences.isEmpty()||!(actual instanceof String value)||value.isBlank())return null;
+        return preferences.stream().anyMatch(p->p.equalsIgnoreCase(value))?BigDecimal.valueOf(100):BigDecimal.ZERO;
     }
-
-    private ScoreDetail computePreferenceScore(AcademicProfile profile, Map<String, Object> programData) {
-        BigDecimal score = BigDecimal.valueOf(50);
-        String explanation = "Préférences non spécifiées";
-
-        if (profile.getPreferredFields() != null && !profile.getPreferredFields().isEmpty()) {
-            score = BigDecimal.valueOf(70);
-            explanation = profile.getPreferredFields().size() + " domaine(s) d'intérêt";
-        }
-
-        return ScoreDetail.builder()
-                .scoreType("preference")
-                .score(score)
-                .weight(WEIGHTS.get("preference"))
-                .explanation(explanation)
-                .computed(true)
-                .build();
-    }
-
-    private ScoreDetail computeCountryScore(AcademicProfile profile, Map<String, Object> programData) {
-        BigDecimal score = BigDecimal.valueOf(50);
-        String explanation = "Score pays par défaut";
-
-        if (profile.getPreferredCountries() != null && !profile.getPreferredCountries().isEmpty()) {
-            score = BigDecimal.valueOf(80);
-            explanation = profile.getPreferredCountries().size() + " pays préféré(s)";
-        }
-
-        return ScoreDetail.builder()
-                .scoreType("country")
-                .score(score)
-                .weight(WEIGHTS.get("country"))
-                .explanation(explanation)
-                .computed(true)
-                .build();
-    }
-
-    private ScoreDetail computeLanguageScore(AcademicProfile profile, Map<String, Object> programData) {
-        BigDecimal score = BigDecimal.valueOf(60);
-        String explanation = "Score langue par défaut";
-
-        if (profile.getLanguage() != null) {
-            score = BigDecimal.valueOf(80);
-            explanation = "Langue: " + profile.getLanguage();
-        }
-
-        return ScoreDetail.builder()
-                .scoreType("language")
-                .score(score)
-                .weight(WEIGHTS.get("language"))
-                .explanation(explanation)
-                .computed(true)
-                .build();
-    }
-
-    private BigDecimal computeConfidence(List<ScoreDetail> components) {
-        long computedCount = components.stream().filter(ScoreDetail::isComputed).count();
-        return BigDecimal.valueOf((double) computedCount / components.size() * 100)
-                .setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private String buildSummary(BigDecimal score, BigDecimal confidence) {
-        if (score.compareTo(BigDecimal.valueOf(80)) >= 0) {
-            return "Excellent profil académique";
-        } else if (score.compareTo(BigDecimal.valueOf(60)) >= 0) {
-            return "Bon profil académique";
-        } else if (score.compareTo(BigDecimal.valueOf(40)) >= 0) {
-            return "Profil académique moyen";
-        } else {
-            return "Profil académique à améliorer";
-        }
+    private BigDecimal percentage(BigDecimal value,com.orientation.orientationapp.modules.orientation.entity.GradeScale scale) {
+        var normalizer=new GradeNormalizer();
+        if(normalizer.convert(value,scale,scale).isEmpty())return null;
+        return value.subtract(scale.getMinScore()).multiply(BigDecimal.valueOf(100))
+                .divide(scale.getMaxScore().subtract(scale.getMinScore()),MathContext.DECIMAL128);
     }
 }

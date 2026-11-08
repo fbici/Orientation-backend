@@ -21,6 +21,10 @@ import java.math.BigDecimal;
         @UniqueConstraint(name = "uk_admission_criterion_program_type", columnNames = {"guide_version_id", "program_id", "criterion_type", "subject_id"})
 })
 public class AdmissionCriterion extends BaseEntity {
+    private java.util.UUID sourceFactId;
+    @Column(length=50) private String fieldName;
+    @Column(precision=10,scale=2) private java.math.BigDecimal valueScaleMax;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "guide_version_id", nullable = false, foreignKey = @ForeignKey(name = "fk_admission_criterion_guide_version"))

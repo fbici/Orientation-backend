@@ -33,6 +33,7 @@ public class CsvParser implements FileParser {
             // Read all content first to allow multiple passes
             byte[] allBytes = inputStream.readAllBytes();
             String content = new String(allBytes, StandardCharsets.UTF_8);
+            if(content.isBlank())return rows;
 
             char separator = detectSeparator(content);
 
@@ -48,12 +49,17 @@ public class CsvParser implements FileParser {
                  CSVParser parser = new CSVParser(reader, format)) {
 
                 List<String> headers = parser.getHeaderNames();
+                if(headers.isEmpty() || headers.size()>100 || headers.stream().anyMatch(String::isBlank) ||
+                  headers.stream().map(RowMapper::normalizeKey).distinct().count()!=headers.size())
+                    throw new IllegalArgumentException("CSV headers must be unique and contain at most 100 columns");
                 log.info("CSV headers detected: {}", headers);
 
                 for (CSVRecord record : parser) {
+                    if(rows.size()>=1000)throw new IllegalArgumentException("Import limit: 1000 rows");
                     Map<String, Object> row = new LinkedHashMap<>();
                     for (String header : headers) {
                         String value = record.isMapped(header) ? record.get(header) : "";
+                        if(value!=null && value.length()>20000)throw new IllegalArgumentException("Cell limit: 20000 characters");
                         row.put(RowMapper.normalizeKey(header), value != null ? value.trim() : "");
                     }
                     rows.add(row);
@@ -116,16 +122,17 @@ public class CsvParser implements FileParser {
     }
 
     private char detectSeparator(String content) {
-        String sample = content.length() > 4096 ? content.substring(0, 4096) : content;
-
-        for (char separator : SEPARATORS) {
-            int count = 0;
-            for (char c : sample.toCharArray()) {
-                if (c == separator) count++;
+        String header=content.split("\\R",2)[0];
+        char best=',';int highest=0;
+        for(char candidate:SEPARATORS) {
+            boolean quoted=false;int count=0;
+            for(int i=0;i<header.length();i++) {
+                char c=header.charAt(i);
+                if(c=='"')quoted=!quoted;
+                else if(c==candidate && !quoted)count++;
             }
-            if (count > 2) return separator;
+            if(count>highest){highest=count;best=candidate;}
         }
-
-        return ','; // default
+        return best;
     }
 }

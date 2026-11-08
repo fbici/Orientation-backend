@@ -115,14 +115,14 @@ export class RolesComponent implements OnInit {
   form: any = { code: '', description: '', permissions: [] as string[] };
 
   permissionCategories = [
-    { name: 'Utilisateurs', permissions: ['users:read', 'users:create', 'users:update', 'users:delete'] },
-    { name: 'Universites', permissions: ['universities:read', 'universities:create', 'universities:update', 'universities:delete'] },
-    { name: 'Programmes', permissions: ['programs:read', 'programs:create', 'programs:update', 'programs:delete'] },
-    { name: 'Candidats', permissions: ['candidates:read', 'candidates:create', 'candidates:update'] },
-    { name: 'Recommandations', permissions: ['recommendations:read', 'recommendations:generate', 'recommendations:simulate'] },
-    { name: 'Documents', permissions: ['documents:read', 'documents:upload', 'documents:delete'] },
-    { name: 'Imports', permissions: ['imports:read', 'imports:create', 'imports:rollback'] },
-    { name: 'Systeme', permissions: ['settings:read', 'settings:update', 'audit:read', 'monitoring:read'] },
+    { name: 'Utilisateurs', permissions: ['USER_READ', 'USER_CREATE', 'USER_UPDATE', 'USER_DELETE'] },
+    { name: 'Universites', permissions: ['UNIVERSITY_READ', 'UNIVERSITY_CREATE', 'UNIVERSITY_UPDATE', 'UNIVERSITY_DELETE'] },
+    { name: 'Programmes', permissions: ['PROGRAM_READ', 'PROGRAM_CREATE', 'PROGRAM_UPDATE', 'PROGRAM_DELETE'] },
+    { name: 'Candidats', permissions: ['CANDIDATE_READ', 'CANDIDATE_CREATE', 'CANDIDATE_UPDATE'] },
+    { name: 'Recommandations', permissions: ['RECOMMENDATION_READ', 'RECOMMENDATION_EXECUTE', 'RECOMMENDATION_EXECUTE'] },
+    { name: 'Documents', permissions: ['DOCUMENT_READ', 'DOCUMENT_MANAGE', 'DOCUMENT_MANAGE'] },
+    { name: 'Imports', permissions: ['IMPORT_READ', 'IMPORT_START', 'IMPORT_ROLLBACK'] },
+    { name: 'Systeme', permissions: ['SYSTEM_CONFIG', 'SYSTEM_CONFIG', 'AUDIT_READ', 'STATISTICS_READ'] },
   ];
 
   constructor(private api: ApiService, private toast: ToastService) {}

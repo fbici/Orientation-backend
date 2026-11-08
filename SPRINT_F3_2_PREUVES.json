@@ -1,0 +1,377 @@
+{
+  "sprint": "F3.2",
+  "verifiedAt": "2026-11-06T19:31:23.845653+00:00",
+  "backend": {
+    "mavenExit": 0,
+    "scope": "full suite F1/F2/F3.1/F3.2",
+    "totals": {
+      "tests": 178,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "com.orientation.orientationapp.ai.AssistantIntentRouterTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.ai.DecisionExportTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.ai.ScholarshipAvailabilityTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.dataplat.parser.CsvParserTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.dataplat.validation.ValidationEngineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.dataplat_import.ImportOrchestratorTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.docintel.classification.ClassificationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.docintel.ocr.OcrEngineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.docintel.ocr.RealDocumentOcrTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.integration.AuthIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.integration.IntelligenceIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.integration.LocationIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.integration.RecommendationIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.integration.UniversityIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.eligibility.engine.impl.RealEligibilityEngineTest",
+        "tests": 39,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.GradeNormalizerTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.ProfileAnalyzerTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.RankingEngineTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.ScoringContractTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.ScoringEngineTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.recengine.SimulationEngineTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.AcademicWorkflowIntegrationTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.AuthRateLimitTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.BootstrapTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.CorsSecurityTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.FoundationsIntegrationTest",
+        "tests": 25,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.JwtTokenProviderTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.SocketSecurityTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.orientation.orientationapp.security.StorageSecurityTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "log": "C:\\Users\\HP\\AppData\\Local\\Temp\\orientia-f32-release-verification.log"
+  },
+  "angular": {
+    "tests": 42,
+    "failures": 0,
+    "ignored": 0,
+    "testExit": 0,
+    "productionBuildExit": 0,
+    "logs": [
+      "C:\\Users\\HP\\AppData\\Local\\Temp\\orientia-f32-angular-tests-final.log",
+      "C:\\Users\\HP\\AppData\\Local\\Temp\\orientia-f32-angular-build-final.log"
+    ]
+  },
+  "postgres": {
+    "schema": "f32_release_20261106",
+    "guideStates": {
+      "ACTIVE": 2,
+      "ARCHIVED": 3
+    },
+    "academicYears": 5,
+    "decisionKinds": {
+      "COMPARISON": 2,
+      "SIMULATION": 3,
+      "SCHOLARSHIP": 2,
+      "CHAT_MESSAGE": 9,
+      "CHAT_SESSION": 1
+    },
+    "lastMigration": "82",
+    "candidateCount": 55,
+    "assistantStates": {
+      "ANSWERED": 5,
+      "NEEDS_INPUT": 1,
+      "UNSUPPORTED": 2,
+      "INSUFFICIENT_DATA": 1
+    },
+    "candidateTenants": 54,
+    "scholarshipStates": {
+      "ELIGIBLE": 2,
+      "NOT_ELIGIBLE": 4,
+      "INSUFFICIENT_DATA": 4
+    },
+    "verifiedScholarships": 8,
+    "flywayFailedMigrations": 0,
+    "flywaySuccessfulVersionedMigrations": 83
+  },
+  "protectedHistoricalMigrationDirectoryFiles": 83,
+  "protectedHistoricalSqlMigrations": 82,
+  "changedHistoricalMigrations": [],
+  "historicalMigrationHashes": {
+    "src/main/resources/db/migration/V63_1__legacy_seed_column_compatibility.sql": "7ff36457879d14e827081fa8685d7890fb8ce93c6ca29a8cd04c73562b9ef6aa",
+    "src/main/resources/db/migration/V65__secure_sessions.sql": "6461630e3d49f465905da412d035876052c639fdb8687e4c3d6aea62332101d3",
+    "src/main/resources/db/migration/V66__resource_ownership_and_permissions.sql": "86556bc1e6d41268cc89723f590bd045c54bfac2c30427698b7102bd4c927478",
+    "src/main/resources/db/migration/V67__missing_schema_objects.sql": "a8fb02771beb883e5202175ef739da8b52c6e79feecea12e189e0003d2ca776d",
+    "src/main/resources/db/migration/V68__account_tokens.sql": "6cc11a333718d9a3a86d48e5f18c319f52bf66f750b22e26f65c89c3afff4276",
+    "src/main/resources/db/migration/V69__search_embedding.sql": "d6fdaf38f4b77d11f01e56e68ea6cfca6386978cc3f27087510086c0846ec801",
+    "src/main/resources/db/migration/V70__canonical_permission_grants.sql": "eefbf169a68163c50c9b15f20a7ae3366caeb3e8954aba81ddb61416d23c06f9",
+    "src/main/resources/db/migration/V71__tenant_dashboard_permission.sql": "559c51e864abf4d5dd3752c8c37899ff4086222523e342b01d12b7dd17013b50",
+    "src/main/resources/db/migration/V72__academic_catalog_scope.sql": "24d1f575d01b9ff76a181da79c86ce729792220bdb2ed3cf648fe00dc45f6b94",
+    "src/main/resources/db/migration/V73__document_review_provenance.sql": "b85a77d52592a9cfb920878c0042b0adbf7f80c53614da5b8aa890d45786ec75",
+    "src/main/resources/db/migration/V74__academic_uniqueness_per_tenant.sql": "071f233879017cb132a9e6d72562e00ed832905fb3c9fd0e793a3c7fb938aff4",
+    "src/main/resources/db/migration/V75__knowledge_relationship_filters.sql": "02a1b93fe67b73500addcf407feebfa7cd1ae757c211d9c4524efef8d1a5bff0",
+    "src/main/resources/db/migration/V76__tabular_import_evidence.sql": "7c3909eed44d3beec23e0bff075f79c593e162a8cc72f1dc6f2687a138bcb701",
+    "src/main/resources/db/migration/V77__candidate_academic_profile.sql": "7e431c67e92d9ae4fc3c0771d2aafbf705c2ac0a6d943e1307473fbbaea2685e",
+    "src/main/resources/db/migration/V78__recommendation_history.sql": "8e1991fca6605d7be7bf62d7f7144f41f0183e0c471b93dfd1fffb5d8de6edaa",
+    "src/main/resources/db/migration/V79__versioned_transcript_analyses.sql": "352270a4873edbd38c1dba63f3a67c6b3f68a0b9902b45e605b85667b334efae",
+    "src/main/resources/db/migration/V80__recommendation_runs.sql": "8ae972dda380f334561ecc080a9dc3c20c8f781da21e1f9a8e10ba62ec7605d2",
+    "src/main/resources/db/migration/V81__transcript_confirmation_idempotency.sql": "49eb70a2323d7ca824103444e434879c592613051e0962c0c941ead8fe8aaa93",
+    "src/main/resources/db/migration/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/main/resources/db/migration/V10__create_faculties.sql": "fbb20ac80317ee4fc583e8a9599b23224f9613e9771da67422f05766602caffd",
+    "src/main/resources/db/migration/V11__create_programs.sql": "e0bd6b73f2726278ffec9098cd3e34391fd88de734893af25ea1c3efc9e1b6e0",
+    "src/main/resources/db/migration/V12__create_orientation_guides.sql": "361499b7076387c408748f6162fb9e82814ac96a6433693e8f5d2355b04e4eda",
+    "src/main/resources/db/migration/V13__create_guide_versions.sql": "71fe2435208cfebf3c9aa2cd41e8479d2d85d545642750a21c9b68b492b13e9d",
+    "src/main/resources/db/migration/V14__create_admission_criteria.sql": "585025e48508d3aec851fb571326dc6490a40cc320b8709bc039fcc6bf5f4972",
+    "src/main/resources/db/migration/V15__create_scholarships.sql": "062d5c4d88b1453f47de5ce9b971aec91362f761464c60345aaf2c333067a642",
+    "src/main/resources/db/migration/V16__create_scholarship_criteria.sql": "d9289ce634204c85d7224ec0b7f827cad7cc1b6c6573325f3ac3cd84c12794e2",
+    "src/main/resources/db/migration/V17__create_candidates.sql": "5828b1e8b1cf7a8e51e7674c645f8972bbfe1d1af90f98d689e545a4b34cca67",
+    "src/main/resources/db/migration/V18__create_transcripts.sql": "5332e21f75db3c1a89c9e85c4d5b4834b67d8d58f72772888db0a09fbc48edad",
+    "src/main/resources/db/migration/V19__create_transcript_lines.sql": "78e2a54ca32480aa499f7d1ebe70393c5f345c7c7c26cb11492967a94a86f932",
+    "src/main/resources/db/migration/V1__create_extensions.sql": "35776bfc637e407225475427ffa51cc671a0f2e0636d28cdf3a47919d4d5719e",
+    "src/main/resources/db/migration/V20__create_transcript_analyses.sql": "0f52da5bbcc799d6230dd2faf28c3fd291842e7ba82c0acc02504a01e11c9161",
+    "src/main/resources/db/migration/V21__create_recommendations.sql": "4901ae45b6d102801cbc1fea8e899e4567a35c0edf12b949447345da2bb5eb40",
+    "src/main/resources/db/migration/V22__create_recommendation_explanations.sql": "d0c5552dba416e847e442768144ad46fd09359a145eaca01bf9ebdb37fdaa0f2",
+    "src/main/resources/db/migration/V23__create_import_histories.sql": "2aa5c33abec3022693d1c7bcd51c1a2907976ebf8809cebbfbd3829787d18145",
+    "src/main/resources/db/migration/V24__seed_countries.sql": "c3addc1ea645d852ec41022b781befddc9b37fee6274f9576a347c8cec6f07b7",
+    "src/main/resources/db/migration/V25__seed_academic_years.sql": "c1a043fb5fb47dcfade2c9e5b273eab6821eb3a5cd48fd6440ff75dfbff6ad36",
+    "src/main/resources/db/migration/V26__seed_grade_scales.sql": "b99cbbf13bb1d0d3e541a3aff31803880d9b881bbd301cb3cd12b2dbb33f2936",
+    "src/main/resources/db/migration/V27__seed_subjects.sql": "b64c929a42602dc8ef8e807546f74cd14591b5fc58b49732727a96affc095590",
+    "src/main/resources/db/migration/V28__seed_scholarship_types.sql": "e3ae5708f46e80124ab6dbbe36fea00f559f31e596d518a3f4416891a69a79fb",
+    "src/main/resources/db/migration/V29__seed_sample_universities.sql": "9141ddcc97d96723af532c3b03424c6f61c31d0d7c7305259b2eb48f68ec4c7f",
+    "src/main/resources/db/migration/V2__create_academic_years.sql": "e40e13d64ebe2e2903ff6a5ea9a5d2704f2a48f0193754a76f91e0c30ecc5011",
+    "src/main/resources/db/migration/V30__seed_sample_campuses.sql": "91ef331825206de244e754aca6131f8a6072d7719d8d4954da4a3d46a3e3013c",
+    "src/main/resources/db/migration/V31__seed_sample_faculties.sql": "2a77e1a811e2ebb3a5417172840b96cf39b775f025065aba943fd7887b8a977b",
+    "src/main/resources/db/migration/V32__seed_sample_programs.sql": "917b431bda8561634d5b7e43ed40c8d082b5dcd9ac9d3e0d2f35db48885a13ac",
+    "src/main/resources/db/migration/V33__create_organizations.sql": "c671b7f719467c1a52aaff2457375bcc20d52cede5392e3c96c6d799d7e8308e",
+    "src/main/resources/db/migration/V34__create_tenants.sql": "451261eaddedc6edaf57377f72b971f42e6bc5530d5947c6558ad30873892d31",
+    "src/main/resources/db/migration/V35__create_roles_permissions.sql": "b3153b1a7843fb38372166db8b40487a828d9148ef4e93ae2b71ce9d833f724b",
+    "src/main/resources/db/migration/V36__create_users_user_roles.sql": "30de9dbb7f571e3c1aa933e79308f542be49070e2b3b4765dcb5e1f18c964d9d",
+    "src/main/resources/db/migration/V37__create_refresh_tokens_api_keys.sql": "9cd65ab775076917fe31c8cd74e6897c0c416748a968360ec19771f18ff58906",
+    "src/main/resources/db/migration/V38__seed_roles_permissions.sql": "ff87d68a804160e72caf8abb55a318e75bd4ee44ee6084906842bbc1166c6cad",
+    "src/main/resources/db/migration/V39__create_departments.sql": "f3fe976566be7bfb38489e53a287f4c1e7829b29ecfffafe3e9adb499fb1314e",
+    "src/main/resources/db/migration/V3__create_countries.sql": "10b0d5edbb88c105248084eb11ade2059e414585be40806a77632dac7af9c306",
+    "src/main/resources/db/migration/V40__create_user_profiles.sql": "bed8f06fdd69998309a55699f79ec1be8191b9a187045235b6c7a629b7fe1b97",
+    "src/main/resources/db/migration/V41__create_invitations.sql": "4d26792c9d6bb9e33d78a2f070f06463bc6d44d1485df1080809fb7e30592ecb",
+    "src/main/resources/db/migration/V42__create_teams.sql": "fa3ef4eb3a4e7cbfd847029e2e2bd1d2706432cf8de743f7fd5eff0f2c7e90ec",
+    "src/main/resources/db/migration/V43__create_activity_logs.sql": "64433890e780f4b4b887dcd8a52657acdcdcab5ef1690580d0f76b4a6886c829",
+    "src/main/resources/db/migration/V44__create_import_history_records.sql": "e44e196780ec9dbeacaae96b257316f7e5cf5858c987813b4cf24db952dab93f",
+    "src/main/resources/db/migration/V45__create_quality_report_records.sql": "42aea1e4eed673152aaa4b5b87dd7969e1c04789e2698dc8b845f63c2d9d6837",
+    "src/main/resources/db/migration/V46__create_import_entity_mappings.sql": "2a40f0ec63ef7e5fba2195afef9635a822cc187322f563bbbdf074f34f020bea",
+    "src/main/resources/db/migration/V47__create_doc_documents.sql": "d6454f482faf3eee4a8d37e0d2b51e96efddea68156e4c7ae03dc78ac57b83a8",
+    "src/main/resources/db/migration/V48__create_doc_versions_pages_metadata.sql": "2272606a21f4e28cbf620d0b2954cbbf4a81ee45a6533a8445f727429c87ca1b",
+    "src/main/resources/db/migration/V49__create_doc_extractions_classifications_audits.sql": "dd3f5c011ea08c371d286020e2713e0dd30f766303e48016f433a79797088cce",
+    "src/main/resources/db/migration/V4__create_cities.sql": "6341ac6efa88e639f20823c0a19304c4efab4eab449d90005ee7da0684d400fe",
+    "src/main/resources/db/migration/V50__create_knowledge_nodes.sql": "41703c8ca2bdec714f3bfdf92b7c0b1d19334fe9023f9ba3979b4bf989197481",
+    "src/main/resources/db/migration/V51__create_knowledge_relations.sql": "ecb252fd3969ec98c33d4682dbb4d72aab460527c66468521160338e722cfab0",
+    "src/main/resources/db/migration/V52__create_search_index.sql": "eef023f20acf6b281b5df34c5011361d7c27b13c2817dadb187007202b8037a8",
+    "src/main/resources/db/migration/V53__create_recommendation_feedback.sql": "d1d9d0d5b950ab29d6c13331d3b3c579cf2cd720a6c504150fdf110d55adff82",
+    "src/main/resources/db/migration/V54__create_similarity_matrix.sql": "e00708e5da3716c8cd1826e7d1b9b42063d6897dda4c4870ba578a450b1eff5c",
+    "src/main/resources/db/migration/V55__create_learning_history.sql": "ae5c6035db1fca6caf5e6a2948974fc94ba246dfb52bb93c721952bee303d3e9",
+    "src/main/resources/db/migration/V56__seed_knowledge_nodes.sql": "c20c8d2b365feb0a6c4eeb39607f6310d9c4e8c7f7046d42b6a5af17b96cc354",
+    "src/main/resources/db/migration/V57__seed_countries_cities_comprehensive.sql": "f869a941b1558ce03e05b8d8297b13fc33ba9a67e818a6fe05af9ab5850fe28c",
+    "src/main/resources/db/migration/V58__seed_world_countries_cities_universities.sql": "7db2c3d5203af0ca8c0d61e70cbb9e2c90431a19d132dba212779201a27dda74",
+    "src/main/resources/db/migration/V59__seed_campuses.sql": "ed7f040fa1764f08be34cb1b6cd4b884d424129c5198ae8b063cc7edb97ce9b8",
+    "src/main/resources/db/migration/V5__create_grade_scales.sql": "fc437efbdedd7d98a82a8758bbaae02c75687fefcd216175f16c487a4ad61a3a",
+    "src/main/resources/db/migration/V60__seed_faculties.sql": "d4a0cce518b051fd59141bbb48bbef11cd6c182b0a1adbe4d6958ff2332ebdf7",
+    "src/main/resources/db/migration/V61__seed_programs.sql": "9fd0f650d29b0dff3b93c2802285c92504226f43825e89f95b32fe7bf7a6ebe2",
+    "src/main/resources/db/migration/V62__seed_grade_scales_subjects.sql": "cc9f9362542510915503380fe59089386c3c0369e32c8d1c7be1548ed315f3d7",
+    "src/main/resources/db/migration/V63__make_candidate_country_bac_nullable.sql": "5a820b7196d715a1d373f0f6c2a45bfe26c7e3d67b8449341f021b8c8a95da97",
+    "src/main/resources/db/migration/V64__seed_benin_universities_complete.sql": "3d205e1a43ad3319555a30537bca6e9e255423e01eb354c460529a061e8dccb6",
+    "src/main/resources/db/migration/V6__create_grade_scale_items.sql": "30fb5033446a5de64c317ba238510c7c3ed47dd6366056436bace15b0c357df2",
+    "src/main/resources/db/migration/V7__create_subjects.sql": "47a9e878a32248af3462bd675dd7c6547e0864e1a8b64fbaf1df3261f99a8663",
+    "src/main/resources/db/migration/V8__create_universities.sql": "6fc2dda645f6ef61b62866095847b4e0b02b7b0c5d5ad8be9f4d59c6c1604378",
+    "src/main/resources/db/migration/V9__create_campuses.sql": "fe686722c610abff535d52542e9a1f446a99455600393d17dbc16c7801bc0599"
+  },
+  "addedMigration": "V82__decision_support_history.sql",
+  "mobile": {
+    "writtenByCodex": false,
+    "gitStatusUnchanged": true,
+    "preexistingStatusLines": 35
+  },
+  "mainDatabaseAccessed": false,
+  "deployed": false,
+  "commitOrPush": false,
+  "verifiedAssertions": [
+    "confirmed candidate profile unchanged by simulation and assistant",
+    "real recommendations count unchanged by simulations",
+    "actual eligibility transitions in both directions",
+    "unknown scales, grades and unsupported years rejected",
+    "published scholarship criteria and dates respected",
+    "comparison sources and unknown fees preserved",
+    "personal chat history including administrative denial",
+    "structured insufficient-data chat without rollback failure",
+    "foreign candidate and export access rejected",
+    "real PDF and XLSX parsed; CSV formula injection neutralized",
+    "archived guides mark decision history noncurrent",
+    "profile changes do not overwrite decision history"
+  ],
+  "privatePostgresStopped": true,
+  "privatePostgresDataRetained": true,
+  "addedMigrationSha256": "6e9b1c23f6243a6bfd78d6d7c4c55e24479bfa76c545abc16a868b1fc1cea7f7"
+}

@@ -10,6 +10,8 @@ import java.util.UUID;
 
 @Repository
 public interface RecommendationRepository extends JpaRepository<Recommendation, UUID> {
+    org.springframework.data.domain.Page<Recommendation> findByCandidateIdAndRunIdIsNotNullOrderByRecommendedAtDescRankAsc(UUID candidateId,org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<Recommendation> findByCandidateIdAndRunIdOrderByRankAsc(UUID candidateId,UUID runId,org.springframework.data.domain.Pageable pageable);
     List<Recommendation> findByCandidateId(UUID candidateId);
     List<Recommendation> findByCandidateIdAndGuideVersionId(UUID candidateId, UUID guideVersionId);
     List<Recommendation> findByProgramId(UUID programId);

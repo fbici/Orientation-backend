@@ -38,6 +38,7 @@ public class Invitation extends BaseEntity {
     private User invitedBy;
 
     @Column(nullable = false, length = 500, unique = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String token;
 
     @Enumerated(EnumType.STRING)

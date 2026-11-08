@@ -18,17 +18,17 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "transcripts", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_transcript_candidate_year", columnNames = {"candidate_id", "academic_year_id"})
-})
+@Table(name = "transcripts")
 public class Transcript extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "candidate_id", nullable = false, foreignKey = @ForeignKey(name = "fk_transcript_candidate"))
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Candidate candidate;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "academic_year_id", nullable = false, foreignKey = @ForeignKey(name = "fk_transcript_academic_year"))
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private AcademicYear academicYear;
 
     @Column(length = 200)
@@ -59,6 +59,7 @@ public class Transcript extends BaseEntity {
     private String originalFileName;
 
     @Column(length = 500)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String fileUrl;
 
     @Column(precision = 5, scale = 2)
@@ -75,6 +76,8 @@ public class Transcript extends BaseEntity {
     @Builder.Default
     private Set<TranscriptLine> lines = new HashSet<>();
 
-    @OneToOne(mappedBy = "transcript", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private TranscriptAnalysis analysis;
+    @OneToMany(mappedBy = "transcript", fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Builder.Default
+    private java.util.List<TranscriptAnalysis> analyses = new java.util.ArrayList<>();
 }

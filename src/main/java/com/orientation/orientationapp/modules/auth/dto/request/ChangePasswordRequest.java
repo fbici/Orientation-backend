@@ -11,9 +11,10 @@ import lombok.*;
 @Builder
 public class ChangePasswordRequest {
     @NotBlank(message = "Current password is required")
+    @com.fasterxml.jackson.annotation.JsonAlias("oldPassword")
     private String currentPassword;
 
     @NotBlank(message = "New password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 12, max = 72, message = "Password must be at least 8 characters")
     private String newPassword;
 }

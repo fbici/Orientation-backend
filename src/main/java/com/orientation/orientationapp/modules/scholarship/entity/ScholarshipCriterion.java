@@ -20,6 +20,13 @@ import java.math.BigDecimal;
         @UniqueConstraint(name = "uk_scholarship_criterion_type", columnNames = {"guide_version_id", "scholarship_id", "criterion_type", "subject_id"})
 })
 public class ScholarshipCriterion extends BaseEntity {
+    @Column(nullable=false,length=50) @Builder.Default private String logicalGroup="DEFAULT";
+    @Enumerated(EnumType.STRING) @Column(nullable=false,length=5) @Builder.Default
+    private com.orientation.orientationapp.common.enums.LogicalOperator logicalOperator=com.orientation.orientationapp.common.enums.LogicalOperator.AND;
+    private java.util.UUID sourceFactId;
+    @Column(length=50) private String fieldName;
+    @Column(precision=10,scale=2) private java.math.BigDecimal valueScaleMax;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "guide_version_id", nullable = false, foreignKey = @ForeignKey(name = "fk_scholarship_criterion_guide_version"))

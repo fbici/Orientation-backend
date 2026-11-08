@@ -29,6 +29,7 @@ public class KnowledgeRelation extends BaseEntity {
     @Column(precision = 5, scale = 2)
     private BigDecimal weight;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String properties;
 

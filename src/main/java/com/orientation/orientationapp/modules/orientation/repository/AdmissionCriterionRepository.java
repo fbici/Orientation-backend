@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface AdmissionCriterionRepository extends JpaRepository<AdmissionCriterion, UUID> {
+public interface AdmissionCriterionRepository extends JpaRepository<AdmissionCriterion, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<AdmissionCriterion> {
+    List<AdmissionCriterion> findByProgramId(UUID programId);
     List<AdmissionCriterion> findByGuideVersionId(UUID guideVersionId);
     List<AdmissionCriterion> findByGuideVersionIdAndProgramId(UUID guideVersionId, UUID programId);
     List<AdmissionCriterion> findByGuideVersionIdAndFacultyId(UUID guideVersionId, UUID facultyId);
+    java.util.Optional<AdmissionCriterion> findBySourceFactId(UUID factId);
 }

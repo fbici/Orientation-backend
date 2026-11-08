@@ -20,9 +20,18 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "scholarships", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_scholarship_name_country_year", columnNames = {"name", "country_id", "academic_year_id"})
+        @UniqueConstraint(name = "uk_scholarship_name_country_year_tenant", columnNames = {"name", "country_id", "academic_year_id", "tenant_id"})
 })
 public class Scholarship extends BaseEntity {
+    @Column(nullable=false) @Builder.Default private Boolean verified=false;
+
+    private java.util.UUID tenantId;
+    @Column(length=500) private String sourceUrl;
+    private java.time.LocalDate validFrom;
+    private java.time.LocalDate validUntil;
+    private java.util.UUID universityId;
+    private java.util.UUID programId;
+
 
     @Column(nullable = false, length = 200)
     private String name;

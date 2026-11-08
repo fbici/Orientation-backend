@@ -60,3 +60,11 @@ frontend/node_modules/
 
 # Build
 dist/
+
+# Signing material and local deployment credentials
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+*.pem

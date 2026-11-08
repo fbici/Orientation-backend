@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthenticationService authenticationService;
+    private final com.orientation.orientationapp.modules.auth.service.AccountProfileService profile;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
@@ -69,17 +70,22 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<UserInfo> getCurrentUser() {
         String userId = SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new RuntimeException("Not authenticated"));
+                .orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Authentication required"));
 
         UserInfo userInfo = authenticationService.getCurrentUser(userId);
         return ResponseEntity.ok(userInfo);
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<UserInfo> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
+        return ResponseEntity.ok(profile.update(request.getFirstName(),request.getLastName(),request.getPhone()));
+    }
+    @PutMapping("/me/password")
+    public ResponseEntity<MessageResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        profile.password(request);
+        return ResponseEntity.ok(MessageResponse.success("Password changed; sign in again"));
+    }
     private String getClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
         return request.getRemoteAddr();
     }
 }

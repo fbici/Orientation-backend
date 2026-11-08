@@ -16,9 +16,11 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "orientation_guides", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_orientation_guide_country_year", columnNames = {"country_id", "academic_year_id"})
+        @UniqueConstraint(name = "uk_guide_country_year_tenant", columnNames = {"country_id", "academic_year_id", "tenant_id"})
 })
 public class OrientationGuide extends BaseEntity {
+    private java.util.UUID tenantId;
+
 
     @Column(nullable = false, length = 300)
     private String title;

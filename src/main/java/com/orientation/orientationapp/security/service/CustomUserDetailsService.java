@@ -26,22 +26,28 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("Loading user by username: {}", username);
 
         User user = loadUserFromDatabase(username);
 
         List<SimpleGrantedAuthority> authorities = user.getUserRoles().stream()
                 .map(UserRole::getRole)
+                .filter(role -> Boolean.TRUE.equals(role.getActive()) && !Boolean.TRUE.equals(role.getDeleted()))
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getCode()))
                 .collect(Collectors.toList());
 
+        user.getUserRoles().stream().map(UserRole::getRole)
+            .filter(role -> Boolean.TRUE.equals(role.getActive()) && !Boolean.TRUE.equals(role.getDeleted()))
+            .flatMap(role -> role.getRolePermissions().stream())
+            .map(rp -> rp.getPermission())
+            .filter(p -> Boolean.TRUE.equals(p.getActive()) && !Boolean.TRUE.equals(p.getDeleted()))
+            .map(p -> new SimpleGrantedAuthority(p.getCode())).forEach(authorities::add);
         return new CustomUserDetails(
                 user.getId().toString(),
                 user.getEmail(),
                 user.getPassword(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEnabled(),
+                AccountState.active(user),
                 authorities
         );
     }

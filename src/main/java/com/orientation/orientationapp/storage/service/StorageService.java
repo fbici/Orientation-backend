@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
 
 public interface StorageService {
+    void validate(MultipartFile file);
 
     /**
      * Store a file in the storage directory

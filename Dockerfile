@@ -1,5 +1,5 @@
 # Stage 1: Build Angular frontend
-FROM node:20-alpine AS frontend
+FROM node:22-alpine AS frontend
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
@@ -18,7 +18,17 @@ RUN mvn clean package -DskipTests -B
 
 # Stage 3: Run
 FROM eclipse-temurin:21-jre
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra fonts-dejavu-core curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 10001 orientia \
+    && useradd --uid 10001 --gid orientia --no-create-home --shell /usr/sbin/nologin orientia \
+    && mkdir -p /app/uploads /app/logs \
+    && chown -R orientia:orientia /app \
+    && chmod 700 /app/uploads /app/logs
 WORKDIR /app
+ENV STORAGE_DIR=/app/uploads
 COPY --from=backend /app/target/*.jar app.jar
+USER 10001:10001
 EXPOSE 8080
-CMD java -jar app.jar --spring.profiles.active=prod --server.port=${PORT:-8080}
+ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "app.jar", "--spring.profiles.active=prod"]

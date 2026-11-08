@@ -14,6 +14,10 @@ import java.time.Instant;
 @Entity
 @Table(name = "import_history_records")
 public class ImportHistoryRecord extends BaseEntity {
+    @Column(columnDefinition="bytea") private byte[] sourceBytes;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(columnDefinition="jsonb") private String rowsData;
+
 
     @Column(nullable = false, length = 255)
     private String fileName;

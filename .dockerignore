@@ -7,3 +7,17 @@ target/
 *.md
 .vscode/
 .idea/
+
+# Private data and generated caches never enter a Docker build context.
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+uploads/
+logs/
+**/*.log
+**/*.jks
+**/*.keystore
+**/*.p12
+**/*.pfx
+**/*.key
+**/*.pem

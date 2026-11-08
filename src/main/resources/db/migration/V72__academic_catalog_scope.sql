@@ -1,0 +1,24 @@
+-- Additive ownership and explicitly optional academic metadata. Legacy records remain unverified.
+ALTER TABLE universities ADD COLUMN tenant_id UUID REFERENCES tenants(id);
+ALTER TABLE universities ADD COLUMN institution_type VARCHAR(30);
+ALTER TABLE universities ADD COLUMN source_url VARCHAR(500);
+ALTER TABLE programs ADD COLUMN study_field VARCHAR(150);
+ALTER TABLE programs ADD COLUMN academic_year_id UUID REFERENCES academic_years(id);
+ALTER TABLE programs ADD COLUMN source_url VARCHAR(500);
+ALTER TABLE programs ADD COLUMN tuition_currency VARCHAR(3);
+ALTER TABLE scholarships ADD COLUMN tenant_id UUID REFERENCES tenants(id);
+ALTER TABLE scholarships ADD COLUMN source_url VARCHAR(500);
+ALTER TABLE scholarships ADD COLUMN valid_from DATE;
+ALTER TABLE scholarships ADD COLUMN valid_until DATE;
+ALTER TABLE scholarships ADD COLUMN university_id UUID REFERENCES universities(id);
+ALTER TABLE scholarships ADD COLUMN program_id UUID REFERENCES programs(id);
+ALTER TABLE orientation_guides ADD COLUMN tenant_id UUID REFERENCES tenants(id);
+ALTER TABLE guide_versions ADD COLUMN document_version_id UUID REFERENCES doc_document_versions(id);
+CREATE INDEX idx_university_tenant ON universities(tenant_id) WHERE NOT deleted;
+CREATE INDEX idx_scholarship_tenant ON scholarships(tenant_id) WHERE NOT deleted;
+CREATE INDEX idx_guide_tenant ON orientation_guides(tenant_id) WHERE NOT deleted;
+ALTER TABLE universities ADD COLUMN verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE campuses ADD COLUMN verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE faculties ADD COLUMN verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE programs ADD COLUMN verified BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE scholarships ADD COLUMN verified BOOLEAN NOT NULL DEFAULT FALSE;

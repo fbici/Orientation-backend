@@ -23,4 +23,5 @@ public interface SemanticSearchService {
      * @return search results
      */
     List<Map<String, Object>> search(String query, String entityType, int limit);
+    List<Map<String,Object>> searchFiltered(String query,String type,int limit,int page,java.util.UUID countryId,java.util.UUID programId,java.util.UUID universityId,java.util.UUID academicYearId,java.util.UUID sourceId);
 }

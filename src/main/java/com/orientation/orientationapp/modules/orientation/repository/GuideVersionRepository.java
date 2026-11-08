@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface GuideVersionRepository extends JpaRepository<GuideVersion, UUID> {
+    Optional<GuideVersion> findByDocumentVersionId(UUID sourceVersionId);
     List<GuideVersion> findByOrientationGuideId(UUID orientationGuideId);
     Optional<GuideVersion> findByOrientationGuideIdAndVersionNumber(UUID orientationGuideId, Integer versionNumber);
     Optional<GuideVersion> findByOrientationGuideIdAndActiveTrue(UUID orientationGuideId);

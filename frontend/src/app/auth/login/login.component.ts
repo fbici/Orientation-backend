@@ -34,7 +34,8 @@ import { AuthService } from '../../core/services/auth.service';
           <p class="card-subtitle">Connectez-vous à votre espace d'administration</p>
 
           <!-- Form -->
-          <form (ngSubmit)="onLogin()" class="login-form">
+          @if(auth.logoutWarning()){<div role="alert">{{auth.logoutWarning()}}</div>}
+            <form (ngSubmit)="onLogin()" class="login-form">
             <!-- Email -->
             <div class="field">
               <label class="field-label">Adresse email</label>
@@ -575,8 +576,9 @@ export class LoginComponent {
   showPwd = signal(false);
   private ret: string;
 
-  constructor(private auth: AuthService, private router: Router, private route: ActivatedRoute) {
-    this.ret = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+  constructor(public auth: AuthService, private router: Router, private route: ActivatedRoute) {
+    const target = this.route.snapshot.queryParams['returnUrl'];
+    this.ret = typeof target === 'string' && target.startsWith('/') && !target.startsWith('//') ? target : '/dashboard';
   }
 
   onLogin(): void {

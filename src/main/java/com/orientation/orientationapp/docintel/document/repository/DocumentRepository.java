@@ -13,6 +13,9 @@ import java.util.UUID;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, UUID>, JpaSpecificationExecutor<Document> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select d from Document d where d.id=:id")
+    java.util.Optional<Document> lock(@Param("id") UUID id);
     Page<Document> findByTenantId(String tenantId, Pageable pageable);
     Page<Document> findByDocumentType(Document.DocumentType type, Pageable pageable);
 

@@ -15,7 +15,7 @@ export interface Notification {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly API = `${environment.apiUrl}/notifications`;
+  private readonly API = `${environment.apiUrl}/backoffice/notifications`;
 
   notifications = signal<Notification[]>([]);
   unreadCount = signal(0);
@@ -34,7 +34,7 @@ export class NotificationService {
   }
 
   markAsRead(id: string): Observable<any> {
-    return this.http.put(`${this.API}/${id}/read`, {}).pipe(
+    return this.http.post(`${this.API}/${id}/read`, {}).pipe(
       tap(() => {
         this.notifications.update(list =>
           list.map(n => n.id === id ? { ...n, read: true } : n)
@@ -45,7 +45,7 @@ export class NotificationService {
   }
 
   markAllAsRead(): Observable<any> {
-    return this.http.put(`${this.API}/read-all`, {}).pipe(
+    return this.http.post(`${this.API}/read-all`, {}).pipe(
       tap(() => {
         this.notifications.update(list => list.map(n => ({ ...n, read: true })));
         this.unreadCount.set(0);

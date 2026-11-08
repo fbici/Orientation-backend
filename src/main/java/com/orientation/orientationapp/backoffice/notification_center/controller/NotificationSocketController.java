@@ -19,10 +19,10 @@ public class NotificationSocketController {
                 "/queue/notifications",
                 notification
         );
-        log.info("Notification sent to user {}: {}", notification.getUserId(), notification.getTitle());
+
     }
 
     public void broadcastNotification(Notification notification) {
-        messagingTemplate.convertAndSend("/topic/notifications", notification);
+        sendNotification(notification);
     }
 }

@@ -11,17 +11,32 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder=true)
 public class AcademicProfile {
 
     private UUID candidateId;
+    private UUID tenantId;
+    private UUID academicYearId;
+    private UUID gradesAcademicYearId;
+    private String diploma;
+    private String educationLevel;
+    private com.orientation.orientationapp.modules.orientation.entity.GradeScale gradeScale;
+    private Map<String, com.orientation.orientationapp.modules.orientation.entity.GradeScale> subjectGradeScales;
     private String firstName;
     private String lastName;
     private String bacType;
+    private String bacSeries;
     private String bacMention;
     private BigDecimal bacAverage;
     private Integer bacYear;
     private String country;
+    private String nationality;
+    private BigDecimal householdIncome;
+    private String incomeCurrency;
+    private String incomePeriod;
+    private UUID targetProgramId;
+    private UUID targetUniversityId;
+    private String targetStudyField;
     private String city;
 
     // Grades

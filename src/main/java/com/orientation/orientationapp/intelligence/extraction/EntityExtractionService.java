@@ -1,329 +1,111 @@
 package com.orientation.orientationapp.intelligence.extraction;
-
 import lombok.*;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 import java.util.*;
+import java.math.BigDecimal;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
-/**
- * Service d'extraction d'entités à partir de texte OCR.
- *
- * Extrait automatiquement :
- * - Universités (noms, pays, villes)
- * - Programmes (noms, types, durée, langue)
- * - Critères d'admission (notes, matières, documents)
- * - Bourses (nom, montant, critères)
- * - Matières (noms, coefficients)
- * - Frais (inscription, scolarité)
- * - Calendriers (dates limites, rentrées)
- * - Conditions (langue, visa, logement)
- */
+/** Conservative extraction into source-backed drafts. No draft is an official rule. */
 @Service
 public class EntityExtractionService {
-
-    /**
-     * Extrait toutes les entités d'un texte donné.
-     *
-     * @param text texte extrait par OCR
-     * @param documentType type de document (guide, règlement, brochure, etc.)
-     * @return entités extraites structurées
-     */
-    public ExtractedEntities extract(String text, String documentType) {
-        ExtractedEntities entities = new ExtractedEntities();
-        entities.setRawText(text);
-        entities.setDocumentType(documentType);
-
-        // Extraction des universités
-        entities.setUniversities(extractUniversities(text));
-
-        // Extraction des programmes
-        entities.setPrograms(extractPrograms(text));
-
-        // Extraction des critères d'admission
-        entities.setCriteria(extractCriteria(text));
-
-        // Extraction des bourses
-        entities.setScholarships(extractScholarships(text));
-
-        // Extraction des matières
-        entities.setSubjects(extractSubjects(text));
-
-        // Extraction des frais
-        entities.setFees(extractFees(text));
-
-        // Extraction des dates
-        entities.setDeadlines(extractDeadlines(text));
-
-        // Extraction des langues
-        entities.setLanguages(extractLanguages(text));
-
-        // Extraction des conditions
-        entities.setConditions(extractConditions(text));
-
-        return entities;
-    }
-
-    // --- Extraction des universités ---
-    private List<ExtractedUniversity> extractUniversities(String text) {
-        List<ExtractedUniversity> universities = new ArrayList<>();
-        // Patterns courants pour les universités
-        String[] patterns = {
-            "universit[ée]", "facult[ée]", "école", "institut", "iut",
-            "grandes? \\u00e9coles?", "polytechnique", "conservatoire"
-        };
-
-        // Recherche de noms d'universités dans le texte
-        String[] lines = text.split("\\n");
-        for (String line : lines) {
-            String lower = line.toLowerCase().trim();
-            for (String pattern : patterns) {
-                if (lower.matches(".*" + pattern + ".*") && line.trim().length() > 10) {
-                    ExtractedUniversity uni = new ExtractedUniversity();
-                    uni.setName(cleanName(line));
-                    uni.setCountry(extractCountryFromContext(line, text));
-                    uni.setCity(extractCityFromContext(line, text));
-                    universities.add(uni);
-                    break;
-                }
-            }
-        }
-        return universities;
-    }
-
-    // --- Extraction des programmes ---
-    private List<ExtractedProgram> extractPrograms(String text) {
-        List<ExtractedProgram> programs = new ArrayList<>();
-        String[] programKeywords = {
-            "licence", "master", "doctorat", "ingénieur", "mastère",
-            "bts", "dut", "bachelor", "phd", "mba", "formation",
-            "diplôme", "certificat", "spécialisation"
-        };
-
-        String[] lines = text.split("\\n");
-        for (String line : lines) {
-            String lower = line.toLowerCase().trim();
-            for (String keyword : programKeywords) {
-                if (lower.contains(keyword) && line.trim().length() > 5) {
-                    ExtractedProgram prog = new ExtractedProgram();
-                    prog.setName(cleanName(line));
-                    prog.setType(extractProgramType(lower));
-                    prog.setDuration(extractDuration(line));
-                    prog.setLanguage(extractLanguageFromLine(line));
-                    programs.add(prog);
-                    break;
-                }
-            }
-        }
-        return programs;
-    }
-
-    // --- Extraction des critères d'admission ---
-    private List<ExtractedCriterion> extractCriteria(String text) {
-        List<ExtractedCriterion> criteria = new ArrayList<>();
-
-        // Recherche de notes minimales
-        String[] notePatterns = {"moyenne.*([0-9]+[.,][0-9]+)", "note.*([0-9]+[.,][0-9]+)",
-                "minimum.*([0-9]+[.,][0-9]+)", "seuil.*([0-9]+[.,][0-9]+)"};
-
-        for (String pattern : notePatterns) {
-            var matcher = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text);
-            while (matcher.find()) {
-                ExtractedCriterion crit = new ExtractedCriterion();
-                crit.setType("MIN_AVERAGE");
-                crit.setOperator("GREATER_THAN_OR_EQUAL");
-                crit.setMinValue(new BigDecimal(matcher.group(1).replace(",", ".")));
-                crit.setMandatory(true);
-                criteria.add(crit);
-            }
-        }
-
-        // Recherche de types de bac
-        if (text.toLowerCase().contains("bac") || text.toLowerCase().contains("baccalauréat")) {
-            ExtractedCriterion crit = new ExtractedCriterion();
-            crit.setType("BAC_TYPE");
-            crit.setOperator("IN_LIST");
-            crit.setMandatory(true);
-            criteria.add(crit);
-        }
-
-        return criteria;
-    }
-
-    // --- Extraction des bourses ---
-    private List<ExtractedScholarship> extractScholarships(String text) {
-        List<ExtractedScholarship> scholarships = new ArrayList<>();
-        String[] scholarshipKeywords = {"bourse", "scholarship", "aide financière", "allocation", "be"};
-
-        String[] lines = text.split("\\n");
-        for (String line : lines) {
-            String lower = line.toLowerCase().trim();
-            for (String keyword : scholarshipKeywords) {
-                if (lower.contains(keyword) && line.trim().length() > 5) {
-                    ExtractedScholarship sch = new ExtractedScholarship();
-                    sch.setName(cleanName(line));
-                    sch.setAmount(extractAmount(line));
-                    scholarships.add(sch);
-                    break;
-                }
-            }
-        }
-        return scholarships;
-    }
-
-    // --- Extraction des matières ---
-    private List<ExtractedSubject> extractSubjects(String text) {
-        List<ExtractedSubject> subjects = new ArrayList<>();
-        String[] subjectNames = {
-            "mathématiques", "maths", "physique", "chimie", "svt", "sciences",
-            "français", "anglais", "arabe", "philosophie", "histoire", "géographie",
-            "informatique", "économie", "droit", "biologie", "géologie"
-        };
-
-        for (String name : subjectNames) {
-            if (text.toLowerCase().contains(name)) {
-                ExtractedSubject sub = new ExtractedSubject();
-                sub.setName(capitalize(name));
-                subjects.add(sub);
-            }
-        }
-        return subjects;
-    }
-
-    // --- Extraction des frais ---
-    private List<ExtractedFee> extractFees(String text) {
-        List<ExtractedFee> fees = new ArrayList<>();
-        String[] feePatterns = {
-            "frais.*([0-9]+[.,]?[0-9]*)\\s*(€|euros?|EUR|FCFA|XOF|XAF|\\$|USD)",
-            "inscription.*([0-9]+[.,]?[0-9]*)\\s*(€|euros?|EUR|FCFA|XOF|XAF|\\$|USD)",
-            "scolarit[ée].*([0-9]+[.,]?[0-9]*)\\s*(€|euros?|EUR|FCFA|XOF|XAF|\\$|USD)"
-        };
-
-        for (String pattern : feePatterns) {
-            var matcher = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text);
-            while (matcher.find()) {
-                ExtractedFee fee = new ExtractedFee();
-                fee.setAmount(new BigDecimal(matcher.group(1).replace(",", ".")));
-                fee.setCurrency(matcher.group(2));
-                fee.setType(pattern.contains("inscription") ? "INSCRIPTION" : "TUITION");
-                fees.add(fee);
-            }
-        }
-        return fees;
-    }
-
-    // --- Extraction des dates limites ---
-    private List<ExtractedDeadline> extractDeadlines(String text) {
-        List<ExtractedDeadline> deadlines = new ArrayList<>();
-        String[] datePatterns = {
-            "([0-9]{1,2})[/\\-\\.]([0-9]{1,2})[/\\-\\.]([0-9]{2,4})",
-            "(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\\s+([0-9]{4})"
-        };
-
-        for (String pattern : datePatterns) {
-            var matcher = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text);
-            while (matcher.find()) {
-                ExtractedDeadline deadline = new ExtractedDeadline();
-                deadline.setDate(matcher.group());
-                deadlines.add(deadline);
-            }
-        }
-        return deadlines;
-    }
-
-    // --- Extraction des langues ---
-    private List<String> extractLanguages(String text) {
-        List<String> languages = new ArrayList<>();
-        String[] langNames = {"français", "anglais", "arabe", "espagnol", "allemand", "portugais", "chinois"};
-        for (String lang : langNames) {
-            if (text.toLowerCase().contains(lang)) {
-                languages.add(capitalize(lang));
-            }
-        }
-        return languages;
-    }
-
-    // --- Extraction des conditions ---
-    private List<String> extractConditions(String text) {
-        List<String> conditions = new ArrayList<>();
-        String[] keywords = {"visa", "logement", "assurance", "séjour", "hébergement", "transport"};
-        for (String keyword : keywords) {
-            if (text.toLowerCase().contains(keyword)) {
-                conditions.add(capitalize(keyword));
-            }
-        }
-        return conditions;
-    }
-
-    // --- Helpers ---
-    private String cleanName(String line) {
-        return line.trim().replaceAll("\\s+", " ").substring(0, Math.min(line.trim().length(), 200));
-    }
-
-    private String extractCountryFromContext(String line, String fullText) {
-        String[] countries = {"France", "Maroc", "Sénégal", "Côte d'Ivoire", "Tunisie", "Canada", "Belgique", "Suisse"};
-        for (String country : countries) {
-            if (line.contains(country) || fullText.contains(country)) return country;
-        }
-        return null;
-    }
-
-    private String extractCityFromContext(String line, String fullText) {
-        String[] cities = {"Paris", "Lyon", "Marseille", "Casablanca", "Rabat", "Dakar", "Abidjan", "Tunis", "Montréal", "Bruxelles"};
-        for (String city : cities) {
-            if (line.contains(city)) return city;
-        }
-        return null;
-    }
-
-    private String extractProgramType(String text) {
-        if (text.contains("licence") || text.contains("bachelor")) return "LICENCE";
-        if (text.contains("master") || text.contains("mastère")) return "MASTER";
-        if (text.contains("doctorat") || text.contains("phd")) return "DOCTORAT";
-        if (text.contains("ingénieur")) return "INGENIEUR";
-        if (text.contains("bts") || text.contains("dut")) return "BTS_DUT";
-        return "OTHER";
-    }
-
-    private String extractDuration(String text) {
-        var matcher = java.util.regex.Pattern.compile("([0-9]+)\\s*an", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text);
-        if (matcher.find()) return matcher.group(1) + " ans";
-        return null;
-    }
-
-    private String extractLanguageFromLine(String text) {
-        if (text.toLowerCase().contains("anglais") || text.toLowerCase().contains("english")) return "Anglais";
-        if (text.toLowerCase().contains("français") || text.toLowerCase().contains("french")) return "Français";
-        if (text.toLowerCase().contains("arabe")) return "Arabe";
-        return null;
-    }
-
-    private BigDecimal extractAmount(String text) {
-        var matcher = java.util.regex.Pattern.compile("([0-9]+[.,]?[0-9]*)\\s*(€|euros?|EUR|FCFA)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text);
-        if (matcher.find()) return new BigDecimal(matcher.group(1).replace(",", "."));
-        return null;
-    }
-
-    private String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
-    // --- DTOs ---
-
+ public record FactDraft(String kind,int pageNumber,String passage,Map<String,Object> values) {}
+ private String plain(String value) {
+  return Normalizer.normalize(value,Normalizer.Form.NFD).replaceAll("\\p{M}+","").toLowerCase(Locale.ROOT);
+ }
+ public List<FactDraft> extractPage(String text,int page) {
+  var result=new ArrayList<FactDraft>();
+  for(String line:text.split("\\R")) {
+   String passage=line.strip();
+   if(passage.isEmpty() || passage.length()>10000)continue;
+   String normalized=plain(passage);String first=passage.split(";",2)[0].strip();
+   String name=first.contains(":")?first.substring(first.indexOf(':')+1).strip():first;
+   if(normalized.matches("^(universite|university)\\b.*")) add(result,"UNIVERSITY",page,passage,map("name",name));
+   else if(normalized.matches("^campus\\b.*")) add(result,"CAMPUS",page,passage,map("name",name));
+   else if(normalized.matches("^(faculte|faculty|ecole|institut)\\b.*")) add(result,"FACULTY",page,passage,map("name",name));
+   else if(normalized.matches("^(programme|program|filiere|formation|licence|license|master|doctorat|bts|dut)\\b.*")) {
+    var data=map("name",name);
+    String normalizedName=plain(name);
+    if(normalizedName.startsWith("licence professionnelle"))data.put("type","LICENSE_PRO");
+    else if(normalizedName.startsWith("licence") || normalizedName.startsWith("license"))data.put("type","LICENSE");
+    else if(normalizedName.startsWith("master"))data.put("type","MASTER");
+    else if(normalizedName.startsWith("doctorat"))data.put("type","DOCTORATE");
+    else if(normalizedName.startsWith("bts"))data.put("type","BTS");
+    else if(normalizedName.startsWith("dut"))data.put("type","DUT");
+    var duration=Pattern.compile("(?:duree|duration)\\s*[:=-]?\\s*(\\d{1,2})\\s*(?:ans?|years?)\\b").matcher(normalized);
+    if(duration.find())data.put("duration",Integer.valueOf(duration.group(1)));
+    var language=Pattern.compile("(?:langue|language)\\s*[:=]\\s*([^;]+)",Pattern.CASE_INSENSITIVE).matcher(passage);
+    if(language.find())data.put("language",language.group(1).strip());
+    var field=Pattern.compile("(?:domaine|field)\\s*[:=]\\s*([^;]+)",Pattern.CASE_INSENSITIVE).matcher(passage);
+    if(field.find())data.put("studyField",field.group(1).strip());
+    add(result,"PROGRAM",page,passage,data);
+   }
+   if(normalized.matches("^(bourse|scholarship|aide financiere|allocation)\\b.*")) {
+    var data=map("name",name);amount(passage,data);add(result,"SCHOLARSHIP",page,passage,data);
+   }
+   var minimum=Pattern.compile("(?:moyenne\\s+(?:minimale|minimum)|minimum\\s+(?:de\\s+)?moyenne|average\\s+minimum)\\s*[:>=-]*\\s*(\\d{1,2}(?:[.,]\\d{1,2})?)").matcher(normalized);
+   if(minimum.find())add(result,"ADMISSION_CRITERION",page,passage,map("criterionType","MIN_AVERAGE","operator","GREATER_THAN_OR_EQUAL","minValue",new BigDecimal(minimum.group(1).replace(',','.')),"description",passage));
+   if(normalized.matches("^(pays|country)\\s*[:=].*"))add(result,"COUNTRY",page,passage,map("name",name));
+   var year=Pattern.compile("\\b((?:19|20)\\d{2})\\s*[-/]\\s*((?:19|20)\\d{2})\\b").matcher(passage);
+   if(year.find() && normalized.matches(".*(annee|academ|year|guide).*"))add(result,"ACADEMIC_YEAR",page,passage,map("label",year.group(1)+"-"+year.group(2)));
+   if(normalized.matches(".*\\b(bac|baccalaureat|serie)\\b.*(requis|exige|accepte|:).*"))add(result,"BAC_REQUIREMENT",page,passage,map("description",passage));
+   if(normalized.matches(".*\\b(diplome|degree)\\b.*(requis|exige|:).*"))add(result,"DIPLOMA_REQUIREMENT",page,passage,map("description",passage));
+   if(normalized.matches(".*\\b(matieres?|subjects?)\\b.*(obligatoire|requis|exige|:).*"))add(result,"SUBJECT_REQUIREMENT",page,passage,map("description",passage));
+   if(normalized.matches(".*\\b(documents?|pieces?)\\b.*(exiges?|requis|fournir|:).*"))add(result,"DOCUMENT_REQUIREMENT",page,passage,map("description",passage));
+   if(normalized.matches("^(frais|tuition|scolarite|inscription)\\b.*")) {
+    var data=map("description",passage);amount(passage,data);add(result,"FEE",page,passage,data);
+   }
+   if(normalized.matches(".*\\b(date limite|deadline|candidature|rentree)\\b.*")) {
+    var data=map("description",passage);
+    var iso=Pattern.compile("\\b(20\\d{2}-\\d{2}-\\d{2})\\b").matcher(passage);
+    if(iso.find()) {try {data.put("date",java.time.LocalDate.parse(iso.group(1)).toString());}catch(java.time.DateTimeException ignored){}}
+    add(result,"DATE",page,passage,data);
+   }
+   if(normalized.matches("^(langue|language|domaine|field|diplome|degree|niveau|level|duree|duration)\\s*[:=].*"))
+    add(result,"ACADEMIC_ATTRIBUTE",page,passage,map("description",passage));
+  }
+  return result;
+ }
+ private void amount(String text,Map<String,Object> data) {
+  var m=Pattern.compile("(\\d+(?:[ .,]\\d{3})*(?:[.,]\\d{1,2})?)\\s*(EUR|USD|XOF|XAF|FCFA)\\b",Pattern.CASE_INSENSITIVE).matcher(text);
+  if(m.find()) {
+   String number=m.group(1).replace(" ","");
+   // Ambiguous separators remain in the passage for human review.
+   if(number.matches("\\d+(?:[.,]\\d{1,2})?")) {
+    data.put("amount",new BigDecimal(number.replace(',','.')));
+    if(!m.group(2).equalsIgnoreCase("FCFA"))data.put("currency",m.group(2).toUpperCase(Locale.ROOT));
+   }
+  }
+ }
+ private Map<String,Object> map(Object... entries) {
+  var result=new LinkedHashMap<String,Object>();for(int i=0;i<entries.length;i+=2)result.put((String)entries[i],entries[i+1]);return result;
+ }
+ private void add(List<FactDraft> facts,String kind,int page,String passage,Map<String,Object> values) {
+  facts.add(new FactDraft(kind,page,passage,values));
+ }
+ public ExtractedEntities extract(String text,String documentType) {
+  var entities=new ExtractedEntities();entities.setRawText(text);entities.setDocumentType(documentType);
+  for(var fact:extractPage(text,1)) {
+   if(fact.kind().equals("UNIVERSITY")){var u=new ExtractedUniversity();u.setName((String)fact.values().get("name"));entities.getUniversities().add(u);}
+   if(fact.kind().equals("PROGRAM")){var p=new ExtractedProgram();p.setName((String)fact.values().get("name"));p.setType((String)fact.values().get("type"));entities.getPrograms().add(p);}
+   if(fact.kind().equals("SCHOLARSHIP")){var s=new ExtractedScholarship();s.setName((String)fact.values().get("name"));s.setAmount((BigDecimal)fact.values().get("amount"));s.setCurrency((String)fact.values().get("currency"));entities.getScholarships().add(s);}
+   if(fact.kind().equals("ADMISSION_CRITERION")){var c=new ExtractedCriterion();c.setType((String)fact.values().get("criterionType"));c.setOperator((String)fact.values().get("operator"));c.setMinValue((BigDecimal)fact.values().get("minValue"));entities.getCriteria().add(c);}
+  }
+  return entities;
+ }
     @Data @Builder @NoArgsConstructor @AllArgsConstructor
     public static class ExtractedEntities {
         private String rawText;
         private String documentType;
-        private List<ExtractedUniversity> universities = new ArrayList<>();
-        private List<ExtractedProgram> programs = new ArrayList<>();
-        private List<ExtractedCriterion> criteria = new ArrayList<>();
-        private List<ExtractedScholarship> scholarships = new ArrayList<>();
-        private List<ExtractedSubject> subjects = new ArrayList<>();
-        private List<ExtractedFee> fees = new ArrayList<>();
-        private List<ExtractedDeadline> deadlines = new ArrayList<>();
-        private List<String> languages = new ArrayList<>();
-        private List<String> conditions = new ArrayList<>();
+        @Builder.Default private List<ExtractedUniversity> universities = new ArrayList<>();
+        @Builder.Default private List<ExtractedProgram> programs = new ArrayList<>();
+        @Builder.Default private List<ExtractedCriterion> criteria = new ArrayList<>();
+        @Builder.Default private List<ExtractedScholarship> scholarships = new ArrayList<>();
+        @Builder.Default private List<ExtractedSubject> subjects = new ArrayList<>();
+        @Builder.Default private List<ExtractedFee> fees = new ArrayList<>();
+        @Builder.Default private List<ExtractedDeadline> deadlines = new ArrayList<>();
+        @Builder.Default private List<String> languages = new ArrayList<>();
+        @Builder.Default private List<String> conditions = new ArrayList<>();
     }
 
     @Data @Builder @NoArgsConstructor @AllArgsConstructor
@@ -350,7 +132,7 @@ public class EntityExtractionService {
         private String operator;
         private java.math.BigDecimal minValue;
         private java.math.BigDecimal maxValue;
-        private boolean mandatory;
+        private Boolean mandatory;
     }
 
     @Data @Builder @NoArgsConstructor @AllArgsConstructor

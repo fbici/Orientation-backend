@@ -1,70 +1,47 @@
 package com.orientation.orientationapp.security.filter;
 
 import com.orientation.orientationapp.security.jwt.JwtTokenProvider;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.orientation.orientationapp.modules.auth.service.impl.RefreshTokenServiceImpl;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
+import java.util.UUID;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final RefreshTokenServiceImpl sessions;
 
     @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
-
-        try {
-            String jwt = getJwtFromRequest(request);
-
-            if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-                String email = jwtTokenProvider.getEmailFromToken(jwt);
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain chain) throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            try {
+                var claims = jwtTokenProvider.getAccessClaims(header.substring(7));
+                var details = userDetailsService.loadUserByUsername(claims.getSubject());
+                if (details.isEnabled() && details.isAccountNonLocked() && details.isAccountNonExpired()
+                        && details.isCredentialsNonExpired()
+                        && sessions.isSessionActive(UUID.fromString(claims.get("sid",String.class)),
+                            UUID.fromString(claims.getSubject()))) {
+                    var authentication = new UsernamePasswordAuthenticationToken(details,null,details.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (org.springframework.security.core.AuthenticationException | IllegalArgumentException | io.jsonwebtoken.JwtException ex) {
+                SecurityContextHolder.clearContext();
             }
-        } catch (Exception ex) {
-            log.error("Could not set user authentication in security context: {}", ex.getMessage());
         }
-
-        filterChain.doFilter(request, response);
-    }
-
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-
-        return null;
+        chain.doFilter(request,response);
     }
 }

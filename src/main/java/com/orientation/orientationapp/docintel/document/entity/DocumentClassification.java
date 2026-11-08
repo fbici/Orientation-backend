@@ -26,12 +26,14 @@ public class DocumentClassification extends BaseEntity {
     @Column(precision = 5, scale = 2)
     private BigDecimal primaryConfidence;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String allClassificationsJson;
 
     @Column(length = 100)
     private String classificationEngine;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String featuresJson;
 

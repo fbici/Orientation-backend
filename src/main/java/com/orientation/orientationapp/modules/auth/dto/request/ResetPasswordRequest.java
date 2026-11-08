@@ -14,6 +14,7 @@ public class ResetPasswordRequest {
     private String token;
 
     @NotBlank(message = "New password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 12, max = 72, message = "Password must be at least 8 characters")
+    @com.fasterxml.jackson.annotation.JsonAlias("password")
     private String newPassword;
 }

@@ -32,6 +32,7 @@ public class WebConfig {
 
     @Bean
     public CorsFilter corsFilter() {
+        if(allowedOrigins.contains("*")) throw new IllegalStateException("Explicit CORS origins are required");
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
@@ -43,7 +44,7 @@ public class WebConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
-        log.info("CORS configuration initialized with allowed origins: {}", allowedOrigins);
+
 
         return new CorsFilter(source);
     }

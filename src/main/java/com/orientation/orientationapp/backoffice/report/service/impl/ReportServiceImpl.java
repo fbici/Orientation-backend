@@ -13,10 +13,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResponse generateReport(String type, String format) {
-        return ReportResponse.builder()
-                .reportType(type)
-                .format(format)
-                .metadata(Map.of("generatedAt", java.time.Instant.now().toString()))
-                .build();
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+                "Select a saved decision and use /ai/export/{pdf,csv,excel}/{id}; aggregate reports are unavailable without measured data");
     }
 }

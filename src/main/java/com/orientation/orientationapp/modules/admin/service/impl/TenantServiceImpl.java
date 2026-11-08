@@ -18,13 +18,18 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TenantServiceImpl implements TenantService {
 
     private final TenantRepository tenantRepository;
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
     private final OrganizationRepository organizationRepository;
+    private final com.orientation.orientationapp.modules.auth.repository.RefreshTokenRepository sessions;
 
     public TenantResponse create(CreateTenantRequest request) {
+        access.require("SYSTEM_CONFIG");
+        if (!access.global()) throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
         Organization org = organizationRepository.findById(request.getOrganizationId())
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
 
@@ -45,6 +50,10 @@ public class TenantServiceImpl implements TenantService {
     }
 
     public TenantResponse update(UUID id, CreateTenantRequest request) {
+        access.require("SYSTEM_CONFIG");
+        access.sameTenant(id);
+        if (!access.global() && !request.getOrganizationId().equals(access.current().getTenant().getOrganization().getId()))
+            throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tenant not found"));
 
@@ -61,11 +70,19 @@ public class TenantServiceImpl implements TenantService {
     }
 
     public TenantResponse getById(UUID id) {
+        access.current();
+        access.sameTenant(id);
         return mapToResponse(tenantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tenant not found")));
     }
 
     public Page<TenantResponse> list(UUID organizationId, String search, Pageable pageable) {
+        var current=access.current();
+        if (!access.global()) {
+            if (organizationId!=null && !organizationId.equals(current.getTenant().getOrganization().getId()))
+                throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
+            return new org.springframework.data.domain.PageImpl<>(java.util.List.of(mapToResponse(current.getTenant())),pageable,1);
+        }
         if (organizationId != null) {
             return tenantRepository.findByOrganizationId(organizationId)
                     .stream()
@@ -79,22 +96,31 @@ public class TenantServiceImpl implements TenantService {
     }
 
     public void activate(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        access.sameTenant(id);
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tenant not found"));
+        sessions.revokeTenant(id);
         tenant.setActive(true);
         tenantRepository.save(tenant);
     }
 
     public void suspend(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        access.sameTenant(id);
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tenant not found"));
+        sessions.revokeTenant(id);
         tenant.setActive(false);
         tenantRepository.save(tenant);
     }
 
     public void delete(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        access.sameTenant(id);
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tenant not found"));
+        sessions.revokeTenant(id);
         tenant.setDeleted(true);
         tenantRepository.save(tenant);
     }

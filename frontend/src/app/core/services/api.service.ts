@@ -17,6 +17,40 @@ export interface PageResponse<T> {
 export class ApiService {
   private readonly b = environment.apiUrl;
 
+  importAcademic(file: File, dataType: string, dryRun: boolean): Observable<any> {
+    const data = new FormData(); data.append('file', file); data.append('dataType', dataType); data.append('dryRun', String(dryRun));
+    return this.http.post(`${this.b}/imports`, data);
+  }
+  academicSources(resource: string, id: string): Observable<any> {return this.http.get(`${this.b}/${resource}/${id}/sources`);}
+  catalog(resource: string, page = 0, filters: Record<string, any> = {}): Observable<PageResponse<any>> {
+    const params: Record<string, string> = {page: String(page), size: '20'};
+    Object.entries(filters).forEach(([k,v]) => {if(v !== undefined && v !== null && v !== '') params[k] = String(v);});
+    return this.http.get<PageResponse<any>>(`${this.b}/${resource}`, {params});
+  }
+  saveCatalog(resource: string, id: string | undefined, values: any): Observable<any> {
+    return id ? this.http.put(`${this.b}/${resource}/${id}`, values) : this.http.post(`${this.b}/${resource}`, values);
+  }
+  disableCatalog(resource: string, id: string): Observable<any> {return this.http.delete(`${this.b}/${resource}/${id}`);}
+  reference(resource: string, search = ''): Observable<any> {return this.http.get(`${this.b}/${resource}`, {params:{size:'100',search}});}
+  reviewDocument(id: string): Observable<any> {return this.http.get(`${this.b}/documents/${id}/review`);}
+  processDocument(id: string): Observable<any> {return this.http.post(`${this.b}/documents/${id}/process`, {});}
+  documentPage(id: string, page: number): Observable<Blob> {return this.http.get(`${this.b}/documents/${id}/pages/${page}/preview`, {responseType:'blob'});}
+  reviewFact(id: string, fact: string, values: any): Observable<any> {return this.http.put(`${this.b}/documents/${id}/extractions/${fact}`, values);}
+  addSourceFact(id: string, values: any): Observable<any> {return this.http.post(`${this.b}/documents/${id}/extractions`, values);}
+  publishDocument(id: string, values: any): Observable<any> {return this.http.post(`${this.b}/documents/${id}/publish`, values);}
+  guideVersions(id: string): Observable<any> {return this.http.get(`${this.b}/guides/${id}/versions`);}
+  publishedRules(page = 0, programId = ''): Observable<PageResponse<any>> {return this.catalog('admission-criteria', page, {programId});}
+  knowledgeSearch(query: string, filters: Record<string, string> = {}): Observable<any> {return this.http.get(`${this.b}/knowledge/search`, {params:{query,limit:'20',...filters}});}
+  knowledgeGraph(): Observable<any> {return this.http.get(`${this.b}/knowledge/graph`);}
+
+
+  simulateDecision(data: unknown): Observable<any> {return this.http.post(this.b+'/recommendations/simulate',data);}
+  compareDecision(data: unknown): Observable<any> {return this.http.post(this.b+'/ai/compare/programs',data);}
+  scholarshipDecision(data: unknown): Observable<any> {return this.http.post(this.b+'/scholarships/evaluate',data);}
+  decisionHistory(candidateId:string,kind:string,page:number):Observable<any>{return this.http.get(this.b+'/ai/decisions',{params:{candidateId,kind,page:String(page),size:'20'}});}
+  createDecisionChat(candidateId:string):Observable<any>{return this.http.post(this.b+'/ai/chat/sessions',{}, {params:{candidateId}});}
+  askDecisionChat(session:string,data:unknown):Observable<any>{return this.http.post(this.b+'/ai/chat/sessions/'+session+'/messages',data);}
+  exportDecision(id:string,format:'pdf'|'csv'|'excel'):Observable<Blob>{return this.http.get(this.b+'/ai/export/'+format+'/'+id,{responseType:'blob'});}
   constructor(private http: HttpClient) {}
 
   // ── Auth ──
@@ -45,11 +79,11 @@ export class ApiService {
 
   // ── Notifications ──
   getNotifications(page = 0, size = 50): Observable<any> {
-    return this.http.get(`${this.b}/notifications`, { params: this.p(page, size) });
+    return this.http.get(`${this.b}/backoffice/notifications`, { params: this.p(page, size) });
   }
-  markNotificationRead(id: string): Observable<any> { return this.http.put(`${this.b}/notifications/${id}/read`, {}); }
-  markAllNotificationsRead(): Observable<any> { return this.http.put(`${this.b}/notifications/read-all`, {}); }
-  deleteNotification(id: string): Observable<any> { return this.http.delete(`${this.b}/notifications/${id}`); }
+  markNotificationRead(id: string): Observable<any> { return this.http.post(`${this.b}/backoffice/notifications/${id}/read`, {}); }
+  markAllNotificationsRead(): Observable<any> { return this.http.post(`${this.b}/backoffice/notifications/read-all`, {}); }
+  deleteNotification(id: string): Observable<any> { return this.http.delete(`${this.b}/backoffice/notifications/${id}`); }
 
   // ── Universities ──
   getUniversities(page = 0, size = 20, sort?: string): Observable<PageResponse<any>> {
@@ -94,8 +128,8 @@ export class ApiService {
   getCandidate(id: string): Observable<any> { return this.http.get(`${this.b}/candidates/${id}`); }
 
   // ── Recommendations ──
-  getRecommendations(page = 0, size = 20): Observable<PageResponse<any>> {
-    return this.http.get<PageResponse<any>>(`${this.b}/recommendations`, { params: this.p(page, size) });
+  getRecommendations(page = 0, size = 20, candidateId?: string): Observable<PageResponse<any>> {
+    return this.http.get<PageResponse<any>>(`${this.b}/recommendations`, { params: candidateId ? { ...this.p(page, size), candidateId } : this.p(page, size) });
   }
   generateRecommendations(data: any): Observable<any> { return this.http.post(`${this.b}/recommendations/generate`, data); }
   simulate(data: any): Observable<any> { return this.http.post(`${this.b}/recommendations/simulate`, data); }
@@ -143,7 +177,7 @@ export class ApiService {
   uploadImport(file: File, type?: string): Observable<any> {
     const fd = new FormData();
     fd.append('file', file);
-    if (type) fd.append('type', type);
+    if (type) fd.append('dataType', type);
     return this.http.post(`${this.b}/imports`, fd);
   }
   rollbackImport(id: string): Observable<any> { return this.http.post(`${this.b}/imports/${id}/rollback`, {}); }
@@ -157,7 +191,7 @@ export class ApiService {
   uploadDocument(file: File): Observable<any> {
     const fd = new FormData();
     fd.append('file', file);
-    return this.http.post(`${this.b}/documents`, fd);
+    return this.http.post(`${this.b}/documents/upload`, fd);
   }
   deleteDocument(id: string): Observable<any> { return this.http.delete(`${this.b}/documents/${id}`); }
   getDocumentExtractions(id: string): Observable<any> { return this.http.get(`${this.b}/documents/${id}/extractions`); }
@@ -215,8 +249,8 @@ export class ApiService {
     return this.http.get(`${this.b}/knowledge/nodes`, { params: this.p(page, size) });
   }
   getKnowledgeNode(id: string): Observable<any> { return this.http.get(`${this.b}/knowledge/nodes/${id}`); }
-  searchKnowledge(query: string): Observable<any> { return this.http.get(`${this.b}/knowledge/search`, { params: { q: query } }); }
-  smartQuery(query: string): Observable<any> { return this.http.post(`${this.b}/knowledge/smart-query`, { query }); }
+  searchKnowledge(query: string): Observable<any> { return this.http.get(`${this.b}/knowledge/search`, { params: { query } }); }
+  smartQuery(query: string): Observable<any> { return this.http.post(`${this.b}/knowledge/query`, { query }); }
 
   // ── Audit ──
   getAuditLogs(page = 0, size = 50): Observable<any> {

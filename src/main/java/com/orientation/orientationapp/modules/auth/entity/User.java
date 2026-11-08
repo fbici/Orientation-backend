@@ -22,6 +22,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
 
     @Column(nullable = false, length = 100)
@@ -35,6 +36,7 @@ public class User extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tenant_id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_tenant"))
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Tenant tenant;
 
     @Enumerated(EnumType.STRING)
@@ -67,18 +69,22 @@ public class User extends BaseEntity {
     private Boolean mfaEnabled = false;
 
     @Column(length = 255)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String mfaSecret;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Set<RefreshToken> refreshTokens = new HashSet<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Set<ApiKey> apiKeys = new HashSet<>();
 
     @Transient

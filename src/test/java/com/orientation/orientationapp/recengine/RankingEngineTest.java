@@ -31,9 +31,9 @@ class RankingEngineTest {
         );
 
         List<Map<String, Object>> programs = List.of(
-                Map.of("name", "Program A"),
-                Map.of("name", "Program B"),
-                Map.of("name", "Program C")
+                Map.of("id", java.util.UUID.nameUUIDFromBytes("Program A".getBytes(java.nio.charset.StandardCharsets.UTF_8)), "name", "Program A"),
+                Map.of("id", java.util.UUID.nameUUIDFromBytes("Program B".getBytes(java.nio.charset.StandardCharsets.UTF_8)), "name", "Program B"),
+                Map.of("id", java.util.UUID.nameUUIDFromBytes("Program C".getBytes(java.nio.charset.StandardCharsets.UTF_8)), "name", "Program C")
         );
 
         List<RankedRecommendation> ranked = rankingEngine.rank(scores, programs);
@@ -45,7 +45,7 @@ class RankingEngineTest {
     }
 
     @Test
-    void shouldAssignDifficultyLevel() {
+    void shouldNeverInventAdmissionDifficultyOrProbability() {
         List<CompositeScore> scores = List.of(
                 createScore(BigDecimal.valueOf(90)),
                 createScore(BigDecimal.valueOf(50)),
@@ -53,16 +53,22 @@ class RankingEngineTest {
         );
 
         List<Map<String, Object>> programs = List.of(
-                Map.of("name", "Easy"),
-                Map.of("name", "Medium"),
-                Map.of("name", "Hard")
+                Map.of("id", java.util.UUID.nameUUIDFromBytes("Easy".getBytes(java.nio.charset.StandardCharsets.UTF_8)), "name", "Easy"),
+                Map.of("id", java.util.UUID.nameUUIDFromBytes("Medium".getBytes(java.nio.charset.StandardCharsets.UTF_8)), "name", "Medium"),
+                Map.of("id", java.util.UUID.nameUUIDFromBytes("Hard".getBytes(java.nio.charset.StandardCharsets.UTF_8)), "name", "Hard")
         );
 
         List<RankedRecommendation> ranked = rankingEngine.rank(scores, programs);
 
-        assertEquals("Facile", ranked.get(0).getDifficultyLevel());
-        assertEquals("Difficile", ranked.get(1).getDifficultyLevel());
-        assertEquals("Très difficile", ranked.get(2).getDifficultyLevel());
+        assertNull(ranked.get(0).getDifficultyLevel());
+        assertNull(ranked.get(0).getAdmissionProbability());
+        assertFalse(ranked.get(0).isEligible());
+        assertNull(ranked.get(1).getDifficultyLevel());
+        assertNull(ranked.get(1).getAdmissionProbability());
+        assertFalse(ranked.get(1).isEligible());
+        assertNull(ranked.get(2).getDifficultyLevel());
+        assertNull(ranked.get(2).getAdmissionProbability());
+        assertFalse(ranked.get(2).isEligible());
     }
 
     private CompositeScore createScore(BigDecimal value) {
@@ -80,5 +86,14 @@ class RankingEngineTest {
                 ))
                 .summary("Test score")
                 .build();
+    }
+    @Test void compatibilityCannotOverrideEligibility() {
+        var idA=java.util.UUID.randomUUID();var idB=java.util.UUID.randomUUID();
+        var eligible=com.orientation.orientationapp.recengine.eligibility.model.EligibilityStatus.ELIGIBLE;
+        var refused=com.orientation.orientationapp.recengine.eligibility.model.EligibilityStatus.NOT_ELIGIBLE;
+        var ranked=rankingEngine.rank(List.of(createScore(BigDecimal.TEN),createScore(BigDecimal.valueOf(99))),
+            List.of(Map.of("id",idA,"eligibility",eligible),Map.of("id",idB,"eligibility",refused)));
+        assertEquals(idA,ranked.getFirst().getProgramId());assertTrue(ranked.getFirst().isEligible());
+        assertEquals(refused,ranked.getLast().getEligibilityStatus());assertFalse(ranked.getLast().isEligible());
     }
 }

@@ -19,6 +19,7 @@ import java.util.UUID;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
 
     @Override
     @Transactional
@@ -37,28 +38,30 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional(readOnly = true)
     public Page<Notification> getByUser(String userId, Pageable pageable) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(access.personalUser(userId), pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public long getUnreadCount(String userId) {
-        return notificationRepository.countByUserIdAndReadFalse(userId);
+        return notificationRepository.countByUserIdAndReadFalse(access.personalUser(userId));
     }
 
     @Override
     @Transactional
     public void markAsRead(UUID id) {
-        notificationRepository.findById(id).ifPresent(n -> {
-            n.setRead(true);
-            notificationRepository.save(n);
-        });
+        var notification=notificationRepository.findById(id)
+            .orElseThrow(com.orientation.orientationapp.security.service.ResourceAccess::denied);
+        if(notification.getUserId()==null) throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
+        access.personalUser(notification.getUserId());
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 
     @Override
     @Transactional
     public void markAllAsRead(String userId) {
-        Page<Notification> unread = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, Pageable.unpaged());
+        Page<Notification> unread = notificationRepository.findByUserIdOrderByCreatedAtDesc(access.personalUser(userId), Pageable.unpaged());
         unread.getContent().forEach(n -> {
             n.setRead(true);
             notificationRepository.save(n);

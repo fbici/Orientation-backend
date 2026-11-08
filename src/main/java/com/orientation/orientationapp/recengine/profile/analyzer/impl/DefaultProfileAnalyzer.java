@@ -2,114 +2,49 @@ package com.orientation.orientationapp.recengine.profile.analyzer.impl;
 
 import com.orientation.orientationapp.recengine.profile.analyzer.ProfileAnalyzer;
 import com.orientation.orientationapp.recengine.profile.model.AcademicProfile;
-import lombok.extern.slf4j.Slf4j;
+import com.orientation.orientationapp.modules.orientation.entity.GradeScale;
+import com.orientation.orientationapp.recengine.profile.normalization.GradeNormalizer;
+import com.orientation.orientationapp.modules.user.service.CandidateAcademicService;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.math.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 public class DefaultProfileAnalyzer implements ProfileAnalyzer {
-
-    @Override
-    public AcademicProfile analyze(UUID candidateId) {
-        log.info("Analyzing profile for candidate: {}", candidateId);
-        // In production, this would load from database
-        return AcademicProfile.builder()
-                .candidateId(candidateId)
-                .build();
+    private CandidateAcademicService academic;
+    public DefaultProfileAnalyzer() {}
+    @Autowired public DefaultProfileAnalyzer(CandidateAcademicService academic){this.academic=academic;}
+    @Override public AcademicProfile analyze(UUID candidateId) {
+        if(academic==null)throw new IllegalStateException("Persistent academic profile service is required");
+        return academic.analyze(candidateId);
     }
-
-    @Override
-    public AcademicProfile analyze(String bacType, BigDecimal bacAverage, Map<String, BigDecimal> subjectGrades) {
-        AcademicProfile profile = AcademicProfile.builder()
-                .bacType(bacType)
-                .bacAverage(bacAverage)
-                .subjectGrades(subjectGrades != null ? subjectGrades : new HashMap<>())
-                .build();
-
-        // Compute derived metrics
-        if (subjectGrades != null && !subjectGrades.isEmpty()) {
-            profile.setGeneralAverage(computeAverage(subjectGrades));
-            profile.setStrongSubjects(findStrongSubjects(subjectGrades));
-            profile.setWeakSubjects(findWeakSubjects(subjectGrades));
-            profile.setCompetencyScores(computeCompetencies(subjectGrades));
-            profile.setDominantCompetency(findDominantCompetency(profile.getCompetencyScores()));
-            profile.setNormalizedScore(normalizeScore(bacAverage));
+    /** Legacy unscaled input cannot yield normalized values or an inferred overall average. */
+    @Override public AcademicProfile analyze(String bacType,BigDecimal average,Map<String,BigDecimal> grades) {
+        return AcademicProfile.builder().bacType(bacType).bacAverage(average)
+                .subjectGrades(grades==null?null:Collections.unmodifiableMap(new LinkedHashMap<>(grades))).build();
+    }
+    /** Explicit-scale adapter for pure calculations; production loads persisted, confirmed inputs. */
+    public AcademicProfile analyze(String bacType,BigDecimal average,Map<String,BigDecimal> grades,GradeScale scale) {
+        var profile=analyze(bacType,average,grades);
+        var normalizer=new GradeNormalizer();profile.setGradeScale(scale);
+        if(normalizer.convert(average,scale,scale).isPresent()) {
+            profile.setGeneralAverage(average);
+            profile.setNormalizedScore(percent(average,scale));
         }
-
+        var strong=new ArrayList<String>();var weak=new ArrayList<String>();
+        if(grades!=null)for(var entry:new TreeMap<>(grades).entrySet()) {
+            if(normalizer.convert(entry.getValue(),scale,scale).isEmpty())continue;
+            var percentage=percent(entry.getValue(),scale);
+            if(percentage.compareTo(new BigDecimal("75"))>=0)strong.add(entry.getKey());
+            if(percentage.compareTo(new BigDecimal("50"))<0)weak.add(entry.getKey());
+        }
+        profile.setStrongSubjects(strong);profile.setWeakSubjects(weak);
+        // No competency model is configured: missing competencies must not become zero scores.
         return profile;
     }
-
-    private BigDecimal computeAverage(Map<String, BigDecimal> grades) {
-        if (grades.isEmpty()) return BigDecimal.ZERO;
-        BigDecimal sum = grades.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return sum.divide(BigDecimal.valueOf(grades.size()), 2, RoundingMode.HALF_UP);
-    }
-
-    private List<String> findStrongSubjects(Map<String, BigDecimal> grades) {
-        return grades.entrySet().stream()
-                .filter(e -> e.getValue().compareTo(BigDecimal.valueOf(15)) >= 0)
-                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> findWeakSubjects(Map<String, BigDecimal> grades) {
-        return grades.entrySet().stream()
-                .filter(e -> e.getValue().compareTo(BigDecimal.valueOf(10)) < 0)
-                .sorted(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-    }
-
-    private Map<String, BigDecimal> computeCompetencies(Map<String, BigDecimal> grades) {
-        Map<String, BigDecimal> competencies = new HashMap<>();
-
-        // Analytical (Math, Physics, Logic)
-        BigDecimal analytical = computeCategoryAverage(grades, List.of("Mathématiques", "Physique", "Logique"));
-        competencies.put("analytical", analytical);
-
-        // Linguistic (Arabic, French, English)
-        BigDecimal linguistic = computeCategoryAverage(grades, List.of("Arabe", "Français", "Anglais"));
-        competencies.put("linguistic", linguistic);
-
-        // Scientific (Physics, Chemistry, SVT)
-        BigDecimal scientific = computeCategoryAverage(grades, List.of("Physique", "Chimie", "SVT", "Sciences"));
-        competencies.put("scientific", scientific);
-
-        // Humanistic (History, Geography, Philosophy)
-        BigDecimal humanistic = computeCategoryAverage(grades, List.of("Histoire", "Géographie", "Philosophie"));
-        competencies.put("humanistic", humanistic);
-
-        return competencies;
-    }
-
-    private BigDecimal computeCategoryAverage(Map<String, BigDecimal> grades, List<String> categorySubjects) {
-        List<BigDecimal> matching = grades.entrySet().stream()
-                .filter(e -> categorySubjects.stream().anyMatch(s -> e.getKey().toLowerCase().contains(s.toLowerCase())))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
-
-        if (matching.isEmpty()) return BigDecimal.ZERO;
-        BigDecimal sum = matching.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        return sum.divide(BigDecimal.valueOf(matching.size()), 2, RoundingMode.HALF_UP);
-    }
-
-    private String findDominantCompetency(Map<String, BigDecimal> competencies) {
-        return competencies.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse("unknown");
-    }
-
-    private BigDecimal normalizeScore(BigDecimal average) {
-        if (average == null) return BigDecimal.ZERO;
-        // Normalize to 0-100 scale
-        return average.multiply(BigDecimal.valueOf(5)).setScale(2, RoundingMode.HALF_UP);
+    private BigDecimal percent(BigDecimal value,GradeScale scale) {
+        return value.subtract(scale.getMinScore()).multiply(new BigDecimal("100"))
+            .divide(scale.getMaxScore().subtract(scale.getMinScore()),MathContext.DECIMAL128);
     }
 }

@@ -1,0 +1,232 @@
+{
+  "date": "2026-11-06",
+  "backendFullSuite": {
+    "tests": 96,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "backendFinalFocusedWorkflow": {
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "backendClasses": [
+    {
+      "class": "com.orientation.orientationapp.dataplat.parser.CsvParserTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.dataplat.validation.ValidationEngineTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.dataplat_import.ImportOrchestratorTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.docintel.classification.ClassificationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.docintel.ocr.OcrEngineTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.docintel.ocr.RealDocumentOcrTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.integration.AuthIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.integration.IntelligenceIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.integration.LocationIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.integration.RecommendationIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.integration.UniversityIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.recengine.ProfileAnalyzerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.recengine.RankingEngineTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.recengine.ScoringEngineTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.recengine.SimulationEngineTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.AcademicWorkflowIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.AuthRateLimitTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.BootstrapTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.CorsSecurityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.FoundationsIntegrationTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.JwtTokenProviderTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.SocketSecurityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.orientation.orientationapp.security.StorageSecurityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "angular": {
+    "tests": 28,
+    "failures": 0,
+    "browser": "Chrome Headless 156",
+    "productionBuildPassed": true
+  },
+  "npm": {
+    "before": {
+      "total": 66,
+      "critical": 4,
+      "high": 28,
+      "moderate": 32,
+      "low": 2
+    },
+    "after": {
+      "total": 48,
+      "critical": 0,
+      "high": 15,
+      "moderate": 31,
+      "low": 2
+    },
+    "production": {
+      "total": 12,
+      "critical": 0,
+      "high": 5,
+      "moderate": 7
+    },
+    "overrides": {
+      "piscina": "^4.9.4",
+      "pacote": "^20.0.1"
+    }
+  },
+  "protection": {
+    "historicalMigrationsUnchanged": true,
+    "historicalMigrationFiles": 73,
+    "flutterGitStatusUnchanged": true,
+    "primaryDatabaseAccessed": false,
+    "deploymentPerformed": false,
+    "privatePostgresStoppedAfterTests": true
+  },
+  "isolatedDatabaseAggregates": {
+    "database": "orientia_f1",
+    "schema": "f2_final_20261106",
+    "lastMigration": "76",
+    "documents": 22,
+    "facts": 96,
+    "publishedFacts": 64,
+    "guideVersions": 8,
+    "nodes": 72,
+    "indices": 72,
+    "imports": 12
+  },
+  "dataNote": "Aggregates include repeated synthetic test executions; no official guide was imported.",
+  "gitDiffWhitespaceCheckPassed": true
+}

@@ -16,12 +16,20 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
+    private final com.orientation.orientationapp.security.service.ResourceAccess access;
+    private void scope(UUID id) {
+        if(!access.global() && !access.current().getTenant().getOrganization().getId().equals(id))
+            throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
+    }
 
     public OrganizationResponse create(CreateOrganizationRequest request) {
+        access.require("SYSTEM_CONFIG");
+        if(!access.global()) throw com.orientation.orientationapp.security.service.ResourceAccess.denied();
         if (organizationRepository.existsByName(request.getName())) {
             throw new RuntimeException("Organization name already exists");
         }
@@ -39,6 +47,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public OrganizationResponse update(UUID id, CreateOrganizationRequest request) {
+        access.require("SYSTEM_CONFIG");
+        scope(id);
         Organization org = organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
         org.setName(request.getName());
@@ -51,15 +61,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public OrganizationResponse getById(UUID id) {
+        access.current();
+        scope(id);
         return mapToResponse(organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found")));
     }
 
     public Page<OrganizationResponse> list(String search, Pageable pageable) {
+        if (!access.global()) {
+            var own=access.current().getTenant().getOrganization();
+            return new org.springframework.data.domain.PageImpl<>(java.util.List.of(mapToResponse(own)),pageable,1);
+        }
+
         return organizationRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     public void activate(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        scope(id);
         Organization org = organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
         org.setActive(true);
@@ -67,6 +86,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public void suspend(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        scope(id);
         Organization org = organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
         org.setActive(false);
@@ -74,6 +95,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public void archive(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        scope(id);
         Organization org = organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
         org.setActive(false);
@@ -82,6 +105,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public void delete(UUID id) {
+        access.require("SYSTEM_CONFIG");
+        scope(id);
         Organization org = organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
         org.setDeleted(true);

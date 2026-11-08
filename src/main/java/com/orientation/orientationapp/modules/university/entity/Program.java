@@ -17,6 +17,13 @@ import java.math.BigDecimal;
         @UniqueConstraint(name = "uk_program_name_faculty", columnNames = {"name", "faculty_id"})
 })
 public class Program extends BaseEntity {
+    @Column(nullable=false) @Builder.Default private Boolean verified=false;
+
+    @Column(length=150) private String studyField;
+    private java.util.UUID academicYearId;
+    @Column(length=500) private String sourceUrl;
+    @Column(length=3) private String tuitionCurrency;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "faculty_id", nullable = false, foreignKey = @ForeignKey(name = "fk_program_faculty"))

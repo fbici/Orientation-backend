@@ -27,6 +27,7 @@ public class ImportEntityMapping extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String repositoryClassName;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String columnMappingJson;
 

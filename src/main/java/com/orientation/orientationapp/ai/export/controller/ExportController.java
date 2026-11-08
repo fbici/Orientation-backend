@@ -22,7 +22,7 @@ public class ExportController {
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<byte[]> exportPdf(@PathVariable UUID id) {
         ExportResult result = exportService.exportToPdf(id);
-        return ResponseEntity.ok()
+        return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL,"no-store").header("X-Content-Type-Options","nosniff")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.getFileName() + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(result.getData());
@@ -32,7 +32,7 @@ public class ExportController {
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<byte[]> exportExcel(@PathVariable UUID id) {
         ExportResult result = exportService.exportToExcel(id);
-        return ResponseEntity.ok()
+        return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL,"no-store").header("X-Content-Type-Options","nosniff")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.getFileName() + "\"")
                 .contentType(MediaType.parseMediaType(result.getMimeType()))
                 .body(result.getData());
@@ -42,7 +42,7 @@ public class ExportController {
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('CANDIDAT')")
     public ResponseEntity<byte[]> exportCsv(@PathVariable UUID id) {
         ExportResult result = exportService.exportToCsv(id);
-        return ResponseEntity.ok()
+        return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL,"no-store").header("X-Content-Type-Options","nosniff")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.getFileName() + "\"")
                 .contentType(MediaType.parseMediaType(result.getMimeType()))
                 .body(result.getData());

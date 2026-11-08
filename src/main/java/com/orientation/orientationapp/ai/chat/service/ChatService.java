@@ -6,6 +6,8 @@ import com.orientation.orientationapp.ai.chat.model.ChatSession;
 import java.util.UUID;
 
 public interface ChatService {
+    ChatSession createSessionFor(UUID candidateId);
+    ChatMessage ask(UUID sessionId,com.orientation.orientationapp.ai.chat.model.AskRequest request);
 
     /**
      * Send a message to the chat assistant.

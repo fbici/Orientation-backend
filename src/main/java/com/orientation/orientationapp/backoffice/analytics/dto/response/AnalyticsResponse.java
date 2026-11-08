@@ -12,6 +12,9 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class AnalyticsResponse {
+    private boolean available;
+    private String unavailableReason;
+    private java.util.UUID tenantId;
 
     private TopEntities topUniversities;
     private TopEntities topPrograms;

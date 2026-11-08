@@ -27,7 +27,7 @@ class ProfileAnalyzerTest {
                 "Arabe", BigDecimal.valueOf(12)
         );
 
-        AcademicProfile profile = analyzer.analyze("SCIENTIFIQUE", BigDecimal.valueOf(15.3), grades);
+        AcademicProfile profile = analyzer.analyze("SCIENTIFIQUE", BigDecimal.valueOf(15.3), grades,scale());
 
         assertNotNull(profile);
         assertEquals("SCIENTIFIQUE", profile.getBacType());
@@ -35,8 +35,8 @@ class ProfileAnalyzerTest {
         assertNotNull(profile.getGeneralAverage());
         assertNotNull(profile.getStrongSubjects());
         assertNotNull(profile.getWeakSubjects());
-        assertNotNull(profile.getCompetencyScores());
-        assertNotNull(profile.getDominantCompetency());
+        assertNull(profile.getCompetencyScores());
+        assertNull(profile.getDominantCompetency());
     }
 
     @Test
@@ -47,7 +47,7 @@ class ProfileAnalyzerTest {
                 "Arabe", BigDecimal.valueOf(10)
         );
 
-        AcademicProfile profile = analyzer.analyze("SCIENTIFIQUE", BigDecimal.valueOf(14.7), grades);
+        AcademicProfile profile = analyzer.analyze("SCIENTIFIQUE", BigDecimal.valueOf(14.7), grades,scale());
 
         assertTrue(profile.getStrongSubjects().contains("Mathématiques"));
         assertTrue(profile.getStrongSubjects().contains("Physique"));
@@ -62,10 +62,20 @@ class ProfileAnalyzerTest {
                 "Arabe", BigDecimal.valueOf(7)
         );
 
-        AcademicProfile profile = analyzer.analyze("SCIENTIFIQUE", BigDecimal.valueOf(11), grades);
+        AcademicProfile profile = analyzer.analyze("SCIENTIFIQUE", BigDecimal.valueOf(11), grades,scale());
 
         assertTrue(profile.getWeakSubjects().contains("Physique"));
         assertTrue(profile.getWeakSubjects().contains("Arabe"));
         assertFalse(profile.getWeakSubjects().contains("Mathématiques"));
+    }
+    private com.orientation.orientationapp.modules.orientation.entity.GradeScale scale() {
+        return com.orientation.orientationapp.modules.orientation.entity.GradeScale.builder()
+            .country(new com.orientation.orientationapp.modules.university.entity.Country())
+            .academicYear(new com.orientation.orientationapp.modules.orientation.entity.AcademicYear())
+            .minScore(BigDecimal.ZERO).maxScore(new BigDecimal("20")).normalizeTo(new BigDecimal("20")).build();
+    }
+    @Test void unscaledLegacyInputsNeverAssumeTwenty() {
+        var p=analyzer.analyze("SCIENTIFIQUE",new BigDecimal("80"),Map.of("MATH",new BigDecimal("90")));
+        assertNull(p.getGeneralAverage());assertNull(p.getNormalizedScore());assertNull(p.getCompetencyScores());
     }
 }

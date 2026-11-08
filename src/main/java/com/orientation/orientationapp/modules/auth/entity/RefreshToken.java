@@ -17,6 +17,10 @@ public class RefreshToken extends BaseEntity {
 
     @Column(nullable = false, length = 500)
     private String token;
+    @Column(nullable = false)
+    private java.util.UUID familyId;
+    @Transient @com.fasterxml.jackson.annotation.JsonIgnore
+    private String plainToken;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_refresh_token_user"))

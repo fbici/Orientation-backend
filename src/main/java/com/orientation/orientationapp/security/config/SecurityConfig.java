@@ -26,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final com.orientation.orientationapp.security.filter.AuthRateLimitFilter authRateLimitFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -41,7 +42,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(authorize -> authorize
                 // === PUBLIC ENDPOINTS (no auth required) ===
-                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/h2-console/**").denyAll()
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/register").permitAll()
                 .requestMatchers("/auth/refresh").permitAll()
@@ -64,12 +66,13 @@ public class SecurityConfig {
                 .requestMatchers("/browser/**").permitAll()
 
                 // Admin only
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(authRateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

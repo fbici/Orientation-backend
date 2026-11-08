@@ -26,9 +26,12 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
           <div style="display:flex;gap:8px">
             <div style="position:relative">
               <span class="material-symbols-rounded" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--n-400)">search</span>
-              <input type="text" class="form-input" style="padding-left:36px;width:220px" placeholder="Rechercher..." [(ngModel)]="search" (ngModelChange)="load()">
+              <input type="text" class="form-input" style="padding-left:36px;width:220px" placeholder="Rechercher..." [(ngModel)]="search" (ngModelChange)="page.set(0);load()">
             </div>
-            <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
+            <select class="form-input" aria-label="Pays" [(ngModel)]="countryFilter" (ngModelChange)="page.set(0);load()"><option value="">Tous les pays</option>@for(c of countries();track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
+ <select class="form-input" aria-label="Type" [(ngModel)]="typeFilter" (ngModelChange)="page.set(0);load()"><option value="">Tous les types</option><option value="PUBLIC">Public</option><option value="PRIVATE">Privé</option><option value="OTHER">Autre</option></select>
+ <select class="form-input" aria-label="Statut" [(ngModel)]="statusFilter" (ngModelChange)="page.set(0);load()"><option value="">Tous les statuts</option><option value="ACTIVE">Actif</option><option value="INACTIVE">Inactif</option><option value="PENDING">En attente</option><option value="SUSPENDED">Suspendu</option></select>
+ <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
           </div>
         </div>
         <div class="card-body" style="padding:0">
@@ -36,7 +39,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
             <div style="padding:48px;text-align:center"><div class="spinner"></div><p style="margin-top:12px;font-size:.8125rem;color:var(--n-500)">Chargement...</p></div>
           } @else {
             <table class="data-table">
-              <thead><tr><th>Nom</th><th>Pays</th><th>Ville</th><th>Statut</th><th>Classement</th><th style="text-align:right">Actions</th></tr></thead>
+              <thead><tr><th>Nom</th><th>Pays</th><th>Ville</th><th>Statut</th><th>Validation</th><th style="text-align:right">Actions</th></tr></thead>
               <tbody>
                 @for (u of universities(); track u.id) {
                   <tr>
@@ -46,8 +49,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                     </td>
                     <td style="font-size:.8125rem">{{ u.country?.name || '-' }}</td>
                     <td style="font-size:.8125rem">{{ u.city?.name || '-' }}</td>
-                    <td><span class="badge" [class]="u.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'">{{ u.status || 'ACTIVE' }}</span></td>
-                    <td style="font-size:.8125rem;font-weight:600">{{ u.ranking || '-' }}</td>
+                    <td><span class="badge" [class]="u.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'">{{ u.status || 'PENDING' }}</span></td>
+                    <td style="font-size:.8125rem;font-weight:600">{{ u.verificationStatus }}</td>
                     <td style="text-align:right">
                       <div style="display:flex;gap:2px;justify-content:flex-end">
                         <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
@@ -80,6 +83,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       </div>
     </div>
 
+    <p>Les fiches créées ou modifiées restent à revoir avant publication depuis un guide source.</p>
     <!-- Create/Edit Modal -->
     <app-modal [open]="showForm()" [title]="formTitle()" size="600px" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
@@ -87,7 +91,9 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
           <label class="form-label">Nom *</label>
           <input type="text" class="form-input" [(ngModel)]="form.name" placeholder="ex: Université d'Abomey-Calavi">
         </div>
-        <div class="form-group">
+        <div class="form-group"><label class="form-label">Type</label><select class="form-input" [(ngModel)]="form.type"><option [ngValue]="null">Non renseigné</option><option value="PUBLIC">Public</option><option value="PRIVATE">Privé</option><option value="OTHER">Autre</option></select></div>
+ <div class="form-group"><label class="form-label">URL de la source</label><input type="url" class="form-input" [(ngModel)]="form.sourceUrl"></div>
+ <div class="form-group">
           <label class="form-label">Sigle</label>
           <input type="text" class="form-input" [(ngModel)]="form.shortName" placeholder="ex: UAC">
         </div>
@@ -179,6 +185,7 @@ export class UniversitiesComponent implements OnInit {
   total = signal(0);
   totalPages = signal(0);
   search = '';
+  countryFilter='';typeFilter='';statusFilter='';
 
   form: any = this.emptyForm();
 
@@ -196,8 +203,8 @@ export class UniversitiesComponent implements OnInit {
   }
 
   /** Quand l'utilisateur change le pays, on recharge les villes */
-  onCountryChange(): void {
-    this.form.cityId = ''; // Reset la ville
+  onCountryChange(reset = true): void {
+    if (reset) this.form.cityId = ''; // Reset la ville
     if (this.form.countryId) {
       this.api.getCitiesByCountry(this.form.countryId).subscribe({
         next: (r: any) => {
@@ -218,7 +225,7 @@ export class UniversitiesComponent implements OnInit {
 
   deleteMessage(): string {
     const name = this.deleteTarget()?.name || '';
-    return `Supprimer « ${name} » ? Cette action est irréversible.`;
+    return `Désactiver « ${name} » ? La fiche sera désactivée.`;
   }
 
   private loadCountries(): void {
@@ -237,7 +244,7 @@ export class UniversitiesComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.api.getUniversities(this.page(), 20).subscribe({
+    this.api.catalog("universities",this.page(),{search:this.search,countryId:this.countryFilter,type:this.typeFilter,status:this.statusFilter}).subscribe({
       next: (r) => {
         this.universities.set(r?.content || []);
         this.total.set(r?.totalElements || 0);
@@ -261,10 +268,10 @@ export class UniversitiesComponent implements OnInit {
       countryId: u.country?.id || '', cityId: u.city?.id || '',
       address: u.address || '', email: u.email || '', phone: u.phone || '',
       website: u.website || '', foundedYear: u.foundedYear || null,
-      status: u.status || 'ACTIVE', description: u.description || ''
+      status: u.status || 'PENDING', description: u.description || '', type:u.type, sourceUrl:u.sourceUrl
     };
     // Charger les villes du pays de l'université
-    if (this.form.countryId) this.onCountryChange();
+    if (this.form.countryId) this.onCountryChange(false);
     this.showForm.set(true);
   }
 
@@ -296,12 +303,12 @@ export class UniversitiesComponent implements OnInit {
   doDelete(): void {
     this.deleting.set(true);
     this.api.deleteUniversity(this.deleteTarget()?.id).subscribe({
-      next: () => { this.deleting.set(false); this.showDelete.set(false); this.toast.success('Supprimée.'); this.load(); },
+      next: () => { this.deleting.set(false); this.showDelete.set(false); this.toast.success('Université désactivée.'); this.load(); },
       error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); }
     });
   }
 
   private emptyForm(): any {
-    return { name: '', shortName: '', countryId: '', cityId: '', address: '', email: '', phone: '', website: '', foundedYear: null, status: 'ACTIVE', description: '' };
+    return { name: '', shortName: '', countryId: '', cityId: '', address: '', email: '', phone: '', website: '', foundedYear: null, status: 'PENDING', description: '', type:null, sourceUrl:null };
   }
 }

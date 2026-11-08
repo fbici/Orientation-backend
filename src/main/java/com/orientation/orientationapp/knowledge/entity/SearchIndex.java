@@ -13,6 +13,17 @@ import lombok.*;
 @Entity
 @Table(name = "knowledge_search_index")
 public class SearchIndex extends BaseEntity {
+    private java.util.UUID nodeId;
+    @Column(length=100) private String nodeType;
+    private java.util.UUID tenantId;
+    private java.util.UUID programId;
+    private java.util.UUID universityId;
+    private java.util.UUID countryId;
+    private java.util.UUID academicYearId;
+    private java.util.UUID sourceDocumentId;
+    private java.util.UUID guideVersionId;
+    @Column(nullable=false) @Builder.Default private Boolean verified=false;
+
 
     @Column(nullable = false, length = 100)
     private String entityType;
@@ -26,6 +37,7 @@ public class SearchIndex extends BaseEntity {
     @Column(columnDefinition = "text")
     private String content;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String metadata;
 

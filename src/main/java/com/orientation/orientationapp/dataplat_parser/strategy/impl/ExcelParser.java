@@ -27,6 +27,7 @@ public class ExcelParser implements FileParser {
 
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
+            if(sheet.getLastRowNum()>1000)throw new IllegalArgumentException("Import limit: 1000 rows");
 
             if (sheet.getPhysicalNumberOfRows() == 0) {
                 log.warn("Excel file is empty");
@@ -35,6 +36,7 @@ public class ExcelParser implements FileParser {
 
             // Read headers from first row
             Row headerRow = sheet.getRow(0);
+            if(headerRow==null || headerRow.getLastCellNum()>100)throw new IllegalArgumentException("Import limit: 100 columns");
             List<String> headers = new ArrayList<>();
             for (int i = 0; i < headerRow.getPhysicalNumberOfCells(); i++) {
                 Cell cell = headerRow.getCell(i);
@@ -53,6 +55,7 @@ public class ExcelParser implements FileParser {
                 for (int j = 0; j < headers.size(); j++) {
                     Cell cell = row.getCell(j);
                     String value = getCellValue(cell);
+                    if(value!=null && value.length()>20000)throw new IllegalArgumentException("Cell limit: 20000 characters");
                     dataRow.put(headers.get(j), value != null ? value.trim() : "");
                 }
                 rows.add(dataRow);
@@ -70,7 +73,9 @@ public class ExcelParser implements FileParser {
     public List<String> extractHeaders(InputStream inputStream) {
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
+            if(sheet.getLastRowNum()>1000)throw new IllegalArgumentException("Import limit: 1000 rows");
             Row headerRow = sheet.getRow(0);
+            if(headerRow==null || headerRow.getLastCellNum()>100)throw new IllegalArgumentException("Import limit: 100 columns");
 
             List<String> headers = new ArrayList<>();
             for (int i = 0; i < headerRow.getPhysicalNumberOfCells(); i++) {
@@ -111,7 +116,7 @@ public class ExcelParser implements FileParser {
 
         CellType type = cell.getCellType();
         if (type == CellType.FORMULA) {
-            type = cell.getCachedFormulaResultType();
+            throw new IllegalArgumentException("Formula cells are unsupported; export explicit values");
         }
 
         return switch (type) {

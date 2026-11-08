@@ -1,72 +1,44 @@
 package com.orientation.orientationapp.knowledge.graph.service.impl;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import com.orientation.orientationapp.knowledge.entity.KnowledgeNode;
-import com.orientation.orientationapp.knowledge.entity.KnowledgeRelation;
 import com.orientation.orientationapp.knowledge.graph.service.KnowledgeGraphService;
-import com.orientation.orientationapp.knowledge.repository.KnowledgeNodeRepository;
-import com.orientation.orientationapp.knowledge.repository.KnowledgeRelationRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
-
-@Slf4j
-@Service
-@RequiredArgsConstructor
+@Service @RequiredArgsConstructor
 public class DefaultKnowledgeGraphService implements KnowledgeGraphService {
-
-    private final KnowledgeNodeRepository knowledgeNodeRepository;
-    private final KnowledgeRelationRepository knowledgeRelationRepository;
-
-    @Override
-    public Map<String, Object> getGraph() {
-        List<KnowledgeNode> nodes = knowledgeNodeRepository.findAll();
-        List<KnowledgeRelation> relations = knowledgeRelationRepository.findAll();
-
-        List<Map<String, Object>> nodeList = nodes.stream()
-                .map(n -> Map.<String, Object>of("id", n.getId(), "label", n.getName(), "type", n.getNodeType()))
-                .toList();
-
-        List<Map<String, Object>> edgeList = relations.stream()
-                .map(r -> Map.<String, Object>of(
-                        "source", r.getSource().getId(),
-                        "target", r.getTarget().getId(),
-                        "label", r.getRelationType()
-                ))
-                .toList();
-
-        return Map.of("nodes", nodeList, "edges", edgeList);
-    }
-
-    @Override
-    public List<Map<String, Object>> getRelatedEntities(String entityType, UUID entityId, int depth) {
-        List<KnowledgeNode> related = knowledgeNodeRepository.findByEntityTypeAndEntityId(entityType, entityId);
-
-        return related.stream()
-                .flatMap(node -> node.getRelatedNodes().stream())
-                .limit(depth * 10)
-                .map(n -> Map.<String, Object>of("id", n.getId(), "name", n.getName(), "type", n.getNodeType()))
-                .distinct()
-                .toList();
-    }
-
-    @Override
-    public List<Map<String, Object>> findPath(String fromType, UUID fromId, String toType, UUID toId) {
-        // Simplified path finding - in production would use BFS/DFS
-        List<KnowledgeNode> startNodes = knowledgeNodeRepository.findByEntityTypeAndEntityId(fromType, fromId);
-        List<KnowledgeNode> endNodes = knowledgeNodeRepository.findByEntityTypeAndEntityId(toType, toId);
-
-        List<Map<String, Object>> path = new ArrayList<>();
-        for (KnowledgeNode start : startNodes) {
-            for (KnowledgeNode end : endNodes) {
-                path.add(Map.<String, Object>of("from", start.getName(), "to", end.getName()));
-            }
-        }
-
-        return path;
-    }
+ private final com.orientation.orientationapp.intelligence.knowledge.KnowledgeGraphService graph;
+ @Override public Map<String,Object> getGraph(){return graph.graph();}
+ @SuppressWarnings("unchecked")
+ private List<Map<String,Object>> nodes(Map<String,Object> data){return (List<Map<String,Object>>)data.get("nodes");}
+ @SuppressWarnings("unchecked")
+ private List<Map<String,Object>> edges(Map<String,Object> data){return (List<Map<String,Object>>)data.get("edges");}
+ private Set<UUID> matching(List<Map<String,Object>> nodes,String type,UUID id) {
+  var ids=new HashSet<UUID>();for(var n:nodes)if(type.equals(n.get("type")) && id.equals(n.get("entityId")))ids.add((UUID)n.get("id"));return ids;
+ }
+ @Override public List<Map<String,Object>> getRelatedEntities(String type,UUID id,int depth) {
+  if(depth<1 || depth>5)throw com.orientation.orientationapp.modules.university.service.AcademicCatalogService.invalid("Graph depth must be 1 to 5");
+  var data=graph.graph();var all=nodes(data);var edges=edges(data);var visited=matching(all,type,id);
+  var frontier=new HashSet<>(visited);var result=new HashSet<UUID>();
+  for(int i=0;i<depth;i++) {
+   var next=new HashSet<UUID>();
+   for(var e:edges)if(frontier.contains(e.get("source")) && visited.add((UUID)e.get("target")))next.add((UUID)e.get("target"));
+   result.addAll(next);frontier=next;
+  }
+  return all.stream().filter(n->result.contains(n.get("id"))).toList();
+ }
+ @Override public List<Map<String,Object>> findPath(String fromType,UUID fromId,String toType,UUID toId) {
+  var data=graph.graph();var all=nodes(data);var links=edges(data);
+  var start=matching(all,fromType,fromId);var target=matching(all,toType,toId);
+  var queue=new ArrayDeque<UUID>(start);var parent=new HashMap<UUID,UUID>();start.forEach(id->parent.put(id,null));
+  UUID end=null;
+  while(!queue.isEmpty()) {
+   UUID current=queue.remove();if(target.contains(current)){end=current;break;}
+   for(var link:links)if(current.equals(link.get("source"))) {
+    UUID next=(UUID)link.get("target");if(!parent.containsKey(next)){parent.put(next,current);queue.add(next);}
+   }
+  }
+  if(end==null)return List.of();
+  var order=new ArrayList<UUID>();for(UUID current=end;current!=null;current=parent.get(current))order.add(current);Collections.reverse(order);
+  var map=new HashMap<UUID,Map<String,Object>>();all.forEach(n->map.put((UUID)n.get("id"),n));
+  return order.stream().map(map::get).toList();
+ }
 }

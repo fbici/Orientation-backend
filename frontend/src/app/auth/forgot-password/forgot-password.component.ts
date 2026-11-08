@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-forgot-password', standalone: true, imports: [FormsModule, RouterLink, CommonModule],
   template: `
@@ -17,6 +17,6 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ForgotPasswordComponent {
   email=''; loading=signal(false); error=signal(''); sent=signal(false);
-  constructor(private http:HttpClient){}
-  onSubmit(){this.loading.set(true);this.error.set('');this.http.post('/auth/forgot-password',{email:this.email}).subscribe({next:()=>{this.sent.set(true);this.loading.set(false)},error:()=>{this.sent.set(true);this.loading.set(false)}});}
+  constructor(private auth:AuthService){}
+  onSubmit(){this.loading.set(true);this.error.set('');this.auth.forgotPassword(this.email).subscribe({next:()=>{this.sent.set(true);this.loading.set(false)},error:(e)=>{this.error.set(e.error?.message || 'Envoi indisponible. Aucun email confirm?.');this.loading.set(false)}});}
 }

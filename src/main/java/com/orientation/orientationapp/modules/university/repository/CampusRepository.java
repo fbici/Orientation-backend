@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CampusRepository extends JpaRepository<Campus, UUID> {
+public interface CampusRepository extends JpaRepository<Campus, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Campus> {
     List<Campus> findByUniversityId(UUID universityId);
     List<Campus> findByCityId(UUID cityId);
     Optional<Campus> findByNameAndUniversityId(String name, UUID universityId);

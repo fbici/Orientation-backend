@@ -28,7 +28,7 @@ public class DocumentMetadata extends BaseEntity {
     @Column(length = 50)
     private String year;
 
-    @Column(length = 50)
+    @Column(name = "version_number", length = 50)
     private String docVersion;
 
     @Column(length = 200)
@@ -44,12 +44,14 @@ public class DocumentMetadata extends BaseEntity {
 
     private Instant createdDate;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String keywords;
 
     @Column(length = 500)
     private String checksum;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String customMetadata;
 }

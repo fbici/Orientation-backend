@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
 @Slf4j
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="app.realtime.scheduled-broadcasts",havingValue="true",matchIfMissing=true)
 @Controller
 @RequiredArgsConstructor
 public class DashboardSocketController {
@@ -18,8 +19,9 @@ public class DashboardSocketController {
     @Scheduled(fixedRate = 30000)
     public void broadcastDashboardUpdate() {
         try {
-            var dashboard = dashboardService.getExecutiveDashboard();
-            messagingTemplate.convertAndSend("/topic/dashboard", dashboard);
+            // Invalidate the authorized client's HTTP view; no tenant data is broadcast.
+            messagingTemplate.convertAndSend("/topic/dashboard", java.util.Map.of(
+                "type","KPI_UPDATE","timestamp",java.time.Instant.now().toString()));
         } catch (Exception e) {
             log.error("Failed to broadcast dashboard update", e);
         }

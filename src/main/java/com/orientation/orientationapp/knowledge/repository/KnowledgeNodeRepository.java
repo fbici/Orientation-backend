@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface KnowledgeNodeRepository extends JpaRepository<KnowledgeNode, UUID> {
+public interface KnowledgeNodeRepository extends JpaRepository<KnowledgeNode, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<KnowledgeNode> {
     List<KnowledgeNode> findByNodeType(String nodeType);
     List<KnowledgeNode> findByEntityType(String entityType);
     List<KnowledgeNode> findByEntityTypeAndEntityId(String entityType, UUID entityId);
@@ -18,4 +18,5 @@ public interface KnowledgeNodeRepository extends JpaRepository<KnowledgeNode, UU
 
     @Query("SELECT kn FROM KnowledgeNode kn WHERE kn.active = true AND kn.nodeType = :nodeType")
     List<KnowledgeNode> findActiveByNodeType(@Param("nodeType") String nodeType);
+    java.util.Optional<KnowledgeNode> findByEntityTypeAndEntityIdAndGuideVersionId(String type,UUID entityId,UUID versionId);
 }

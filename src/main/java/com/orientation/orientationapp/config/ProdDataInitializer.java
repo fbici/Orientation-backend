@@ -4,153 +4,62 @@ import com.orientation.orientationapp.common.enums.CandidateStatus;
 import com.orientation.orientationapp.modules.auth.entity.*;
 import com.orientation.orientationapp.modules.auth.repository.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.Set;
-
-/**
- * Cree les donnees de base au premier demarrage en production :
- * - Tenant par defaut
- * - Roles (SUPER_ADMIN, ADMIN, CANDIDAT)
- * - Utilisateur admin par defaut
- */
-@Slf4j
+/** Explicit, one-time bootstrap. Never changes an existing account. */
 @Component
-@Profile("prod")
+@ConditionalOnProperty(name = "app.bootstrap.enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class ProdDataInitializer implements ApplicationRunner {
+    private final TenantRepository tenants;
+    private final RoleRepository roles;
+    private final UserRepository users;
+    private final PasswordEncoder encoder;
 
-    private final OrganizationRepository organizationRepository;
-    private final TenantRepository tenantRepository;
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
-    private final PermissionRepository permissionRepository;
-    private final RolePermissionRepository rolePermissionRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Value("${app.bootstrap.email:}") private String email;
+    @Value("${app.bootstrap.password:}") private String password;
+    @Value("${app.bootstrap.tenant-code:}") private String tenantCode;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        // 0. Organization
-        Organization org = findOrCreateOrganization();
-
-        // 1. Tenant par defaut
-        Tenant tenant = findOrCreateTenant(org);
-
-        // 2. Roles
-        Role superAdmin = findOrCreateRole("SUPER_ADMIN", "Super Administrateur", tenant);
-        Role adminRole = findOrCreateRole("ADMIN", "Administrateur", tenant);
-        Role candidat = findOrCreateRole("CANDIDAT", "Candidat", tenant);
-
-        // 3. Permissions de base
-        createPermissionsIfNotExist();
-
-        // 4. Admin par defaut
-        Optional<User> existingAdmin = userRepository.findByEmail("admin@orientia.com");
-        if (existingAdmin.isEmpty()) {
-            User adminUser = new User();
-            adminUser.setEmail("admin@orientia.com");
-            adminUser.setPassword(passwordEncoder.encode("Admin@2025"));
-            adminUser.setFirstName("Super");
-            adminUser.setLastName("Admin");
-            adminUser.setTenant(tenant);
-            adminUser.setStatus(CandidateStatus.ACTIVE);
-            adminUser.setEmailVerified(true);
-            adminUser.setEnabled(true);
-            adminUser.setAccountLocked(false);
-            adminUser.setFailedLoginAttempts(0);
-            adminUser.setMfaEnabled(false);
-            adminUser.setDeleted(false);
-
-            UserRole ur = new UserRole();
-            ur.setUser(adminUser);
-            ur.setRole(superAdmin);
-            adminUser.getUserRoles().add(ur);
-
-            userRepository.save(adminUser);
-            log.info("Default admin created: admin@orientia.com / Admin@2025");
-        } else {
-            // Corriger le champ deleted si necessaire
-            User admin = existingAdmin.get();
-            if (admin.getDeleted() == null || admin.getDeleted()) {
-                admin.setDeleted(false);
-                userRepository.save(admin);
-                log.info("Fixed admin user deleted flag");
-            }
-            log.info("Default admin already exists");
-        }
-    }
-
-    private Organization findOrCreateOrganization() {
-        Optional<Organization> existing = organizationRepository.findByCode("ORIENTIA");
-        if (existing.isPresent()) return existing.get();
-
-        Organization org = new Organization();
-        org.setName("Orientia");
-        org.setCode("ORIENTIA");
-        org.setDescription("Platforme d'orientation universitaire");
-        org.setActive(true);
-        Organization saved = organizationRepository.save(org);
-        log.info("Default organization created");
-        return saved;
-    }
-
-    private Tenant findOrCreateTenant(Organization org) {
-        Optional<Tenant> existing = tenantRepository.findByCode("default");
-        if (existing.isPresent()) return existing.get();
-
-        Tenant tenant = new Tenant();
-        tenant.setName("Orientia Platform");
-        tenant.setCode("default");
-        tenant.setOrganization(org);
-        tenant.setActive(true);
-        Tenant saved = tenantRepository.save(tenant);
-        log.info("Default tenant created");
-        return saved;
-    }
-
-    private Role findOrCreateRole(String code, String name, Tenant tenant) {
-        Optional<Role> existing = roleRepository.findByCode(code);
-        if (existing.isPresent()) return existing.get();
-
-        Role role = new Role();
-        role.setCode(code);
-        role.setName(name);
-        role.setDescription(name);
-        role.setActive(true);
-        Role saved = roleRepository.save(role);
-        log.info("Role created: {}", code);
-        return saved;
-    }
-
-    private void createPermissionsIfNotExist() {
-        String[][] perms = {
-            {"users.read", "Users"}, {"users.write", "Users"}, {"users.delete", "Users"},
-            {"roles.read", "Roles"}, {"roles.write", "Roles"},
-            {"universities.read", "Universities"}, {"universities.write", "Universities"},
-            {"candidates.read", "Candidates"}, {"candidates.write", "Candidates"},
-            {"recommendations.read", "Recommendations"}, {"recommendations.write", "Recommendations"},
-            {"documents.read", "Documents"}, {"documents.write", "Documents"},
-            {"settings.read", "Settings"}, {"settings.write", "Settings"},
-            {"dashboard.read", "Dashboard"}, {"analytics.read", "Analytics"}
-        };
-        for (String[] p : perms) {
-            if (permissionRepository.findByCode(p[0]).isEmpty()) {
-                Permission perm = new Permission();
-                perm.setCode(p[0]);
-                perm.setName(p[0].replace(".", " "));
-                perm.setDescription(p[0]);
-                perm.setCategory(p[1]);
-                perm.setActive(true);
-                permissionRepository.save(perm);
-            }
-        }
+        // Native query deliberately includes soft-deleted accounts.
+        if (users.countAllSuperAdministrators() > 0)
+            throw new IllegalStateException("Bootstrap refused: administrator already provisioned");
+        if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$") ||
+                password == null || password.length() < 16 || password.length() > 72 ||
+                !password.matches("(?s).*[A-Z].*") || !password.matches("(?s).*[a-z].*") ||
+                !password.matches("(?s).*[0-9].*") || !password.matches("(?s).*[^a-zA-Z0-9].*") ||
+                tenantCode == null || tenantCode.isBlank())
+            throw new IllegalStateException("Bootstrap requires an email, existing tenant and strong secret (16-72 characters)");
+        if (users.countAllByEmail(email) > 0)
+            throw new IllegalStateException("Bootstrap refused: account already provisioned");
+        Tenant tenant = tenants.findByCode(tenantCode)
+                .filter(t -> Boolean.TRUE.equals(t.getActive()))
+                .orElseThrow(() -> new IllegalStateException("Bootstrap requires an active existing tenant"));
+        Role role = roles.lockByCode("SUPER_ADMIN")
+                .orElseThrow(() -> new IllegalStateException("Apply role migrations before bootstrap"));
+        if (users.countAllSuperAdministrators() > 0 || users.countAllByEmail(email) > 0)
+            throw new IllegalStateException("Bootstrap refused: account already provisioned");
+        User user = new User();
+        user.setEmail(email);
+        user.setFirstName("Platform");
+        user.setLastName("Administrator");
+        user.setPassword(encoder.encode(password));
+        user.setTenant(tenant);
+        user.setStatus(CandidateStatus.ACTIVE);
+        user.setEnabled(true);
+        user.setEmailVerified(true);
+        UserRole membership = new UserRole();
+        membership.setUser(user);
+        membership.setRole(role);
+        user.getUserRoles().add(membership);
+        users.save(user);
     }
 }

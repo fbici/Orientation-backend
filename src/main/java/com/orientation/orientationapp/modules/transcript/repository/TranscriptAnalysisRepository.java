@@ -9,5 +9,9 @@ import java.util.UUID;
 
 @Repository
 public interface TranscriptAnalysisRepository extends JpaRepository<TranscriptAnalysis, UUID> {
-    Optional<TranscriptAnalysis> findByTranscriptId(UUID transcriptId);
+    Optional<TranscriptAnalysis> findByParentAnalysisIdAndConfirmedAtIsNotNull(UUID parentId);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select a from TranscriptAnalysis a where a.id=:id")
+    Optional<TranscriptAnalysis> lockById(@org.springframework.data.repository.query.Param("id") UUID id);
+    org.springframework.data.domain.Page<TranscriptAnalysis> findByTranscriptIdOrderByAnalyzedAtDesc(UUID transcriptId,org.springframework.data.domain.Pageable pageable);
 }

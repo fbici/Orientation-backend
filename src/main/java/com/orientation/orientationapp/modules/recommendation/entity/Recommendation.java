@@ -21,27 +21,34 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "recommendations", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_recommendation_candidate_guide_program", columnNames = {"candidate_id", "guide_version_id", "program_id"})
+        @UniqueConstraint(name = "uk_recommendation_run_program", columnNames = {"run_id", "program_id"})
 })
 public class Recommendation extends BaseEntity {
+    private java.util.UUID runId;
+    private Long candidateVersion;
+    @Enumerated(EnumType.STRING) @Column(length=30)
+    private com.orientation.orientationapp.recengine.eligibility.model.EligibilityStatus eligibilityStatus;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(columnDefinition="jsonb") private String resultPayload;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "candidate_id", nullable = false, foreignKey = @ForeignKey(name = "fk_recommendation_candidate"))
     private Candidate candidate;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "guide_version_id", nullable = false, foreignKey = @ForeignKey(name = "fk_recommendation_guide_version"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guide_version_id", foreignKey = @ForeignKey(name = "fk_recommendation_guide_version"))
     private GuideVersion guideVersion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "program_id", nullable = false, foreignKey = @ForeignKey(name = "fk_recommendation_program"))
     private Program program;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "transcript_id", nullable = false, foreignKey = @ForeignKey(name = "fk_recommendation_transcript"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transcript_id", foreignKey = @ForeignKey(name = "fk_recommendation_transcript"))
     private Transcript transcript;
 
-    @Column(nullable = false, precision = 5, scale = 2)
+    @Column(precision = 5, scale = 2)
     private BigDecimal matchScore;
 
     @Column(nullable = false, precision = 5, scale = 2)
@@ -57,7 +64,7 @@ public class Recommendation extends BaseEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean eligible = true;
+    private Boolean eligible = false;
 
     @Column(precision = 5, scale = 2)
     private BigDecimal admissionProbability;

@@ -31,6 +31,7 @@ class ScoringEngineTest {
                 Map.of("Mathématiques", BigDecimal.valueOf(18), "Physique", BigDecimal.valueOf(16))
         );
 
+        configureScale(profile);
         Map<String, Object> programData = Map.of("name", "Licence Informatique");
         CompositeScore score = scoringEngine.computeScore(profile, programData);
 
@@ -49,6 +50,7 @@ class ScoringEngineTest {
                 Map.of("Arabe", BigDecimal.valueOf(9), "Français", BigDecimal.valueOf(8))
         );
 
+        configureScale(profile);
         Map<String, Object> programData = Map.of("name", "Licence Informatique");
         CompositeScore score = scoringEngine.computeScore(profile, programData);
 
@@ -64,9 +66,17 @@ class ScoringEngineTest {
                 Map.of("Mathématiques", BigDecimal.valueOf(15))
         );
 
+        configureScale(profile);
         CompositeScore score = scoringEngine.computeScore(profile, Map.of());
 
         assertNotNull(score.getComponents());
         assertTrue(score.getComponents().size() >= 5);
+    }
+    private void configureScale(AcademicProfile profile) {
+        profile.setGeneralAverage(profile.getBacAverage());
+        profile.setGradeScale(com.orientation.orientationapp.modules.orientation.entity.GradeScale.builder()
+            .country(new com.orientation.orientationapp.modules.university.entity.Country())
+            .academicYear(new com.orientation.orientationapp.modules.orientation.entity.AcademicYear())
+            .minScore(BigDecimal.ZERO).maxScore(BigDecimal.valueOf(20)).normalizeTo(BigDecimal.valueOf(20)).build());
     }
 }

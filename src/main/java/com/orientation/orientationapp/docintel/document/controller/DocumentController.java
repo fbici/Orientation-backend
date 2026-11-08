@@ -31,7 +31,7 @@ public class DocumentController {
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "description", required = false) String description) {
 
-        Document document = documentService.upload(file, title, description, "default", "current-user");
+        Document document = documentService.upload(file, title, description, null, null);
         return ResponseEntity.ok(mapToResponse(document));
     }
 
@@ -75,6 +75,13 @@ public class DocumentController {
         return ResponseEntity.ok(MessageResponse.success("Document deleted"));
     }
 
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable UUID id) {
+        Document document=documentService.getById(id);
+        return ResponseEntity.ok().contentType(org.springframework.http.MediaType.parseMediaType(document.getMimeType()))
+            .header("Content-Disposition","attachment; filename=\"document\"")
+            .header("X-Content-Type-Options","nosniff").body(documentService.download(id));
+    }
     private DocumentResponse mapToResponse(Document doc) {
         return DocumentResponse.builder()
                 .id(doc.getId())

@@ -16,6 +16,7 @@ public class ChatSession {
 
     private UUID sessionId;
     private UUID userId;
+    private UUID candidateId;
     private List<ChatMessage> messages;
     private Instant createdAt;
     private Instant lastActivityAt;
