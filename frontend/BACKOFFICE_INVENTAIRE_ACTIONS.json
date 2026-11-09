@@ -1,0 +1,823 @@
+{
+  "kind": "static-inventory-not-an-execution-proof",
+  "productionWrites": false,
+  "sources": [
+    {
+      "file": "frontend/src/app/administration/administration.routes.ts",
+      "routes": [
+        "",
+        "users",
+        "roles",
+        "organizations",
+        "tenants",
+        "teams",
+        "departments"
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/administration/components/administration.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [
+        "getOrganizations",
+        "getRoles",
+        "getTenants",
+        "getUsers"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/administration/components/departments.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [
+        "createDepartment",
+        "deleteDepartment",
+        "getDepartments",
+        "updateDepartment"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/administration/components/organizations.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "confirmDel(o)",
+        "openCreate()",
+        "openEdit(o)",
+        "page=page+1;load()",
+        "page=page-1;load()"
+      ],
+      "apiMethods": [
+        "createOrganization",
+        "deleteOrganization",
+        "getOrganizations",
+        "updateOrganization"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/administration/components/roles.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [
+        "createRole",
+        "deleteRole",
+        "getRoles",
+        "updateRole"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/administration/components/teams.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [
+        "createTeam",
+        "deleteTeam",
+        "getTeams",
+        "updateTeam"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/administration/components/tenants.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "confirmDel(t)",
+        "openCreate()",
+        "openEdit(t)",
+        "page=page+1;load()",
+        "page=page-1;load()"
+      ],
+      "apiMethods": [
+        "createTenant",
+        "deleteTenant",
+        "getOrganizations",
+        "getTenants",
+        "updateTenant"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/administration/components/users.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "confirmDel(u)",
+        "openEdit(u)",
+        "page=0; load()",
+        "page=page+1; load()",
+        "page=page-1; load()"
+      ],
+      "apiMethods": [
+        "createUser",
+        "deleteUser",
+        "getUsers",
+        "updateUser"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/analytics/analytics.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/analytics/components/analytics.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "load()"
+      ],
+      "apiMethods": [
+        "getAnalytics"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/app.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/app.config.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/app.routes.ts",
+      "routes": [
+        "auth",
+        "",
+        "campuses",
+        "faculties",
+        "programs",
+        "scholarships",
+        "guides",
+        "dashboard",
+        "analytics",
+        "monitoring",
+        "universities",
+        "recommendations",
+        "documents",
+        "imports",
+        "rules",
+        "intelligence",
+        "knowledge",
+        "notifications",
+        "administration",
+        "settings",
+        "reports",
+        "profile",
+        "",
+        "**"
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/auth/auth.routes.ts",
+      "routes": [
+        "login",
+        "forgot-password",
+        "reset-password",
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/auth/forgot-password/forgot-password.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/auth/login/login.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "showPwd.set(!showPwd())"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/auth/reset-password/reset-password.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/catalog/academic-fields.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [
+        "reference"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/catalog/catalog.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "edit()",
+        "edit(r)",
+        "page = page + 1; load()",
+        "page = page - 1; load()",
+        "source(r)",
+        "toDisable = r"
+      ],
+      "apiMethods": [
+        "academicSources",
+        "disableCatalog",
+        "saveCatalog"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/catalog/guides.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "page = page + 1; load()",
+        "page = page - 1; load()"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/guards/auth.guard.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/guards/role.guard.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/interceptors/auth.interceptor.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/api.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/auth.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/cache.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/chart.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/file-upload.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/intelligence.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/notification.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/realtime.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/search.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/core/services/websocket.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/dashboard/components/dashboard.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "loadData()",
+        "updatePeriod(p)"
+      ],
+      "apiMethods": [
+        "getDashboard"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/dashboard/dashboard.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/documents/components/document-review.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "add()",
+        "decide('REJECTED')",
+        "decide('TO_REVIEW')",
+        "decide('VALIDATED')",
+        "process()",
+        "publish()",
+        "select(f)"
+      ],
+      "apiMethods": [
+        "documentPage",
+        "getCountries",
+        "processDocument",
+        "publishDocument",
+        "reference",
+        "reviewDocument"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/documents/components/documents.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "load()",
+        "page = page + 1; load()",
+        "page = page - 1; load()"
+      ],
+      "apiMethods": [
+        "getDocuments",
+        "uploadDocument"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/documents/documents.routes.ts",
+      "routes": [
+        ":id/review",
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/imports/components/imports.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "load()",
+        "page = page + 1; load()",
+        "page = page - 1; load()",
+        "upload()"
+      ],
+      "apiMethods": [
+        "getImports",
+        "importAcademic"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/imports/imports.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/intelligence/components/knowledge-browser.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "load()",
+        "search()"
+      ],
+      "apiMethods": [],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/intelligence/components/pipeline.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "fileInput.click()"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/intelligence/components/smart-query.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "ask()",
+        "query = ex; ask()"
+      ],
+      "apiMethods": [],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/intelligence/decisions.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "ask()",
+        "compare()",
+        "download(row.id,'csv')",
+        "download(row.id,'excel')",
+        "download(row.id,'pdf')",
+        "funding()",
+        "page=0;load()",
+        "page=page+1;load()",
+        "page=page-1;load()",
+        "result.set(row)",
+        "simulate()"
+      ],
+      "apiMethods": [
+        "askDecisionChat",
+        "compareDecision",
+        "createDecisionChat",
+        "decisionHistory",
+        "exportDecision",
+        "scholarshipDecision",
+        "simulateDecision"
+      ],
+      "tables": 3
+    },
+    {
+      "file": "frontend/src/app/intelligence/intelligence.routes.ts",
+      "routes": [
+        "decisions",
+        "",
+        "smart-query",
+        "knowledge"
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/knowledge/components/knowledge.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "loadGraph()",
+        "page = page + 1; search()",
+        "page = page - 1; search()"
+      ],
+      "apiMethods": [
+        "knowledgeGraph",
+        "reference"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/knowledge/components/smart-query.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [
+        "smartQuery"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/knowledge/knowledge.routes.ts",
+      "routes": [
+        "",
+        "smart-query"
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/layout/layout.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "collapsed.set(!collapsed())",
+        "logout()",
+        "markAllRead()",
+        "menuOpen.set(!menuOpen())",
+        "menuOpen.set(false)",
+        "notifPanelOpen.set(false)",
+        "readNotif(n.id)",
+        "toggleNotifPanel()"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/monitoring/components/monitoring.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "load()",
+        "page=page+1;load()",
+        "page=page-1;load()"
+      ],
+      "apiMethods": [
+        "getActivityLogs",
+        "getMonitoring"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/monitoring/monitoring.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/notifications/components/notifications.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "markAllRead()",
+        "notifSvc.load(notifSvc.page())",
+        "notifSvc.load(notifSvc.page()+1)",
+        "notifSvc.load(notifSvc.page()-1)",
+        "read(n.id)",
+        "tab='all'",
+        "tab='unread'"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/notifications/notifications.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/profile/components/profile.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "save()"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/profile/profile.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/recommendations/components/recommendations.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "changePage(-1)",
+        "changePage(1)",
+        "generate()",
+        "load()",
+        "selected.set(r)"
+      ],
+      "apiMethods": [
+        "generateRecommendations",
+        "getRecommendations"
+      ],
+      "tables": 2
+    },
+    {
+      "file": "frontend/src/app/recommendations/recommendations.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/reports/components/reports.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/reports/reports.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/rules/components/rules.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "page = page + 1; load()",
+        "page = page - 1; load()"
+      ],
+      "apiMethods": [
+        "publishedRules",
+        "reference"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/rules/rules.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/settings/components/settings.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/settings/settings.routes.ts",
+      "routes": [
+        ""
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/confirm-dialog.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/data-table.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "col.sortable && onSort(col.key)",
+        "goToPage(currentPage + 1)",
+        "goToPage(currentPage - 1)",
+        "goToPage(p)"
+      ],
+      "apiMethods": [],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/shared/components/empty-state.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/loading.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/modal.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "!confirmLoading && !confirmDisabled && confirm.emit()",
+        "!confirmLoading && close.emit()",
+        "$event.stopPropagation()"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/page-header.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/stat-card.component.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/toast-container.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "toastSvc.remove(t.id)"
+      ],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/shared/components/toast.service.ts",
+      "routes": [],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/universities/components/universities.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "confirmDelete(u)",
+        "load()",
+        "openCreate()",
+        "openEdit(u)",
+        "page.set(page()+1);load()",
+        "page.set(page()-1);load()"
+      ],
+      "apiMethods": [
+        "catalog",
+        "createUniversity",
+        "deleteUniversity",
+        "getCities",
+        "getCitiesByCountry",
+        "getCountries",
+        "updateUniversity"
+      ],
+      "tables": 1
+    },
+    {
+      "file": "frontend/src/app/universities/components/university-detail.component.ts",
+      "routes": [],
+      "clickHandlers": [
+        "page = page + 1; loadCampuses()",
+        "page = page - 1; loadCampuses()"
+      ],
+      "apiMethods": [
+        "getUniversity"
+      ],
+      "tables": 0
+    },
+    {
+      "file": "frontend/src/app/universities/universities.routes.ts",
+      "routes": [
+        "",
+        ":id"
+      ],
+      "clickHandlers": [],
+      "apiMethods": [],
+      "tables": 0
+    }
+  ]
+}

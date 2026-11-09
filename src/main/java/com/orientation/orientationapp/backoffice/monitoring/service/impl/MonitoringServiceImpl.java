@@ -13,15 +13,23 @@ import java.util.Map;
 
 @Slf4j
 @Service
+@lombok.RequiredArgsConstructor
 public class MonitoringServiceImpl implements MonitoringService {
+    private final javax.sql.DataSource dataSource;
 
+    private static Double processCpu() {
+        if(ManagementFactory.getOperatingSystemMXBean() instanceof com.sun.management.OperatingSystemMXBean bean) {
+            double load=bean.getProcessCpuLoad();return load>=0?load*100:null;
+        }
+        return null;
+    }
     @Override
     public MonitoringResponse getMonitoringData() {
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
         MonitoringResponse.SystemMetrics systemMetrics = MonitoringResponse.SystemMetrics.builder()
-                .cpuUsage(Runtime.getRuntime().availableProcessors() > 0 ? 25.0 : 0)
+                .cpuUsage(processCpu())
                 .memoryUsage((double) memoryBean.getHeapMemoryUsage().getUsed() / memoryBean.getHeapMemoryUsage().getMax() * 100)
                 .heapUsed(memoryBean.getHeapMemoryUsage().getUsed())
                 .heapMax(memoryBean.getHeapMemoryUsage().getMax())
@@ -32,17 +40,20 @@ public class MonitoringServiceImpl implements MonitoringService {
                 .build();
 
         MonitoringResponse.ApplicationMetrics appMetrics = MonitoringResponse.ApplicationMetrics.builder()
-                .totalApiCalls(0L)
-                .averageResponseTime(45.0)
-                .errorCount(0L)
-                .activeSessions(1L)
+                .totalApiCalls(null)
+                .averageResponseTime(null)
+                .errorCount(null)
+                .activeSessions(null)
                 .endpointCalls(Map.of())
                 .build();
 
-        List<MonitoringResponse.HealthCheck> healthChecks = List.of(
-                MonitoringResponse.HealthCheck.builder().name("Database").status("UP").message("PostgreSQL connected").responseTimeMs(5).build(),
-                MonitoringResponse.HealthCheck.builder().name("Application").status("UP").message("Running").responseTimeMs(1).build()
-        );
+        boolean databaseUp=false;
+        try(var connection=dataSource.getConnection()) { databaseUp=connection.isValid(2); }
+        catch(java.sql.SQLException ex) { log.warn("Database health check unavailable"); }
+        List<MonitoringResponse.HealthCheck> healthChecks=List.of(
+            MonitoringResponse.HealthCheck.builder().name("Database").status(databaseUp?"UP":"DOWN")
+                .message(databaseUp?"Connection validated":"Connection unavailable").build(),
+            MonitoringResponse.HealthCheck.builder().name("Application").status("UP").message("Running").build());
 
         return MonitoringResponse.builder()
                 .systemMetrics(systemMetrics)

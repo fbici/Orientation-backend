@@ -12,7 +12,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}
       <div class="page-header">
         <div><h1>Universités</h1><p>Gestion des universités et établissements</p></div>
         <div class="page-header-actions">
@@ -31,7 +31,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
             <select class="form-input" aria-label="Pays" [(ngModel)]="countryFilter" (ngModelChange)="page.set(0);load()"><option value="">Tous les pays</option>@for(c of countries();track c.id){<option [value]="c.id">{{c.name}}</option>}</select>
  <select class="form-input" aria-label="Type" [(ngModel)]="typeFilter" (ngModelChange)="page.set(0);load()"><option value="">Tous les types</option><option value="PUBLIC">Public</option><option value="PRIVATE">Privé</option><option value="OTHER">Autre</option></select>
  <select class="form-input" aria-label="Statut" [(ngModel)]="statusFilter" (ngModelChange)="page.set(0);load()"><option value="">Tous les statuts</option><option value="ACTIVE">Actif</option><option value="INACTIVE">Inactif</option><option value="PENDING">En attente</option><option value="SUSPENDED">Suspendu</option></select>
- <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
+ <button class="btn btn-secondary btn-sm" (click)="load()" aria-label="Actualiser"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
           </div>
         </div>
         <div class="card-body" style="padding:0">
@@ -47,14 +47,14 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                       <a [routerLink]="['/universities', u.id]" style="font-weight:600;color:var(--n-900)">{{ u.name }}</a>
                       @if (u.shortName) { <span style="font-size:.75rem;color:var(--n-500);margin-left:6px">{{ u.shortName }}</span> }
                     </td>
-                    <td style="font-size:.8125rem">{{ u.country?.name || '-' }}</td>
-                    <td style="font-size:.8125rem">{{ u.city?.name || '-' }}</td>
+                    <td style="font-size:.8125rem">{{ u.countryName || u.country?.name || '-' }}</td>
+                    <td style="font-size:.8125rem">{{ u.cityName || u.city?.name || '-' }}</td>
                     <td><span class="badge" [class]="u.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'">{{ u.status || 'PENDING' }}</span></td>
                     <td style="font-size:.8125rem;font-weight:600">{{ u.verificationStatus }}</td>
                     <td style="text-align:right">
                       <div style="display:flex;gap:2px;justify-content:flex-end">
-                        <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
-                        <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDelete(u)"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
+                        <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
+                        <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDelete(u)" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
                       </div>
                     </td>
                   </tr>
@@ -184,6 +184,7 @@ export class UniversitiesComponent implements OnInit {
   page = signal(0);
   total = signal(0);
   totalPages = signal(0);
+  error = signal('');
   search = '';
   countryFilter='';typeFilter='';statusFilter='';
 
@@ -214,7 +215,7 @@ export class UniversitiesComponent implements OnInit {
           const newCities = cities.filter((c: any) => !existing.some(e => e.id === c.id));
           this.allCities.set([...existing, ...newCities]);
         },
-        error: () => {}
+        error: () => this.error.set('Referentiel des villes indisponible.')
       });
     }
   }
@@ -238,12 +239,12 @@ export class UniversitiesComponent implements OnInit {
     // Précharger toutes les villes
     this.api.getCities().subscribe({
       next: (r: any) => { this.allCities.set(r || []); },
-      error: () => {}
+      error: () => this.error.set('Referentiel des villes indisponible.')
     });
   }
 
   load(): void {
-    this.loading.set(true);
+    this.loading.set(true);this.error.set('');
     this.api.catalog("universities",this.page(),{search:this.search,countryId:this.countryFilter,type:this.typeFilter,status:this.statusFilter}).subscribe({
       next: (r) => {
         this.universities.set(r?.content || []);
@@ -251,7 +252,7 @@ export class UniversitiesComponent implements OnInit {
         this.totalPages.set(r?.totalPages || 0);
         this.loading.set(false);
       },
-      error: () => { this.loading.set(false); this.toast.error('Erreur chargement.'); }
+      error: () => { this.loading.set(false); this.universities.set([]);this.error.set('Universites indisponibles ou acces refuse.'); }
     });
   }
 
@@ -265,7 +266,7 @@ export class UniversitiesComponent implements OnInit {
     this.editId.set(u.id);
     this.form = {
       name: u.name || '', shortName: u.shortName || '',
-      countryId: u.country?.id || '', cityId: u.city?.id || '',
+      countryId: u.countryId || u.country?.id || '', cityId: u.cityId || u.city?.id || '',
       address: u.address || '', email: u.email || '', phone: u.phone || '',
       website: u.website || '', foundedYear: u.foundedYear || null,
       status: u.status || 'PENDING', description: u.description || '', type:u.type, sourceUrl:u.sourceUrl

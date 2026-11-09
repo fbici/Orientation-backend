@@ -12,7 +12,7 @@ import { ToastService } from './toast.service';
         <div class="toast" [class]="'toast-' + t.type">
           <span class="material-symbols-rounded toast-icon">{{ icon(t.type) }}</span>
           <span class="toast-msg">{{ t.message }}</span>
-          <button class="toast-close" (click)="toastSvc.remove(t.id)">
+          <button class="toast-close" (click)="toastSvc.remove(t.id)" aria-label="Fermer">
             <span class="material-symbols-rounded" style="font-size:16px">close</span>
           </button>
         </div>

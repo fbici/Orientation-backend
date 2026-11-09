@@ -10,10 +10,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 @Component({
   selector: 'app-departments', standalone: true, imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up"><div class="api-notice" role="status">Le backend ne fournit pas encore l API administrative departments. Les modifications sont indisponibles.</div>
       <div class="page-header">
         <div style="display:flex;align-items:center;gap:12px"><a routerLink="/administration" class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded">arrow_back</span></a><div><h1>Départements</h1><p>Structure organisationnelle</p></div></div>
-        <div class="page-header-actions"><button class="btn btn-primary" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Ajouter</button></div>
+        <div class="page-header-actions"><button class="btn btn-primary" disabled title="API non disponible"><span class="material-symbols-rounded">add</span>Ajouter</button></div>
       </div>
       <div class="card">
         <div class="card-body" style="padding:0">
@@ -27,8 +27,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                     <td style="font-size:.8125rem;color:var(--n-600)">{{ d.description || '—' }}</td>
                     <td>{{ d.memberCount || 0 }}</td>
                     <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(d)"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(d)"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" disabled title="API non disponible" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" disabled title="API non disponible" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
                     </div></td>
                   </tr>
                 } @empty { <tr><td colspan="4" style="text-align:center;padding:48px;color:var(--n-400)">Aucun département</td></tr> }
@@ -53,7 +53,7 @@ export class DepartmentsComponent implements OnInit {
   form: any = {};
   constructor(private api: ApiService, private toast: ToastService) {}
   ngOnInit(): void { this.load(); }
-  load(): void { this.loading.set(true); this.api.getDepartments().subscribe({ next: (r) => { this.depts.set(r?.content || r || []); this.loading.set(false); }, error: () => this.loading.set(false) }); }
+  load(): void { this.loading.set(true); this.api.getDepartments().subscribe({ next: (r) => { this.depts.set(r?.content || r || []); this.loading.set(false); }, error: () => {this.loading.set(false);this.toast.error('API administrative indisponible ou acces refuse.');} }); }
   openCreate(): void { this.editId.set(null); this.form = { name: '', description: '' }; this.showForm.set(true); }
   openEdit(d: any): void { this.editId.set(d.id); this.form = { name: d.name, description: d.description }; this.showForm.set(true); }
   save(): void { if (!this.form.name) { this.toast.warning('Nom requis.'); return; } this.saving.set(true); const call = this.editId() ? this.api.updateDepartment(this.editId()!, this.form) : this.api.createDepartment(this.form); call.subscribe({ next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success('Sauvegardé.'); this.load(); }, error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }

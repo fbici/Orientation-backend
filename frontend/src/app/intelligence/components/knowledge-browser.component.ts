@@ -36,7 +36,7 @@ import { IntelligenceService } from '../../core/services/intelligence.service';
       <div class="card">
         <div class="card-header">
           <span style="font-size:.8125rem;color:var(--n-500)">{{ nodes().length }} nœuds</span>
-          <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
+          <button class="btn btn-secondary btn-sm" (click)="load()" aria-label="Actualiser"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
         </div>
         <div class="card-body" style="padding:0">
           @if (loading()) { <div style="padding:48px;text-align:center"><div class="spinner"></div></div> } @else {

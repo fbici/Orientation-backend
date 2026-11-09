@@ -23,14 +23,14 @@ public class DashboardResponse {
     @Builder
     public static class KpiSummary {
         private long totalCandidates;
-        private long totalRecommendations;
-        private long totalGuidesImported;
-        private long totalDocumentsOcr;
-        private long activeRules;
-        private long totalTenants;
-        private long activeUsers;
-        private long todayRecommendations;
-        private long activeImports;
+        private Long totalRecommendations;
+        private Long totalGuidesImported;
+        private Long totalDocumentsOcr;
+        private Long activeRules;
+        private Long totalTenants;
+        private Long activeUsers;
+        private Long todayRecommendations;
+        private Long activeImports;
     }
 
     @Getter
@@ -39,10 +39,10 @@ public class DashboardResponse {
     @AllArgsConstructor
     @Builder
     public static class RecentActivity {
-        private long recentImports;
-        private long recentRecommendations;
-        private long recentDocuments;
-        private long recentUsers;
+        private Long recentImports;
+        private Long recentRecommendations;
+        private Long recentDocuments;
+        private Long recentUsers;
     }
 
     @Getter
@@ -52,13 +52,13 @@ public class DashboardResponse {
     @Builder
     public static class SystemHealth {
         private String status;
-        private double cpuUsage;
+        private Double cpuUsage;
         private double memoryUsage;
         private long heapUsed;
         private long heapMax;
         private int activeThreads;
-        private int databaseConnections;
-        private double responseTimeMs;
+        private Integer databaseConnections;
+        private Double responseTimeMs;
     }
 
     @Getter

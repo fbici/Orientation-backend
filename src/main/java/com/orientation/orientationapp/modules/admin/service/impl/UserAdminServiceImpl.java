@@ -1,6 +1,7 @@
 package com.orientation.orientationapp.modules.admin.service.impl;
 
 import com.orientation.orientationapp.modules.admin.dto.request.CreateUserRequest;
+import com.orientation.orientationapp.modules.admin.dto.request.UpdateUserRequest;
 import com.orientation.orientationapp.modules.admin.dto.response.UserResponse;
 import com.orientation.orientationapp.modules.admin.service.UserAdminService;
 import com.orientation.orientationapp.modules.auth.entity.User;
@@ -35,7 +36,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         throw new RuntimeException("User creation requires tenant context");
     }
 
-    public UserResponse update(UUID id, CreateUserRequest request) {
+    public UserResponse update(UUID id, UpdateUserRequest request) {
         access.require("USER_UPDATE");
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -111,6 +112,7 @@ public class UserAdminServiceImpl implements UserAdminService {
                 .tenantName(user.getTenant().getName())
                 .status(user.getStatus().name())
                 .enabled(user.getEnabled())
+                .roles(user.getUserRoles().stream().map(m -> m.getRole().getCode()).distinct().toList())
                 .build();
     }
 }

@@ -10,10 +10,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 @Component({
   selector: 'app-teams', standalone: true, imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up"><div class="api-notice" role="status">Le backend ne fournit pas encore l API administrative teams. Les modifications sont indisponibles.</div>
       <div class="page-header">
         <div style="display:flex;align-items:center;gap:12px"><a routerLink="/administration" class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded">arrow_back</span></a><div><h1>Équipes</h1><p>Gestion des équipes de travail</p></div></div>
-        <div class="page-header-actions"><button class="btn btn-primary" (click)="openCreate()"><span class="material-symbols-rounded">group_add</span>Ajouter</button></div>
+        <div class="page-header-actions"><button class="btn btn-primary" disabled title="API non disponible"><span class="material-symbols-rounded">group_add</span>Ajouter</button></div>
       </div>
       <div class="g3 stagger">
         @for (t of teams(); track t.id) {
@@ -21,7 +21,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
             <div class="card-body">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
                 <div style="display:flex;align-items:center;gap:10px"><span class="material-symbols-rounded" style="font-size:20px;color:var(--brand)">groups</span><span style="font-weight:600;color:var(--n-900)">{{ t.name }}</span></div>
-                <div style="display:flex;gap:2px"><button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(t)"><span class="material-symbols-rounded" style="font-size:16px">edit</span></button><button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(t)"><span class="material-symbols-rounded" style="font-size:16px;color:var(--red-500)">delete</span></button></div>
+                <div style="display:flex;gap:2px"><button class="btn btn-ghost btn-icon btn-sm" disabled title="API non disponible" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:16px">edit</span></button><button class="btn btn-ghost btn-icon btn-sm" disabled title="API non disponible" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:16px;color:var(--red-500)">delete</span></button></div>
               </div>
               <p style="font-size:.8125rem;color:var(--n-600)">{{ t.description || '—' }}</p>
               <div style="font-size:.75rem;color:var(--n-500);margin-top:8px">{{ t.memberCount || 0 }} membres</div>
@@ -48,7 +48,7 @@ export class TeamsComponent implements OnInit {
   form: any = {};
   constructor(private api: ApiService, private toast: ToastService) {}
   ngOnInit(): void { this.load(); }
-  load(): void { this.loading.set(true); this.api.getTeams().subscribe({ next: (r) => { this.teams.set(r?.content || r || []); this.loading.set(false); }, error: () => this.loading.set(false) }); }
+  load(): void { this.loading.set(true); this.api.getTeams().subscribe({ next: (r) => { this.teams.set(r?.content || r || []); this.loading.set(false); }, error: () => {this.loading.set(false);this.toast.error('API administrative indisponible ou acces refuse.');} }); }
   openCreate(): void { this.editId.set(null); this.form = { name: '', description: '' }; this.showForm.set(true); }
   openEdit(t: any): void { this.editId.set(t.id); this.form = { name: t.name, description: t.description }; this.showForm.set(true); }
   save(): void { if (!this.form.name) { this.toast.warning('Nom requis.'); return; } this.saving.set(true); const call = this.editId() ? this.api.updateTeam(this.editId()!, this.form) : this.api.createTeam(this.form); call.subscribe({ next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success('Sauvegardé.'); this.load(); }, error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }

@@ -84,7 +84,7 @@ import { AuthService } from '../../core/services/auth.service';
               @if (auth.user()?.mfaEnabled) {
                 <span class="badge badge-success">Activé</span>
               } @else {
-                <button class="btn btn-secondary btn-sm"><span class="material-symbols-rounded" style="font-size:16px">security</span>Configurer</button>
+                <button class="btn btn-secondary btn-sm" disabled title="Aucun endpoint de configuration MFA disponible">Configuration indisponible</button>
               }
             </div>
           </div>
@@ -122,6 +122,10 @@ export class ProfileComponent {
   }
 
   save(): void {
+    if(this.saving()) return;
+    if(!this.firstName.trim() || !this.lastName.trim()) {this.error.set('Prenom et nom requis.');return;}
+    if(!!this.oldPassword !== !!this.newPassword) {this.error.set('Renseignez les deux mots de passe.');return;}
+    if(this.newPassword && (this.newPassword.length<12 || new TextEncoder().encode(this.newPassword).length>72)) {this.error.set('Nouveau mot de passe : 12 caracteres minimum, 72 octets maximum.');return;}
     this.saving.set(true);
     this.saved.set(false);
     this.error.set('');

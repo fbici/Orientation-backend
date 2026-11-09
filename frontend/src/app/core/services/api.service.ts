@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface PageResponse<T> {
@@ -74,8 +74,8 @@ export class ApiService {
   getMonitoring(): Observable<any> { return this.http.get(`${this.b}/backoffice/monitoring`); }
 
   // ── Reports ──
-  getReports(): Observable<any> { return this.http.get(`${this.b}/backoffice/report`); }
-  generateReport(data: any): Observable<any> { return this.http.post(`${this.b}/backoffice/report/generate`, data); }
+  getReports(): Observable<any> { return throwError(()=>new Error('La liste des rapports n est pas exposee ; utiliser l historique des decisions.')); }
+  generateReport(data: {type:string;format?:string}): Observable<any> { return this.http.get(`${this.b}/backoffice/reports/generate`, {params:{type:data.type,format:data.format || 'json'}}); }
 
   // ── Notifications ──
   getNotifications(page = 0, size = 50): Observable<any> {
@@ -198,8 +198,8 @@ export class ApiService {
   getDocumentClassifications(id: string): Observable<any> { return this.http.get(`${this.b}/documents/${id}/classifications`); }
 
   // ── Admin: Users ──
-  getUsers(page = 0, size = 20): Observable<PageResponse<any>> {
-    return this.http.get<PageResponse<any>>(`${this.b}/admin/users`, { params: this.p(page, size) });
+  getUsers(page = 0, size = 20, search = ''): Observable<PageResponse<any>> {
+    return this.http.get<PageResponse<any>>(`${this.b}/admin/users`, { params: { ...this.p(page, size), search } });
   }
   getUser(id: string): Observable<any> { return this.http.get(`${this.b}/admin/users/${id}`); }
   createUser(data: any): Observable<any> { return this.http.post(`${this.b}/admin/users`, data); }
@@ -214,14 +214,14 @@ export class ApiService {
   deleteRole(id: string): Observable<any> { return this.http.delete(`${this.b}/admin/roles/${id}`); }
 
   // ── Admin: Organizations ──
-  getOrganizations(): Observable<any> { return this.http.get(`${this.b}/admin/organizations`); }
+  getOrganizations(page = 0, size = 20): Observable<any> { return this.http.get(`${this.b}/admin/organizations`, {params: this.p(page, size)}); }
   getOrganization(id: string): Observable<any> { return this.http.get(`${this.b}/admin/organizations/${id}`); }
   createOrganization(data: any): Observable<any> { return this.http.post(`${this.b}/admin/organizations`, data); }
   updateOrganization(id: string, data: any): Observable<any> { return this.http.put(`${this.b}/admin/organizations/${id}`, data); }
   deleteOrganization(id: string): Observable<any> { return this.http.delete(`${this.b}/admin/organizations/${id}`); }
 
   // ── Admin: Tenants ──
-  getTenants(): Observable<any> { return this.http.get(`${this.b}/admin/tenants`); }
+  getTenants(page = 0, size = 20): Observable<any> { return this.http.get(`${this.b}/admin/tenants`, {params: this.p(page, size)}); }
   getTenant(id: string): Observable<any> { return this.http.get(`${this.b}/admin/tenants/${id}`); }
   createTenant(data: any): Observable<any> { return this.http.post(`${this.b}/admin/tenants`, data); }
   updateTenant(id: string, data: any): Observable<any> { return this.http.put(`${this.b}/admin/tenants/${id}`, data); }
@@ -254,7 +254,7 @@ export class ApiService {
 
   // ── Audit ──
   getAuditLogs(page = 0, size = 50): Observable<any> {
-    return this.http.get(`${this.b}/audit`, { params: this.p(page, size) });
+    return this.http.get(`${this.b}/backoffice/audit`, { params: this.p(page, size) });
   }
 
   // ── Settings ──
@@ -263,7 +263,7 @@ export class ApiService {
 
   // ── Backoffice: Activity Logs ──
   getActivityLogs(page = 0, size = 50): Observable<any> {
-    return this.http.get(`${this.b}/backoffice/activity-logs`, { params: this.p(page, size) });
+    return this.http.get(`${this.b}/backoffice/audit`, { params: this.p(page, size) });
   }
 
   // Helper: build params

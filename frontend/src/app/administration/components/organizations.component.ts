@@ -10,9 +10,9 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 @Component({
   selector: 'app-organizations', standalone: true, imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}
       <div class="page-header">
-        <div style="display:flex;align-items:center;gap:12px"><a routerLink="/administration" class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded">arrow_back</span></a><div><h1>Organisations</h1><p>Gestion des organisations partenaires</p></div></div>
+        <div style="display:flex;align-items:center;gap:12px"><a routerLink="/administration" class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded">arrow_back</span></a><div><h1>Organisations</h1><p>Gestion des organisations partenaires - pays non pris en charge par le modele actuel</p></div></div>
         <div class="page-header-actions"><button class="btn btn-primary" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Ajouter</button></div>
       </div>
       <div class="card">
@@ -25,11 +25,11 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                   <tr>
                     <td style="font-weight:600">{{ o.name }}</td>
                     <td>{{ o.country || '—' }}</td>
-                    <td>{{ o.tenantCount || 0 }}</td>
-                    <td><span class="badge badge-success">{{ o.status || 'Active' }}</span></td>
+                    <td>{{ o.tenantCount ?? 'Non fourni' }}</td>
+                    <td><span class="badge" [class.badge-success]="o.active && !o.archived" [class.badge-gray]="!o.active || o.archived">{{o.archived ? 'Archivee' : o.active ? 'Active' : 'Inactive'}}</span></td>
                     <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(o)"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(o)"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(o)" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(o)" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
                     </div></td>
                   </tr>
                 } @empty { <tr><td colspan="5" style="text-align:center;padding:48px;color:var(--n-400)">Aucune organisation</td></tr> }
@@ -39,9 +39,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
         </div>
       </div>
     </div>
+<div class="table-pagination"><button class="btn btn-secondary" [disabled]="loading() || page===0" (click)="page=page-1;load()">Precedent</button><span>Page {{page+1}} - {{total()}} resultats</span><button class="btn btn-secondary" [disabled]="loading() || (page+1)*20>=total()" (click)="page=page+1;load()">Suivant</button></div>
     <app-modal [open]="showForm()" [title]="editId() ? 'Modifier' : 'Nouvelle organisation'" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
       <div class="form-group"><label class="form-label">Nom *</label><input type="text" class="form-input" [(ngModel)]="form.name"></div>
-      <div class="form-group"><label class="form-label">Pays</label><input type="text" class="form-input" [(ngModel)]="form.country"></div>
+      <div class="form-group"><label class="form-label">Code *</label><input type="text" class="form-input" [(ngModel)]="form.code" maxlength="50"></div><div class="form-group"><label class="form-label">Pays</label><input type="text" class="form-input" [(ngModel)]="form.country" disabled placeholder="Non pris en charge par le modele actuel"></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="3" [(ngModel)]="form.description"></textarea></div>
     </app-modal>
     <app-confirm-dialog [open]="showDel()" title="Supprimer" [message]="'Supprimer « ' + (delTarget()?.name || '') + ' » ?'" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
@@ -51,13 +52,14 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 export class OrganizationsComponent implements OnInit {
   orgs = signal<any[]>([]); loading = signal(false); saving = signal(false); deleting = signal(false);
   showForm = signal(false); showDel = signal(false); editId = signal<string | null>(null); delTarget = signal<any>(null);
+  page=0; total=signal(0); error=signal('');
   form: any = {};
   constructor(private api: ApiService, private toast: ToastService) {}
   ngOnInit(): void { this.load(); }
-  load(): void { this.loading.set(true); this.api.getOrganizations().subscribe({ next: (r) => { this.orgs.set(r?.content || r || []); this.loading.set(false); }, error: () => this.loading.set(false) }); }
-  openCreate(): void { this.editId.set(null); this.form = { name: '', country: '', description: '' }; this.showForm.set(true); }
-  openEdit(o: any): void { this.editId.set(o.id); this.form = { name: o.name, country: o.country, description: o.description }; this.showForm.set(true); }
-  save(): void { if (!this.form.name) { this.toast.warning('Nom requis.'); return; } this.saving.set(true); const call = this.editId() ? this.api.updateOrganization(this.editId()!, this.form) : this.api.createOrganization(this.form); call.subscribe({ next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success('Sauvegardé.'); this.load(); }, error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }
+  load(): void { this.loading.set(true);this.error.set(''); this.api.getOrganizations(this.page,20).subscribe({ next: (r) => { this.orgs.set(r?.content || r || []);this.total.set(r?.totalElements ?? this.orgs().length); this.loading.set(false); }, error: () => {this.loading.set(false);this.error.set('Chargement refuse ou indisponible.');} }); }
+  openCreate(): void { this.editId.set(null); this.form = { name: '', code:'', country: '', description: '' }; this.showForm.set(true); }
+  openEdit(o: any): void { this.editId.set(o.id); this.form = { name: o.name, code:o.code, country: o.country, description: o.description, email:o.email,phone:o.phone,website:o.website,industry:o.industry }; this.showForm.set(true); }
+  save(): void { if (!this.form.name?.trim() || !this.form.code?.trim()) { this.toast.warning('Nom et code requis.'); return; } this.saving.set(true); const call = this.editId() ? this.api.updateOrganization(this.editId()!, this.form) : this.api.createOrganization(this.form); call.subscribe({ next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success('Sauvegardé.'); this.load(); }, error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }
   confirmDel(o: any): void { this.delTarget.set(o); this.showDel.set(true); }
   doDel(): void { this.deleting.set(true); this.api.deleteOrganization(this.delTarget()?.id).subscribe({ next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Supprimé.'); this.load(); }, error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); } }); }
 }

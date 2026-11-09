@@ -10,10 +10,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 @Component({
   selector: 'app-roles', standalone: true, imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up"><div class="api-notice" role="status">Le backend ne fournit pas encore l API administrative roles. Les modifications sont indisponibles.</div>
       <div class="page-header">
         <div style="display:flex;align-items:center;gap:12px"><a routerLink="/administration" class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded">arrow_back</span></a><div><h1>Roles et Permissions</h1><p>Configuration des roles et permissions du systeme</p></div></div>
-        <div class="page-header-actions"><button class="btn btn-primary" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Nouveau role</button></div>
+        <div class="page-header-actions"><button class="btn btn-primary" disabled title="API non disponible"><span class="material-symbols-rounded">add</span>Nouveau role</button></div>
       </div>
 
       @if (loading()) { <div style="padding:48px;text-align:center"><div class="spinner"></div></div> } @else {
@@ -26,8 +26,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                   <h3>{{ r.code || r.name }}</h3>
                 </div>
                 <div style="display:flex;gap:4px">
-                  <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(r)"><span class="material-symbols-rounded" style="font-size:16px">edit</span></button>
-                  <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(r)"><span class="material-symbols-rounded" style="font-size:16px;color:var(--red-500)">delete</span></button>
+                  <button class="btn btn-ghost btn-icon btn-sm" disabled title="API non disponible" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:16px">edit</span></button>
+                  <button class="btn btn-ghost btn-icon btn-sm" disabled title="API non disponible" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:16px;color:var(--red-500)">delete</span></button>
                 </div>
               </div>
               <div class="card-body">
@@ -52,7 +52,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
               <span class="material-symbols-rounded" style="font-size:48px;display:block;margin-bottom:12px;color:var(--n-300)">shield</span>
               <p style="font-weight:600;color:var(--n-600)">Aucun role</p>
               <p style="font-size:.8125rem;margin-bottom:16px">Creez votre premier role pour commencer.</p>
-              <button class="btn btn-primary btn-sm" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Nouveau role</button>
+              <button class="btn btn-primary btn-sm" disabled title="API non disponible"><span class="material-symbols-rounded">add</span>Nouveau role</button>
             </div>
           }
         </div>
@@ -77,7 +77,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
             <div style="margin-bottom:16px">
               <span style="font-size:.75rem;font-weight:600;color:var(--n-600);text-transform:uppercase;letter-spacing:.05em">{{ cat.name }}</span>
               <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
-                @for (perm of cat.permissions; track perm) {
+                @for (perm of cat.permissions; track $index) {
                   <label class="perm-toggle">
                     <input type="checkbox" [checked]="isSelected(perm)" (change)="togglePerm(perm)">
                     <span class="perm-badge" [class.selected]="isSelected(perm)">{{ perm }}</span>
@@ -132,7 +132,7 @@ export class RolesComponent implements OnInit {
     this.loading.set(true);
     this.api.getRoles().subscribe({
       next: (r) => { this.roles.set(Array.isArray(r) ? r : r?.content || []); this.loading.set(false); },
-      error: () => { this.loading.set(false); }
+      error: () => { this.loading.set(false); this.toast.error('API administrative indisponible ou acces refuse.'); }
     });
   }
 

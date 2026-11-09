@@ -7,11 +7,11 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     @if (open) {
-      <div class="modal-overlay" (click)="close.emit()">
-        <div class="modal-card" [style.max-width]="size" (click)="$event.stopPropagation()">
+      <div class="modal-overlay" (click)="!confirmLoading && close.emit()">
+        <div class="modal-card" role="dialog" aria-modal="true" [attr.aria-label]="title" [style.max-width]="size" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h3>{{ title }}</h3>
-            <button class="btn btn-ghost btn-icon btn-sm" (click)="close.emit()">
+            <button class="btn btn-ghost btn-icon btn-sm" aria-label="Fermer" [disabled]="confirmLoading" (click)="!confirmLoading && close.emit()">
               <span class="material-symbols-rounded">close</span>
             </button>
           </div>
@@ -20,8 +20,8 @@ import { CommonModule } from '@angular/common';
           </div>
           @if (showFooter) {
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="close.emit()">Annuler</button>
-              <button class="btn" [class]="confirmClass" (click)="confirm.emit()" [disabled]="confirmDisabled">
+              <button class="btn btn-secondary" [disabled]="confirmLoading" (click)="!confirmLoading && close.emit()">Annuler</button>
+              <button class="btn" [class]="confirmClass" (click)="!confirmLoading && !confirmDisabled && confirm.emit()" [disabled]="confirmDisabled || confirmLoading">
                 @if (confirmLoading) { <span class="spinner-sm"></span> }
                 {{ confirmText }}
               </button>

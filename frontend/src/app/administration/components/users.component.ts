@@ -18,15 +18,15 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
           <a routerLink="/administration" class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded">arrow_back</span></a>
           <div><h1>Utilisateurs</h1><p>Gestion des comptes utilisateurs</p></div>
         </div>
-        <div class="page-header-actions"><button class="btn btn-primary" (click)="openCreate()"><span class="material-symbols-rounded">person_add</span>Ajouter</button></div>
+        <div class="page-header-actions"><button class="btn btn-primary" disabled title="Creation administrative non implementee par le backend"><span class="material-symbols-rounded">person_add</span>Ajouter</button></div>
       </div>
 
-      <div class="card">
+      <p class="api-notice">La creation et les changements de role ne sont pas disponibles dans le service administratif actuel.</p>@if(error()){<div class="api-error" role="alert">{{error()}}</div>}<div class="card">
         <div class="card-header">
           <span style="font-size:.8125rem;color:var(--n-500)">{{ total() }} utilisateurs</span>
           <div style="display:flex;gap:8px">
-            <input type="text" class="form-input" style="width:200px" placeholder="Rechercher…" [(ngModel)]="search">
-            <button class="btn btn-secondary btn-sm" (click)="load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
+            <input type="text" class="form-input" style="width:200px" placeholder="Rechercher…" aria-label="Rechercher les utilisateurs" [(ngModel)]="search" (keyup.enter)="page=0; load()">
+            <button class="btn btn-secondary btn-sm" aria-label="Rechercher et actualiser" (click)="page=0; load()"><span class="material-symbols-rounded" style="font-size:16px">refresh</span></button>
           </div>
         </div>
         <div class="card-body" style="padding:0">
@@ -42,8 +42,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                     <td style="font-size:.8125rem">{{ u.tenantName || u.tenant?.name || '—' }}</td>
                     <td><div style="display:flex;align-items:center;gap:6px"><span class="dot" [class]="u.enabled !== false ? 'green' : 'gray'"></span><span style="font-size:.8125rem">{{ u.enabled !== false ? 'Actif' : 'Inactif' }}</span></div></td>
                     <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(u)"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(u)" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
                     </div></td>
                   </tr>
                 } @empty { <tr><td colspan="6" style="text-align:center;padding:48px;color:var(--n-400)">Aucun utilisateur</td></tr> }
@@ -52,17 +52,18 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
           }
         </div>
       </div>
+      <div class="table-pagination"><button class="btn btn-secondary" [disabled]="loading() || page===0" (click)="page=page-1; load()">Precedent</button><span>Page {{page+1}} - {{total()}} utilisateurs</span><button class="btn btn-secondary" [disabled]="loading() || (page+1)*20>=total()" (click)="page=page+1; load()">Suivant</button></div>
     </div>
 
     <app-modal [open]="showForm()" [title]="editId() ? 'Modifier' : 'Nouvel utilisateur'" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
         <div class="form-group"><label class="form-label">Prénom *</label><input type="text" class="form-input" [(ngModel)]="form.firstName"></div>
         <div class="form-group"><label class="form-label">Nom *</label><input type="text" class="form-input" [(ngModel)]="form.lastName"></div>
-        <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-input" [(ngModel)]="form.email"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-input" [(ngModel)]="form.email" [readOnly]="!!editId()"></div>
         <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" [(ngModel)]="form.phone"></div>
         @if (!editId()) { <div class="form-group" style="grid-column:span 2"><label class="form-label">Mot de passe *</label><input type="password" class="form-input" [(ngModel)]="form.password"></div> }
-        <div class="form-group"><label class="form-label">Rôle *</label><select class="form-input" [(ngModel)]="form.roleCode"><option value="">Sélectionner…</option>@for(r of roles();track r.code){<option [value]="r.code">{{r.code}}</option>}</select></div>
-        <div class="form-group"><label class="form-label">Tenant *</label><select class="form-input" [(ngModel)]="form.tenantId"><option value="">Sélectionner…</option>@for(t of tenants();track t.id){<option [value]="t.id">{{t.name}}</option>}</select></div>
+        <div class="form-group"><label class="form-label">Rôle *</label><select class="form-input" [(ngModel)]="form.roleCode" disabled><option value="">Sélectionner…</option>@for(r of roles();track r.code){<option [value]="r.code">{{r.code}}</option>}</select></div>
+        <div class="form-group"><label class="form-label">Tenant *</label><select class="form-input" [(ngModel)]="form.tenantId" disabled><option value="">Sélectionner…</option>@for(t of tenants();track t.id){<option [value]="t.id">{{t.name}}</option>}</select></div>
       </div>
     </app-modal>
 
@@ -83,27 +84,31 @@ export class UsersComponent implements OnInit {
   editId = signal<string | null>(null);
   delTarget = signal<any>(null);
   search = '';
+  page = 0;
+  error = signal('');
   form: any = {};
   private colors = ['#3b82f6','#8b5cf6','#f97316','#14b8a6','#ef4444','#22c55e'];
 
   constructor(private api: ApiService, private toast: ToastService) {}
-  ngOnInit(): void { this.load(); this.api.getRoles().subscribe({ next: (r) => this.roles.set(r || []), error: () => {} }); this.api.getTenants().subscribe({ next: (r) => this.tenants.set(r?.content || r || []), error: () => {} }); }
+  ngOnInit(): void { this.load(); }
 
   load(): void {
-    this.loading.set(true);
-    this.api.getUsers().subscribe({
+    this.loading.set(true); this.error.set('');
+    this.api.getUsers(this.page, 20, this.search.trim()).subscribe({
       next: (r) => { this.users.set(r?.content || r || []); this.total.set(r?.totalElements ?? this.users().length); this.loading.set(false); },
-      error: () => { this.loading.set(false); }
+      error: () => { this.loading.set(false); this.users.set([]); this.error.set('Chargement des utilisateurs refuse ou indisponible. Reessayez.'); }
     });
   }
 
   openCreate(): void { this.editId.set(null); this.form = { firstName: '', lastName: '', email: '', phone: '', password: '', roleCode: '', tenantId: '' }; this.showForm.set(true); }
-  openEdit(u: any): void { this.editId.set(u.id); this.form = { firstName: u.firstName, lastName: u.lastName, email: u.email, phone: u.phone, roleCode: u.roles?.[0] || '', tenantId: u.tenantId || u.tenant?.id || '' }; this.showForm.set(true); }
+  openEdit(u: any): void { this.tenants.set([{id:u.tenantId,name:u.tenantName}]); this.roles.set((u.roles || []).map((code:string)=>({code}))); this.editId.set(u.id); this.form = { firstName: u.firstName, lastName: u.lastName, email: u.email, phone: u.phone, roleCode: u.roles?.[0] || '', tenantId: u.tenantId || u.tenant?.id || '' }; this.showForm.set(true); }
 
   save(): void {
-    if (!this.form.firstName || !this.form.email) { this.toast.warning('Champs obligatoires manquants.'); return; }
+    if (!this.form.firstName?.trim() || !this.form.lastName?.trim() || !this.form.email || !this.form.tenantId) { this.toast.warning('Champs obligatoires manquants.'); return; }
+    if (!this.editId()) { this.toast.warning('Creation administrative indisponible.'); return; }
+    if (this.saving()) return;
     this.saving.set(true);
-    const call = this.editId() ? this.api.updateUser(this.editId()!, this.form) : this.api.createUser(this.form);
+    const call = this.editId() ? this.api.updateUser(this.editId()!, {firstName:this.form.firstName.trim(),lastName:this.form.lastName.trim(),email:this.form.email,phone:this.form.phone,tenantId:this.form.tenantId}) : this.api.createUser(this.form);
     call.subscribe({
       next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success('Utilisateur sauvegardé.'); this.load(); },
       error: (e) => { this.saving.set(false); this.toast.error(e.error?.message || 'Erreur.'); }

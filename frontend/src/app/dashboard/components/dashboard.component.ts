@@ -11,7 +11,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-dashboard', standalone: true, imports: [CommonModule, RouterLink],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}
       <div class="page-header">
         <div><h1>Tableau de bord</h1><p>Vue d'ensemble de la plateforme d'orientation universitaire</p></div>
         <div class="page-header-actions">
@@ -28,7 +28,7 @@ Chart.register(...registerables);
               <div class="stat-icon" [style.background]="k.g"><span class="material-symbols-rounded filled">{{ k.icon }}</span></div>
               <div class="stat-content">
                 <div class="stat-label">{{ k.label }}</div>
-                <div class="stat-value">{{ k.value | number }}</div>
+                <div class="stat-value">{{ k.value == null ? 'Non mesure' : (k.value | number) }}</div>
                 @if (k.change !== null) {
                   <div class="stat-change" [class.up]="k.change > 0" [class.down]="k.change < 0">
                     <span class="material-symbols-rounded">{{ k.change > 0 ? 'trending_up' : 'trending_down' }}</span>
@@ -44,19 +44,19 @@ Chart.register(...registerables);
       <div class="g2" style="margin-bottom:22px">
         <div class="card anim-fade-up">
           <div class="card-header"><h3>Évolution des recommandations</h3>
-            <div style="display:flex;gap:4px">@for(p of ['7j','30j','90j','12m'];track p){<button class="btn btn-sm" [class.btn-primary]="period()===p" [class.btn-ghost]="period()!==p" (click)="period.set(p)">{{p}}</button>}</div>
+            <div style="display:flex;gap:4px">@for(p of ['7j','30j','90j','12m'];track p){<button class="btn btn-sm" [class.btn-primary]="period()===p" [class.btn-ghost]="period()!==p" [disabled]="!chartLabels.length" (click)="updatePeriod(p)">{{p}}</button>}</div>
           </div>
-          <div class="card-body"><div class="chart-wrap"><canvas #lineCanvas></canvas></div></div>
+          <div class="card-body"><div class="chart-wrap"><canvas #lineCanvas></canvas>@if(!lineDataReco.length){<p class="api-notice">Historique non fourni par le serveur.</p>}</div></div>
         </div>
         <div class="card anim-fade-up">
-          <div class="card-header"><h3>Répartition par filière</h3></div>
-          <div class="card-body"><div class="chart-wrap"><canvas #doughnutCanvas></canvas></div></div>
+          <div class="card-header"><h3>Documents par type</h3></div>
+          <div class="card-body"><div class="chart-wrap"><canvas #doughnutCanvas></canvas>@if(!doughnutValues.length){<p class="api-notice">Repartition non fournie par le serveur.</p>}</div></div>
         </div>
       </div>
 
       <div class="g3" style="margin-bottom:22px">
         <div class="card anim-fade-up">
-          <div class="card-header"><h3>Santé du système</h3><span class="badge badge-success">Opérationnel</span></div>
+          <div class="card-header"><h3>Santé du système</h3><span class="badge badge-gray">Mesures serveur</span></div>
           <div class="card-body">
             <div style="display:flex;flex-direction:column;gap:18px">
               @for (h of health; track h.label) {
@@ -125,6 +125,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('doughnutCanvas') dc!: ElementRef<HTMLCanvasElement>;
 
   period = signal('12m');
+  error = signal('');
+  chartLabels:string[]=[];
+  chartDays:Record<string,number>={};
+  chartImports:Record<string,number>={};
   loading = signal(true);
   chartsReady = signal(false);
   dataReady = signal(false);
@@ -132,7 +136,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private c2?: Chart;
   private subs: Subscription[] = [];
 
-  kpis: { icon: string; label: string; value: number; change: number | null; g: string }[] = [];
+  kpis: { icon: string; label: string; value: number | null; change: number | null; g: string }[] = [];
   health: { icon: string; label: string; val: string; pct: number; color: string; cls: string }[] = [];
   activity: { icon: string; color: string; bg: string; text: string; time: string }[] = [];
   topPrograms: { r: number; name: string; s: number; c: string }[] = [];
@@ -144,10 +148,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   // Chart data from API (or fallback)
-  private lineDataReco: number[] = [];
+  lineDataReco: number[] = [];
   private lineDataCand: number[] = [];
   private doughnutLabels: string[] = [];
-  private doughnutValues: number[] = [];
+  doughnutValues: number[] = [];
 
   constructor(
     private api: ApiService,
@@ -179,6 +183,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadData(): void {
+    this.error.set('');
+    this.chartDays={};this.chartImports={};this.chartLabels=[];this.lineDataReco=[];this.doughnutValues=[];
+    this.c1?.destroy();this.c1=undefined;this.c2?.destroy();this.c2=undefined;this.dataReady.set(false);
     this.loading.set(true);
 
     // Always build charts with fallback first, then update with API data
@@ -194,24 +201,19 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: () => {
         this.loading.set(false);
-        this.dataReady.set(true);
-        this.tryBuildCharts();
+        this.error.set('Tableau de bord indisponible ou acces refuse.');
+        this.dataReady.set(false);
       }
     });
 
-    // Load chart data
-    this.api.getAnalytics().subscribe({
-      next: (data) => {
-        if (data?.monthlyReco) this.lineDataReco = data.monthlyReco;
-        if (data?.monthlyCandidates) this.lineDataCand = data.monthlyCandidates;
-        if (data?.distribution) {
-          this.doughnutLabels = data.distribution.map((d: any) => d.label || d.name);
-          this.doughnutValues = data.distribution.map((d: any) => d.value || d.count);
-        }
-        this.tryBuildCharts();
-      },
-      error: () => {}
-    });
+  }
+  updatePeriod(value:string):void {
+    this.period.set(value);
+    const days=value==='7j'?7:value==='30j'?30:value==='90j'?90:365;
+    this.chartLabels=Object.keys(this.chartDays).sort().slice(-days);
+    this.lineDataReco=this.chartLabels.map(d=>this.chartDays[d]);
+    this.lineDataCand=Object.keys(this.chartImports).length?this.chartLabels.map(d=>this.chartImports[d] ?? 0):[];
+    this.tryBuildCharts();
   }
 
   private tryBuildCharts(): void {
@@ -227,18 +229,18 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private applyData(data: any): void {
     const k = data?.kpis || data || {};
     this.kpis = [
-      { icon: 'group', label: 'Candidats inscrits', value: k.totalCandidates ?? k.candidates ?? 0, change: k.candidatesChange ?? null, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
-      { icon: 'recommend', label: 'Recommandations', value: k.totalRecommendations ?? k.recommendations ?? 0, change: k.recommendationsChange ?? null, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
-      { icon: 'description', label: 'Documents traités', value: k.totalDocumentsOcr ?? k.documents ?? 0, change: k.documentsChange ?? null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
-      { icon: 'school', label: 'Universités', value: k.totalUniversities ?? k.universities ?? 0, change: k.universitiesChange ?? null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
+      { icon: 'group', label: 'Candidats inscrits', value: k.totalCandidates ?? null, change: k.candidatesChange ?? null, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
+      { icon: 'recommend', label: 'Recommandations', value: k.totalRecommendations ?? null, change: k.recommendationsChange ?? null, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
+      { icon: 'description', label: 'Documents traités', value: k.totalDocumentsOcr ?? null, change: k.documentsChange ?? null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
+      { icon: 'school', label: 'Universités', value: k.totalUniversities ?? null, change: k.universitiesChange ?? null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
     ];
 
     const h = data?.systemHealth || {};
     this.health = [
-      { icon: 'memory', label: 'Processeur', val: `${h.cpuUsage ?? 34}%`, pct: h.cpuUsage ?? 34, color: '#3b82f6', cls: 'blue' },
-      { icon: 'storage', label: 'Mémoire', val: `${h.memoryUsage ?? 52}%`, pct: h.memoryUsage ?? 52, color: '#8b5cf6', cls: 'violet' },
-      { icon: 'hard_drive_2', label: 'Disque', val: `${h.diskUsage ?? 45}%`, pct: h.diskUsage ?? 45, color: '#14b8a6', cls: 'teal' },
-      { icon: 'dns', label: 'Connexions DB', val: `${h.activeThreads ?? 12}`, pct: Math.min(100, (h.activeThreads ?? 12)), color: '#22c55e', cls: 'green' },
+      { icon: 'memory', label: 'Processeur', val: h.cpuUsage==null?'Non mesure':`${h.cpuUsage}%`, pct: h.cpuUsage ?? 0, color: '#3b82f6', cls: 'blue' },
+      { icon: 'storage', label: 'Mémoire', val: h.memoryUsage==null?'Non mesure':`${h.memoryUsage}%`, pct: h.memoryUsage ?? 0, color: '#8b5cf6', cls: 'violet' },
+      { icon: 'hard_drive_2', label: 'Disque', val: 'Non mesure', pct: 0, color: '#14b8a6', cls: 'teal' },
+      { icon: 'dns', label: 'Connexions DB', val: h.databaseConnections==null?'Non mesure':`${h.databaseConnections}`, pct: Math.min(100, (h.databaseConnections ?? 0)), color: '#22c55e', cls: 'green' },
     ];
 
     const acts = data?.recentActivities || data?.activities || [];
@@ -252,14 +254,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.topPrograms = (Array.isArray(progs) ? progs : []).slice(0, 5).map((p: any, i: number) => ({
       r: i + 1, name: p.name || p.programName || '', s: p.score ?? p.percentage ?? 0, c: colors[i] || 'blue'
     }));
+    this.chartDays=data?.charts?.recommendationsByDay || {};
+    this.chartImports=data?.charts?.importsByDay || {};
+    const types=data?.charts?.documentsByType || {};
+    this.doughnutLabels=Object.keys(types);this.doughnutValues=Object.values(types);
+    this.updatePeriod(this.period());
   }
 
+    // ChartData exposes dated maps, not a fictitious monthly analytics series.
   private applyFallback(): void {
     this.kpis = [
-      { icon: 'group', label: 'Candidats inscrits', value: 0, change: null, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
-      { icon: 'recommend', label: 'Recommandations', value: 0, change: null, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
-      { icon: 'description', label: 'Documents traites', value: 0, change: null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
-      { icon: 'school', label: 'Universites', value: 0, change: null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
+      { icon: 'group', label: 'Candidats inscrits', value: null, change: null, g: 'linear-gradient(135deg,#3b82f6,#1d4ed8)' },
+      { icon: 'recommend', label: 'Recommandations', value: null, change: null, g: 'linear-gradient(135deg,#22c55e,#15803d)' },
+      { icon: 'description', label: 'Documents traites', value: null, change: null, g: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
+      { icon: 'school', label: 'Universites', value: null, change: null, g: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
     ];
     this.health = [
       { icon: 'memory', label: 'Processeur', val: '-', pct: 0, color: '#3b82f6', cls: 'blue' },
@@ -271,6 +279,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private buildLineChart(): void {
+    if(!this.lineDataReco.length)return;
     if (!this.lc?.nativeElement) return;
     const ctx = this.lc.nativeElement.getContext('2d');
     if (!ctx) return;
@@ -278,7 +287,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.c1 = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+        labels: this.chartLabels,
         datasets: [
           {
             label: 'Recommandations',
@@ -293,7 +302,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             borderWidth: 2.5,
           },
           {
-            label: 'Candidats',
+            label: 'Imports',
             data: this.lineDataCand,
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139,92,246,.06)',
@@ -323,6 +332,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private buildDoughnutChart(): void {
+    if(!this.doughnutValues.length)return;
     if (!this.dc?.nativeElement) return;
     const ctx = this.dc.nativeElement.getContext('2d');
     if (!ctx) return;

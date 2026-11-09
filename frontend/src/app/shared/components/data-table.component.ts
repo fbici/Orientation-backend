@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -23,7 +23,7 @@ export interface TableColumn {
             @if (searchable) {
               <div style="position:relative">
                 <span class="material-symbols-rounded" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--n-400)">search</span>
-                <input type="text" class="form-input" style="padding-left:36px;width:220px" placeholder="Rechercher…" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()">
+                <input type="text" class="form-input" style="padding-left:36px;width:min(220px,100%)" aria-label="Rechercher dans les lignes chargees" placeholder="Rechercher…" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()">
               </div>
             }
             <ng-content select="[toolbar]"></ng-content>
@@ -35,7 +35,7 @@ export interface TableColumn {
           <thead>
             <tr>
               @for (col of columns; track col.key) {
-                <th [style.width]="col.width" [style.text-align]="col.align || 'left'" (click)="col.sortable && onSort(col.key)" [class.sortable]="col.sortable">
+                <th [style.width]="col.width" [style.text-align]="col.align || 'left'" (click)="col.sortable && onSort(col.key)" [class.sortable]="col.sortable" [attr.tabindex]="col.sortable ? 0 : null" (keydown.enter)="col.sortable && onSort(col.key)" (keydown.space)="$event.preventDefault(); col.sortable && onSort(col.key)" [attr.aria-sort]="sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">
                   <div style="display:flex;align-items:center;gap:4px">
                     {{ col.label }}
                     @if (col.sortable) {
@@ -54,7 +54,7 @@ export interface TableColumn {
               @for (i of skeletonRows; track i) {
                 <tr>@for (col of columns; track col.key) { <td><div class="skeleton" style="height:14px;width:80%"></div></td> } @if (actions) { <td><div class="skeleton" style="height:14px;width:60px;float:right"></div></td> }</tr>
               }
-            } @else if (data.length === 0) {
+            } @else if (filteredData.length === 0) {
               <tr><td [attr.colspan]="columns.length + (actions ? 1 : 0)" style="text-align:center;padding:48px;color:var(--n-400)">
                 <span class="material-symbols-rounded" style="font-size:48px;display:block;margin-bottom:12px;color:var(--n-300)">{{ emptyIcon }}</span>
                 <p style="font-weight:600;color:var(--n-600);margin-bottom:4px">{{ emptyTitle }}</p>
@@ -72,11 +72,11 @@ export interface TableColumn {
         <div class="table-pagination">
           <span style="font-size:.8125rem;color:var(--n-500)">{{ totalElements }} résultats</span>
           <div style="display:flex;gap:4px">
-            <button class="btn btn-ghost btn-sm btn-icon" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)"><span class="material-symbols-rounded" style="font-size:18px">chevron_left</span></button>
+            <button class="btn btn-ghost btn-sm btn-icon" aria-label="Page precedente" [disabled]="loading || currentPage === 0" (click)="goToPage(currentPage - 1)"><span class="material-symbols-rounded" style="font-size:18px">chevron_left</span></button>
             @for (p of pages; track p) {
-              <button class="btn btn-sm" [class.btn-primary]="p === currentPage" [class.btn-ghost]="p !== currentPage" (click)="goToPage(p)">{{ p + 1 }}</button>
+              <button class="btn btn-sm" [class.btn-primary]="p === currentPage" [class.btn-ghost]="p !== currentPage" [disabled]="loading" (click)="goToPage(p)">{{ p + 1 }}</button>
             }
-            <button class="btn btn-ghost btn-sm btn-icon" [disabled]="currentPage >= totalPages - 1" (click)="goToPage(currentPage + 1)"><span class="material-symbols-rounded" style="font-size:18px">chevron_right</span></button>
+            <button class="btn btn-ghost btn-sm btn-icon" aria-label="Page suivante" [disabled]="loading || currentPage >= totalPages - 1" (click)="goToPage(currentPage + 1)"><span class="material-symbols-rounded" style="font-size:18px">chevron_right</span></button>
           </div>
         </div>
       }
@@ -124,14 +124,14 @@ export class DataTableComponent {
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
       result = result.filter(row =>
-        this.columns.some(col => String(row[col.key] || '').toLowerCase().includes(q))
+        this.columns.some(col => String(row[col.key] ?? '').toLowerCase().includes(q))
       );
     }
     if (this.sortKey) {
       result.sort((a, b) => {
-        const va = a[this.sortKey] || '';
-        const vb = b[this.sortKey] || '';
-        const cmp = String(va).localeCompare(String(vb));
+        const va = a[this.sortKey] ?? '';
+        const vb = b[this.sortKey] ?? '';
+        const cmp = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb), 'fr', {numeric: true, sensitivity: 'base'});
         return this.sortDir === 'asc' ? cmp : -cmp;
       });
     }
@@ -165,6 +165,7 @@ export class DataTableComponent {
   }
 
   goToPage(page: number): void {
+    if (this.loading || page < 0 || page >= this.totalPages) return;
     this.currentPage = page;
     this.pageChange.emit(page);
   }

@@ -1,6 +1,7 @@
 package com.orientation.orientationapp.modules.admin.controller;
 
 import com.orientation.orientationapp.modules.admin.dto.request.CreateUserRequest;
+import com.orientation.orientationapp.modules.admin.dto.request.UpdateUserRequest;
 import com.orientation.orientationapp.modules.admin.dto.response.MessageResponse;
 import com.orientation.orientationapp.modules.admin.dto.response.UserResponse;
 import com.orientation.orientationapp.modules.admin.service.UserAdminService;
@@ -29,7 +30,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
         return ResponseEntity.ok(userAdminService.update(id, request));
     }
 

@@ -10,10 +10,10 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}<p class="api-notice">Apercu des premiers utilisateurs. La gestion complete et la recherche paginee sont dans Utilisateurs.</p>
       <div class="page-header">
         <div><h1>Administration</h1><p>Gestion des utilisateurs, rôles, organisations et équipes</p></div>
-        <div class="page-header-actions"><button class="btn btn-primary"><span class="material-symbols-rounded">person_add</span>Ajouter un utilisateur</button></div>
+        <div class="page-header-actions"><button class="btn btn-primary" routerLink="/administration/users"><span class="material-symbols-rounded">person_add</span>Ajouter un utilisateur</button></div>
       </div>
       <div class="tabs">
         @for (tab of tabs; track tab.route) {
@@ -59,7 +59,7 @@ import { AuthService } from '../../core/services/auth.service';
                     <td><span class="badge" [class]="roleClass(u)">{{ u.roles?.[0] || 'N/A' }}</span></td>
                     <td style="font-size:.8125rem">{{ u.tenantName || u.tenantId || '—' }}</td>
                     <td><div style="display:flex;align-items:center;gap:6px"><span class="dot" [class]="u.enabled !== false ? 'green' : 'gray'"></span><span style="font-size:.8125rem;color:var(--n-600)">{{ u.enabled !== false ? 'Actif' : 'Inactif' }}</span></div></td>
-                    <td><button class="btn btn-ghost btn-icon btn-sm"><span class="material-symbols-rounded" style="font-size:18px">more_vert</span></button></td>
+                    <td><a class="btn btn-ghost btn-icon btn-sm" routerLink="/administration/users" aria-label="Gerer les utilisateurs"><span class="material-symbols-rounded" style="font-size:18px">manage_accounts</span></a></td>
                   </tr>
                 } @empty {
                   <tr><td colspan="6" style="text-align:center;padding:48px;color:var(--n-400)">Aucun utilisateur trouvé</td></tr>
@@ -90,6 +90,7 @@ export class AdministrationComponent implements OnInit {
     { icon: 'corporate_fare', label: 'Départements', route: '/administration/departments' },
   ];
 
+  error = signal('');
   filter = '';
   loading = signal(false);
   users = signal<any[]>([]);
@@ -115,11 +116,11 @@ export class AdministrationComponent implements OnInit {
         this.totalUsers.set(res?.totalElements ?? this.users().length);
         this.loading.set(false);
       },
-      error: () => { this.loading.set(false); }
+      error: () => { this.loading.set(false); this.error.set('Utilisateurs indisponibles ou acces refuse.'); }
     });
-    this.api.getRoles().subscribe({ next: (res) => { this.roles.set(Array.isArray(res) ? res : res?.content || []); }, error: () => {} });
-    this.api.getOrganizations().subscribe({ next: (res) => { this.orgs.set(Array.isArray(res) ? res : res?.content || []); }, error: () => {} });
-    this.api.getTenants().subscribe({ next: (res) => { this.tenants.set(Array.isArray(res) ? res : res?.content || []); }, error: () => {} });
+    this.api.getRoles().subscribe({ next: (res) => { this.roles.set(Array.isArray(res) ? res : res?.content || []); }, error: () => this.error.set('Certaines donnees administratives sont indisponibles ; consultez les pages detaillees.') });
+    this.api.getOrganizations().subscribe({ next: (res) => { this.orgs.set(Array.isArray(res) ? res : res?.content || []); }, error: () => this.error.set('Certaines donnees administratives sont indisponibles ; consultez les pages detaillees.') });
+    this.api.getTenants().subscribe({ next: (res) => { this.tenants.set(Array.isArray(res) ? res : res?.content || []); }, error: () => this.error.set('Certaines donnees administratives sont indisponibles ; consultez les pages detaillees.') });
   }
 
   filteredUsers(): any[] {

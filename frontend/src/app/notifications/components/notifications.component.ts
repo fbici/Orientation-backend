@@ -7,12 +7,12 @@ import { NotificationService } from '../../core/services/notification.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="anim-fade-up">
+    <div class="anim-fade-up">@if(notifSvc.error()){<div class="api-error" role="alert">{{notifSvc.error()}} <button class="btn btn-secondary" (click)="notifSvc.load(notifSvc.page())">Reessayer</button></div>}
       <div class="page-header">
         <div><h1>Notifications</h1><p>Centre de notifications et alertes système</p></div>
         <div class="page-header-actions">
           @if (notifSvc.unreadCount() > 0) {
-            <button class="btn btn-secondary" (click)="markAllRead()"><span class="material-symbols-rounded">done_all</span>Tout marquer comme lu</button>
+            <button class="btn btn-secondary" [disabled]="notifSvc.busy() || notifSvc.loading()" (click)="markAllRead()"><span class="material-symbols-rounded">done_all</span>Tout marquer comme lu</button>
           }
         </div>
       </div>
@@ -27,13 +27,13 @@ import { NotificationService } from '../../core/services/notification.service';
           </div>
         </div>
         <div class="card-body" style="padding:0">
-          @if (loading()) {
+          @if (notifSvc.loading()) {
             <div style="padding:48px;text-align:center"><div class="spinner-lg"></div></div>
           } @else {
             @for (n of displayed(); track n.id) {
               <div [style.background]="n.read ? 'transparent' : 'var(--brand-50)'"
                    style="display:flex;align-items:flex-start;gap:14px;padding:16px 24px;border-bottom:1px solid var(--n-100);cursor:pointer;transition:background var(--dur-fast)"
-                   (click)="read(n.id)">
+                   role="button" tabindex="0" (keydown.enter)="read(n.id)" (click)="read(n.id)">
                 <div style="width:8px;display:flex;align-items:flex-start;padding-top:6px">
                   @if (!n.read) { <div style="width:8px;height:8px;border-radius:50%;background:var(--brand)"></div> }
                 </div>
@@ -54,7 +54,7 @@ import { NotificationService } from '../../core/services/notification.service';
           }
         </div>
       </div>
-    </div>
+    <div class="table-pagination"><button class="btn btn-secondary" [disabled]="notifSvc.loading() || notifSvc.page()===0" (click)="notifSvc.load(notifSvc.page()-1)">Precedent</button><span>Page {{notifSvc.page()+1}} - {{notifSvc.total()}} notifications</span><button class="btn btn-secondary" [disabled]="notifSvc.loading() || (notifSvc.page()+1)*20>=notifSvc.total()" (click)="notifSvc.load(notifSvc.page()+1)">Suivant</button></div></div>
   `,
   styles: [`
     :host{display:block}
@@ -69,10 +69,7 @@ export class NotificationsComponent implements OnInit {
   constructor(public notifSvc: NotificationService) {}
 
   ngOnInit(): void {
-    this.loading.set(true);
     this.notifSvc.load();
-    // Simulate loading end
-    setTimeout(() => this.loading.set(false), 500);
   }
 
   displayed(): any[] {
@@ -82,10 +79,10 @@ export class NotificationsComponent implements OnInit {
   }
 
   read(id: string): void {
-    this.notifSvc.markAsRead(id).subscribe();
+    if(this.notifSvc.busy())return;this.notifSvc.markAsRead(id).subscribe({error:()=>{}});
   }
 
   markAllRead(): void {
-    this.notifSvc.markAllAsRead().subscribe();
+    if(this.notifSvc.busy())return;this.notifSvc.markAllAsRead().subscribe({error:()=>{}});
   }
 }

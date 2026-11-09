@@ -22,7 +22,7 @@ public class MonitoringResponse {
     @AllArgsConstructor
     @Builder
     public static class SystemMetrics {
-        private double cpuUsage;
+        private Double cpuUsage;
         private double memoryUsage;
         private long heapUsed;
         private long heapMax;
@@ -38,10 +38,10 @@ public class MonitoringResponse {
     @AllArgsConstructor
     @Builder
     public static class ApplicationMetrics {
-        private long totalApiCalls;
-        private double averageResponseTime;
-        private long errorCount;
-        private long activeSessions;
+        private Long totalApiCalls;
+        private Double averageResponseTime;
+        private Long errorCount;
+        private Long activeSessions;
         private Map<String, Long> endpointCalls;
     }
 
@@ -54,6 +54,6 @@ public class MonitoringResponse {
         private String name;
         private String status;
         private String message;
-        private long responseTimeMs;
+        private Long responseTimeMs;
     }
 }
