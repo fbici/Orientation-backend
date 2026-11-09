@@ -27,8 +27,8 @@ interface NavSection {
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <div class="brand-mark"><span class="material-symbols-rounded filled">school</span></div>
-          @if (!collapsed()) { <div class="brand-text"><span class="brand-name">Orientation</span><span class="brand-sub">Administration</span></div> }
+          <div class="brand-mark"><img src="assets/brand/orientia.png" alt="Orientia" width="34" height="34"></div>
+          @if (!collapsed()) { <div class="brand-text"><span class="brand-name">Orientia</span><span class="brand-sub">Administration</span></div> }
         </div>
         <nav class="sidebar-nav">
           @for (sec of sections(); track sec.title) {
@@ -146,7 +146,7 @@ interface NavSection {
     .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     .sidebar-brand{display:flex;align-items:center;gap:12px;padding:20px 20px 24px;border-bottom:1px solid hsla(0,0%,100%,.06)}
     .brand-mark{width:34px;height:34px;background:var(--brand);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .brand-mark .material-symbols-rounded{font-size:20px;color:#fff}
+    .brand-mark img{width:34px;height:34px;object-fit:contain;border-radius:var(--radius-md)}
     .brand-text{display:flex;flex-direction:column;overflow:hidden}
     .brand-name{font-size:.9375rem;font-weight:800;color:#fff;letter-spacing:-.02em;white-space:nowrap}
     .brand-sub{font-size:.625rem;color:var(--n-500);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
