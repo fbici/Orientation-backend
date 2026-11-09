@@ -1,6 +1,6 @@
 # Connexion Google — conception et configuration restantes
 
-9 novembre 2026. Le propriétaire confirme qu'aucun client OAuth Google n'est configuré.
+9 novembre 2026. Le propriétaire a fourni un client Android et confirmé son type. Aucun client Application Web n'est encore fourni ; voir IDENTITE_CONTACTS_OAUTH.md pour l'identifiant Android.
 **Aucun flux Google opérationnel n'est livré ou annoncé.** Le bouton Angular est désactivé,
 avec un message explicite. Aucune bibliothèque externe ni faux endpoint Google ajouté.
 

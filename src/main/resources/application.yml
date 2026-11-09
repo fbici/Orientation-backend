@@ -97,6 +97,9 @@ app:
   password-reset-url: ${PASSWORD_RESET_URL:}
 
   # SendGrid Email Service
+  notifications:
+    admin-email: ${ADMIN_NOTIFICATION_EMAIL:adminorientia@gmail.com}
+    admin-email-enabled: ${ADMIN_NOTIFICATIONS_EMAIL_ENABLED:true}
   sendgrid:
     api-key: ${SENDGRID_API_KEY:}
     from-email: ${SENDGRID_FROM_EMAIL:noreply@orientia.com}

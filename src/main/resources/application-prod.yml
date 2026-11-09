@@ -66,6 +66,9 @@ app:
     languages: ${OCR_LANGUAGES:fra+eng}
     tessdata-dir: ${TESSDATA_DIR:}
     timeout-seconds: ${OCR_TIMEOUT_SECONDS:45}
+  notifications:
+    admin-email: ${ADMIN_NOTIFICATION_EMAIL:adminorientia@gmail.com}
+    admin-email-enabled: ${ADMIN_NOTIFICATIONS_EMAIL_ENABLED:true}
   sendgrid:
     api-key: ${SENDGRID_API_KEY:}
     from-email: ${SENDGRID_FROM_EMAIL:}

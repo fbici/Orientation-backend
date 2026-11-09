@@ -51,6 +51,9 @@ public class EmailService {
         send(email,"Reset your password",(resetUrl.isBlank()?baseUrl+"/auth/reset-password":resetUrl)+"?token="+token);
     }
     public void sendWelcomeEmail(String email,String name) { send(email,"Welcome",baseUrl); }
+    public void sendAdministrativeNotification(String recipient,String message) {
+        send(recipient,"Orientia — notification administrative",message);
+    }
     private void send(String to,String subject,String url) {
         requireConfigured();
         try {

@@ -19,6 +19,7 @@ import java.util.UUID;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final org.springframework.context.ApplicationEventPublisher events;
     private final com.orientation.orientationapp.security.service.ResourceAccess access;
 
     @Override
@@ -32,7 +33,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .read(false)
                 .createdAt(Instant.now())
                 .build();
-        return notificationRepository.save(notification);
+        Notification saved = notificationRepository.save(notification);
+        events.publishEvent(new com.orientation.orientationapp.backoffice.notification_center.service.AdministrativeNotificationCreated(saved.getId(), userId));
+        return saved;
     }
 
     @Override
