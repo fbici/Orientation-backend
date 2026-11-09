@@ -92,7 +92,7 @@ describe('F1 secure authentication contracts', () => {
     const page = new ForgotPasswordComponent(auth); page.email = 'user@example.test'; page.onSubmit();
     requests.expectOne('/api/v1/auth/forgot-password').flush({ message: 'Delivery unavailable' },
       { status: 503, statusText: 'Unavailable' });
-    expect(page.sent()).toBeFalse(); expect(page.error()).toBe('Delivery unavailable');
+    expect(page.sent()).toBeFalse(); expect(page.error()).toContain('momentanément indisponible');
   });
   it('does not restore a session when refresh completes after logout', () => {
     login(); auth.refreshToken().subscribe(); const pending = requests.expectOne('/api/v1/auth/refresh');

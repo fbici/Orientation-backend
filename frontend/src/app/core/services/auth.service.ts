@@ -106,6 +106,12 @@ export class AuthService {
     return this.http.put(`${this.API_URL}/me/password`, { currentPassword: oldPassword, newPassword })
       .pipe(tap(() => this.endSession()));
   }
+  register(data: {firstName:string;lastName:string;email:string;password:string}): Observable<any> {
+    return this.http.post(`${this.API_URL}/register`, data);
+  }
+  verifyEmail(token:string): Observable<any> {
+    return this.http.get(`${this.API_URL}/verify`, {params:{token}});
+  }
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${this.API_URL}/forgot-password`, { email });
   }

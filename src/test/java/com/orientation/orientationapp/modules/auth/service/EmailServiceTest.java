@@ -59,7 +59,7 @@ class EmailServiceTest {
         assertEquals("Bearer synthetic-mail-test-only",request.getValue().headers().firstValue("Authorization").orElseThrow());
         var json=new ObjectMapper().readTree(body(request.getValue()));
         assertEquals("sender@example.invalid",json.path("from").path("email").asText());
-        assertTrue(json.path("content").get(0).path("value").asText().contains("https://links.example.invalid/auth/verify?token=private-account-token"));
+        assertTrue(json.path("content").get(0).path("value").asText().contains("https://links.example.invalid/auth/verify-email?token=private-account-token"));
     }
     @Test void resetUsesConfiguredPage() throws Exception {
         respond(202);ReflectionTestUtils.setField(service,"resetUrl","https://links.example.invalid/auth/reset-password");

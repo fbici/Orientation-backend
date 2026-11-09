@@ -45,7 +45,7 @@ public class EmailService {
         } catch(IllegalArgumentException | NullPointerException ex) { return false; }
     }
     public void sendVerificationEmail(String email,String name,String token) {
-        send(email,"Verify your email",baseUrl+"/auth/verify?token="+token);
+        send(email,"Verify your email",baseUrl+"/auth/verify-email?token="+token);
     }
     public void sendPasswordResetEmail(String email,String name,String token) {
         send(email,"Reset your password",(resetUrl.isBlank()?baseUrl+"/auth/reset-password":resetUrl)+"?token="+token);

@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/forgot-password").permitAll()
                 .requestMatchers("/auth/reset-password").permitAll()
                 .requestMatchers("/auth/verify").permitAll()
+                .requestMatchers(HttpMethod.GET, "/auth/verify-email").permitAll()
                 .requestMatchers("/locations/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
