@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -6,7 +7,7 @@ import { ApiService } from "../../core/services/api.service";
 @Component({
   selector: "app-imports",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginationComponent,CommonModule, FormsModule, RouterLink],
   template: `<div class="anim-fade-up">
     <div class="page-header">
       <div>
@@ -102,22 +103,7 @@ import { ApiService } from "../../core/services/api.service";
         </tbody>
       </table>
     </div>
-    <div class="page-header-actions">
-      <button
-        class="btn btn-secondary"
-        [disabled]="page === 0"
-        (click)="page = page - 1; load()"
-      >
-        Précédent</button
-      ><span>{{ total }} imports</span
-      ><button
-        class="btn btn-secondary"
-        [disabled]="(page + 1) * 20 >= total"
-        (click)="page = page + 1; load()"
-      >
-        Suivant</button
-      ><button class="btn btn-ghost" (click)="load()">Actualiser</button>
-    </div>
+    <app-pagination [page]="page" [total]="total" [loading]="busy()" (pageChange)="page=$event;load()" />
   </div>`,
 })
 export class ImportsComponent implements OnInit {

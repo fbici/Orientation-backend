@@ -37,11 +37,13 @@ public class EmailService {
     @Value("${app.brevo.from-email:}") private String fromEmail;
     @Value("${app.brevo.sender-name:Orientia}") private String senderName;
     @Value("${app.base-url:}") private String baseUrl;
+    @Value("${app.email-logo-url:"+EmailTemplateRenderer.DEFAULT_LOGO_URL+"}")
+    private String logoUrl=EmailTemplateRenderer.DEFAULT_LOGO_URL;
     @Value("${app.password-reset-url:}") private String resetUrl;
     public void requireConfigured() {
         if(!enabled || apiKey==null || apiKey.isBlank() || !safeApiKeyHeader(apiKey) || fromEmail==null
                 || !fromEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
-                || !validUrl(baseUrl) || (resetUrl!=null && !resetUrl.isBlank() && !validUrl(resetUrl))) {
+                || !validUrl(logoUrl) || !logoUrl.startsWith("https://") || !validUrl(baseUrl) || (resetUrl!=null && !resetUrl.isBlank() && !validUrl(resetUrl))) {
             log.warn("Transactional email unavailable: configuration incomplete or disabled");
             throw unavailable();
         }
@@ -64,6 +66,11 @@ public class EmailService {
             "Vérifier mon adresse",baseUrl+"/auth/verify-email?token="+encodeToken(token),
             "Ce lien est valable 24 heures et ne peut être utilisé qu’une fois. Si vous n’avez pas créé ce compte, ignorez cet e-mail.");
     }
+    public void sendVerificationCode(String to,String name,String code) {
+        requireConfigured();
+        String html=EmailTemplateRenderer.verificationCode(baseUrl,name,code,logoUrl);
+        sendHtml(to,"Votre code de vérification Orientia",html);
+    }
     public void sendPasswordResetEmail(String email,String name,String token) {
         requireConfigured();
         send(email,"Un nouveau départ, en toute sécurité",name,
@@ -84,12 +91,16 @@ public class EmailService {
     }
     private void send(String to,String subject,String name,String message,String action,String url,String notice) {
         requireConfigured();
+        sendHtml(to,subject,EmailTemplateRenderer.render(baseUrl,subject,name,message,action,url,notice,logoUrl));
+    }
+    private void sendHtml(String to,String subject,String html) {
+        requireConfigured();
         try {
             Map<String,String> sender=new LinkedHashMap<>();
             sender.put("email",fromEmail);
             if(senderName!=null && !senderName.isBlank()) sender.put("name",senderName.strip());
             String body=json.writeValueAsString(Map.of("sender",sender,"to",List.of(Map.of("email",to)),
-                "subject",subject,"htmlContent",EmailTemplateRenderer.render(baseUrl,subject,name,message,action,url,notice)));
+                "subject",subject,"htmlContent",html));
             var request=HttpRequest.newBuilder(URI.create("https://api.brevo.com/v3/smtp/email"))
                 .timeout(Duration.ofSeconds(15)).header("api-key",apiKey)
                 .header("Accept","application/json").header("Content-Type","application/json")

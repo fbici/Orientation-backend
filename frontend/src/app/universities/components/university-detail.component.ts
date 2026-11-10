@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, RouterLink } from "@angular/router";
@@ -5,7 +6,7 @@ import { ApiService } from "../../core/services/api.service";
 @Component({
   selector: "app-university-detail",
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [PaginationComponent,CommonModule, RouterLink],
   template: `<div class="anim-fade-up">
     <a routerLink="/universities" class="btn btn-secondary">Universités</a>
     @if (error()) {
@@ -51,21 +52,7 @@ import { ApiService } from "../../core/services/api.service";
         } @empty {
           <p>Aucun campus enregistré.</p>
         }
-        <div class="page-header-actions">
-          <button
-            class="btn btn-secondary"
-            [disabled]="page === 0"
-            (click)="page = page - 1; loadCampuses()"
-          >
-            Précédent</button
-          ><button
-            class="btn btn-secondary"
-            [disabled]="(page + 1) * 20 >= total"
-            (click)="page = page + 1; loadCampuses()"
-          >
-            Suivant</button
-          ><a routerLink="/campuses">Gérer les campus</a>
-        </div>
+        <app-pagination [page]="page" [total]="total" [loading]="loading()" (pageChange)="page=$event;loadCampuses()" />
       </section>
       <section class="card card-body" style="margin-top:20px">
         <h2>Sources publiées</h2>

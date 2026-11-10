@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../shared/components/pagination.component';
 import { Component, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
@@ -6,7 +7,7 @@ import { ApiService } from "../core/services/api.service";
 @Component({
   selector: "app-guides",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [PaginationComponent,CommonModule, FormsModule, RouterLink],
   template: `<div class="anim-fade-up">
     <div class="page-header">
       <div>
@@ -82,22 +83,7 @@ import { ApiService } from "../core/services/api.service";
         </div>
       }
     }
-    <div class="page-header-actions">
-      <button
-        class="btn btn-secondary"
-        [disabled]="page === 0"
-        (click)="page = page - 1; load()"
-      >
-        Précédent</button
-      ><span>{{ total }} guides</span
-      ><button
-        class="btn btn-secondary"
-        [disabled]="(page + 1) * 20 >= total"
-        (click)="page = page + 1; load()"
-      >
-        Suivant
-      </button>
-    </div>
+    <app-pagination [page]="page" [total]="total" [loading]="loading()" (pageChange)="page=$event;load()" />
   </div>`,
 })
 export class GuidesComponent implements OnInit {

@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
+  imports: [PaginationComponent,CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
     <div class="anim-fade-up">
       <div class="page-header">
@@ -52,7 +53,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
           }
         </div>
       </div>
-      <div class="table-pagination"><button class="btn btn-secondary" [disabled]="loading() || page===0" (click)="page=page-1; load()">Precedent</button><span>Page {{page+1}} - {{total()}} utilisateurs</span><button class="btn btn-secondary" [disabled]="loading() || (page+1)*20>=total()" (click)="page=page+1; load()">Suivant</button></div>
+      <app-pagination [page]="page" [total]="total()" [loading]="loading()" (pageChange)="page=$event;load()" />
     </div>
 
     <app-modal [open]="showForm()" [title]="editId() ? 'Modifier' : 'Nouvel utilisateur'" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">

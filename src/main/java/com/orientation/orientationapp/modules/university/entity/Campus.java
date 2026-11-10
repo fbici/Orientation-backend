@@ -28,8 +28,8 @@ public class Campus extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "city_id", nullable = false, foreignKey = @ForeignKey(name = "fk_campus_city"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id", foreignKey = @ForeignKey(name = "fk_campus_city"))
     private City city;
 
     @Column(length = 500)

@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterLink, Router } from "@angular/router";
@@ -5,7 +6,7 @@ import { ApiService } from "../../core/services/api.service";
 @Component({
   selector: "app-documents",
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [PaginationComponent,CommonModule, RouterLink],
   template: ` <div class="anim-fade-up">
     <div class="page-header">
       <div>
@@ -76,22 +77,7 @@ import { ApiService } from "../../core/services/api.service";
         </tbody>
       </table>
     </div>
-    <div class="page-header-actions">
-      <button
-        class="btn btn-secondary"
-        [disabled]="page === 0"
-        (click)="page = page - 1; load()"
-      >
-        Précédent</button
-      ><span>Page {{ page + 1 }} · {{ total }} documents</span
-      ><button
-        class="btn btn-secondary"
-        [disabled]="(page + 1) * 20 >= total"
-        (click)="page = page + 1; load()"
-      >
-        Suivant</button
-      ><button class="btn btn-ghost" (click)="load()">Actualiser</button>
-    </div>
+    <app-pagination [page]="page" [total]="total" [loading]="loading()" (pageChange)="page=$event;load()" />
   </div>`,
 })
 export class DocumentsComponent implements OnInit {

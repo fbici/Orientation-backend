@@ -47,6 +47,10 @@ public class Faculty extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
+    @Column(length=1000) private String registrySourceUrl;
+    private Integer registrySourcePage;
+    @Column(length=20) private String registrySourceEdition;
+    @Column(length=30) private String registryEntityKind;
 
     @OneToMany(mappedBy = "faculty", fetch = FetchType.LAZY)
     @Builder.Default

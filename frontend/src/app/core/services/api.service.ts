@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, EMPTY, expand, reduce } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface PageResponse<T> {
@@ -32,6 +32,11 @@ export class ApiService {
   }
   disableCatalog(resource: string, id: string): Observable<any> {return this.http.delete(`${this.b}/${resource}/${id}`);}
   reference(resource: string, search = ''): Observable<any> {return this.http.get(`${this.b}/${resource}`, {params:{size:'100',search}});}
+  allUniversityChoices(countryId=''):Observable<any[]> {
+    const load=(page:number)=>this.http.get<PageResponse<any>>(`${this.b}/universities`,{params:{page:String(page),size:'100',...(countryId?{countryId}:{})}});
+    return load(0).pipe(expand(page=>page.last || page.number+1>=page.totalPages?EMPTY:load(page.number+1)),
+      reduce((rows:any[],page)=>[...rows,...page.content],[]));
+  }
   reviewDocument(id: string): Observable<any> {return this.http.get(`${this.b}/documents/${id}/review`);}
   processDocument(id: string): Observable<any> {return this.http.post(`${this.b}/documents/${id}/process`, {});}
   documentPage(id: string, page: number): Observable<Blob> {return this.http.get(`${this.b}/documents/${id}/pages/${page}/preview`, {responseType:'blob'});}

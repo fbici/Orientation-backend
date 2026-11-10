@@ -1,3 +1,4 @@
+import {PaginationComponent} from './pagination.component';
 import { Component, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,7 @@ export interface TableColumn {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PaginationComponent,CommonModule, FormsModule],
   template: `
     <div class="table-wrap">
       @if (searchable || title) {
@@ -68,17 +69,8 @@ export interface TableColumn {
           </tbody>
         </table>
       </div>
-      @if (paginated && totalElements > pageSize) {
-        <div class="table-pagination">
-          <span style="font-size:.8125rem;color:var(--n-500)">{{ totalElements }} résultats</span>
-          <div style="display:flex;gap:4px">
-            <button class="btn btn-ghost btn-sm btn-icon" aria-label="Page precedente" [disabled]="loading || currentPage === 0" (click)="goToPage(currentPage - 1)"><span class="material-symbols-rounded" style="font-size:18px">chevron_left</span></button>
-            @for (p of pages; track p) {
-              <button class="btn btn-sm" [class.btn-primary]="p === currentPage" [class.btn-ghost]="p !== currentPage" [disabled]="loading" (click)="goToPage(p)">{{ p + 1 }}</button>
-            }
-            <button class="btn btn-ghost btn-sm btn-icon" aria-label="Page suivante" [disabled]="loading || currentPage >= totalPages - 1" (click)="goToPage(currentPage + 1)"><span class="material-symbols-rounded" style="font-size:18px">chevron_right</span></button>
-          </div>
-        </div>
+      @if (paginated) {
+        <app-pagination [page]="currentPage" [total]="totalElements" [size]="pageSize" [loading]="loading" (pageChange)="goToPage($event)" />
       }
     </div>
   `,
@@ -165,7 +157,7 @@ export class DataTableComponent {
   }
 
   goToPage(page: number): void {
-    if (this.loading || page < 0 || page >= this.totalPages) return;
+    if (this.loading || page < 0 || page >= (this.totalPages || Math.ceil(this.totalElements / this.pageSize))) return;
     this.currentPage = page;
     this.pageChange.emit(page);
   }

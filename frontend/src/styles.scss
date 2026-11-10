@@ -198,3 +198,19 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 @keyframes auth-panel-out{to{opacity:0;transform:perspective(1000px) rotateY(9deg) translateX(-20px)}}
 @keyframes auth-field-enter{from{transform:translateY(9px)}to{transform:none}}
 @keyframes auth-halo{from{opacity:.7;transform:scale(.4)}to{opacity:0;transform:scale(1.5)}}
+
+/* Locally served icons work even when Google Fonts is blocked. */
+@font-face{font-family:'Material Symbols Rounded';font-style:normal;font-weight:100 700;src:url('/assets/fonts/material-symbols-rounded.woff2') format('woff2');font-display:block}
+.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;font-size:24px;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;flex-shrink:0}
+.data-table th,.data-table td{padding:16px 18px;vertical-align:middle}
+.data-table td:last-child{white-space:nowrap;min-width:136px}
+.data-table td .btn+.btn{margin-left:6px}
+.table-pagination,.pagination-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 20px;border-top:1px solid var(--n-200);background:#fff;border-radius:0 0 16px 16px}
+.pagination-bar nav{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.pagination-bar .btn{min-width:38px;min-height:38px}
+.auth-experience{--brand:#7725d8;--brand-dark:#510ea5;--brand-light:#d4bdff;background:radial-gradient(ellipse at top right,#e8deff,transparent 55%),#f7f4ff;color:#171249}
+.auth-panel{max-width:470px;background:rgba(255,255,255,.94);border:1px solid #e6def8;border-radius:28px;padding:32px;box-shadow:0 18px 60px #52209b12}
+.auth-wordmark{width:190px;height:auto;margin:0 auto 26px}.auth-wordmark img{width:190px;height:auto}
+.auth-field input{height:54px;border-color:#d7c7f6;border-radius:15px;background:#fdfbff;box-shadow:0 4px 12px #7725d80a}
+.auth-submit{height:56px;border-radius:28px;background:linear-gradient(120deg,#953be9,#5d11b4);font-size:16px;box-shadow:0 8px 20px #7725d828}
+.auth-submit-indicator{border-radius:50%;width:36px;height:36px}.auth-google{border-radius:24px}
+@media(max-width:600px){.table-pagination,.pagination-bar{padding:16px;justify-content:center}.auth-layout{padding:20px 14px}.auth-panel{padding:28px 20px}}

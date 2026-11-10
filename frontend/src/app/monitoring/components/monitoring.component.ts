@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
@@ -5,7 +6,7 @@ import { ApiService } from '../../core/services/api.service';
 @Component({
   selector: 'app-monitoring',
   standalone: true,
-  imports: [CommonModule],
+  imports: [PaginationComponent,CommonModule],
   template: `
     <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}<p class="api-notice">Seules les mesures fournies par le serveur sont affichees. Les metriques non instrumentees ne sont pas estimees.</p>
       <div class="page-header">
@@ -85,7 +86,7 @@ import { ApiService } from '../../core/services/api.service';
           }
         </div>
       </div>
-    <div class="table-pagination"><button class="btn btn-secondary" [disabled]="activityLoading() || page===0" (click)="page=page-1;load()">Precedent</button><span>Page {{page+1}}</span><button class="btn btn-secondary" [disabled]="activityLoading() || (page+1)*20>=total()" (click)="page=page+1;load()">Suivant</button></div></div>
+    <app-pagination [page]="page" [total]="total()" [loading]="activityLoading()" (pageChange)="page=$event;load()" /></div>
   `,
   styles: [`.spinner{width:32px;height:32px;border:3px solid var(--n-200);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}@keyframes spin{to{transform:rotate(360deg)}}`]
 })

@@ -13,7 +13,7 @@ describe('F1 secure authentication contracts', () => {
   const response: AuthResponse = {
     accessToken: 'test-access', refreshToken: 'test-refresh', expiresIn: 900, tokenType: 'Bearer',
     user: { id: 'test-user', email: 'user@example.test', firstName: 'Test', lastName: 'User',
-      roles: ['CANDIDAT'], permissions: [], tenantId: 'test-tenant' }
+      roles: ['SUPER_ADMIN'], permissions: [], tenantId: 'test-tenant' }
   };
   function login(persistent = false): void {
     auth.login('user@example.test', 'only-a-test-password', persistent).subscribe();
@@ -31,6 +31,14 @@ describe('F1 secure authentication contracts', () => {
   afterEach(() => {
     clearTimeout((auth as any).tokenRefreshTimer);
     requests.verify(); localStorage.clear(); sessionStorage.clear();
+  });
+  it('refuses a candidate session in the backoffice and revokes the issued session',()=>{
+    let failure:unknown;
+    auth.login('candidate@example.test','test-password').subscribe({error:e=>failure=e});
+    requests.expectOne('/api/v1/auth/login').flush({...response,user:{...response.user,roles:['CANDIDAT']}});
+    requests.expectOne('/api/v1/auth/logout').flush({});
+    expect(failure).toBeTruthy();expect(auth.authenticated()).toBeFalse();
+    expect(auth.getToken()).toBeNull();expect(sessionStorage.getItem('user')).toBeNull();
   });
   it('uses session storage unless remember me is requested', () => {
     login(); expect(sessionStorage.getItem('refreshToken')).toBe('test-refresh');

@@ -4,13 +4,19 @@ import java.net.URI;
 
 /** Shared, image-independent email layout; all dynamic content is escaped. */
 final class EmailTemplateRenderer {
+    static final String DEFAULT_LOGO_URL = "https://raw.githubusercontent.com/fbici/Orientation-backend/4d87fee35be9e550924d797d2279b8923197eff3/src/main/resources/static/assets/email/orientia-logo.png";
     private EmailTemplateRenderer() {}
     static String render(String baseUrl, String title, String name, String message,
                          String action, String url, String notice) {
+        return render(baseUrl,title,name,message,action,url,notice,DEFAULT_LOGO_URL);
+    }
+    static String render(String baseUrl, String title, String name, String message,
+                         String action, String url, String notice, String logoUrl) {
         safeUrl(baseUrl);
+        safeUrl(logoUrl);
         safeUrl(url);
         String greeting = name == null || name.isBlank() ? "Bonjour," : "Bonjour " + name.strip() + ",";
-        String logo = baseUrl.replaceAll("/+$", "") + "/assets/email/orientia-logo.png";
+        String logo = logoUrl;
         return """
             <!doctype html>
             <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,6 +45,22 @@ final class EmailTemplateRenderer {
             </td></tr></table></td></tr></table></body></html>
             """.formatted(escape(title), escape(title), escape(logo), escape(title), escape(greeting),
                 escape(message), escape(url), escape(action), escape(notice), escape(url), escape(url));
+    }
+    static String verificationCode(String baseUrl,String name,String code) {
+        return verificationCode(baseUrl,name,code,DEFAULT_LOGO_URL);
+    }
+    static String verificationCode(String baseUrl,String name,String code,String logoUrl) {
+        if(code==null || !code.matches("[0-9]{6}")) throw new IllegalArgumentException("Invalid verification code");
+        String html=render(baseUrl,"Vérifiez votre adresse e-mail",name,
+            "Recopiez ce code dans l’application Orientia pour confirmer votre compte.",
+            "Continuer dans l’application",baseUrl,
+            "Code valable 10 minutes, à usage unique. Si cette demande ne vient pas de vous, ignorez cet e-mail.",logoUrl);
+        int start=html.indexOf("<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\">");
+        int end=html.indexOf("</table>",start)+8;
+        html=html.substring(0,start)+"<p style=\"margin:8px 0 28px;padding:22px;background:#f3f0ff;border-radius:16px;text-align:center;font-size:36px;font-weight:bold;letter-spacing:8px;color:#7725d8;\">"+code+"</p>"+html.substring(end);
+        start=html.indexOf("<p style=\"margin:24px 0 8px;");
+        end=html.indexOf("</a></p>",start)+8;
+        return html.substring(0,start)+"<p style=\"font-size:14px;line-height:1.6;\">Retournez dans Orientia, saisissez les six chiffres puis appuyez sur Vérifier.</p>"+html.substring(end);
     }
     private static void safeUrl(String value) {
         URI uri = URI.create(value);

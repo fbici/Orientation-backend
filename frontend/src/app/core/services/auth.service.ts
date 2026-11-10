@@ -30,7 +30,9 @@ export class AuthService {
     try {
       const stored = this.storage().getItem('user');
       if (stored && this.getToken()) {
-        this.currentUser.set(JSON.parse(stored));
+        const cached=JSON.parse(stored) as User;
+        if(!this.staff(cached)) {this.clearStorage(); return;}
+        this.currentUser.set(cached);
         this.isAuthenticated.set(true);
         queueMicrotask(() => {
           this.getCurrentUser().subscribe({ error: () => {} });
@@ -50,6 +52,11 @@ export class AuthService {
   login(email: string, password: string, rememberMe = false): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, { email, password })
       .pipe(tap(response => {
+        if(!this.staff(response.user)) {
+          this.http.post(`${this.API_URL}/logout`,{refreshToken:response.refreshToken},
+            {headers:new HttpHeaders({Authorization:`Bearer ${response.accessToken}`})}).subscribe({error:()=>{}});
+          throw new Error('Cet espace est réservé aux équipes Orientia. Connectez-vous dans l’application mobile.');
+        }
         this.generation++;
         this.storeTokens(response, rememberMe);
         this.currentUser.set(response.user); this.isAuthenticated.set(true);
@@ -82,6 +89,7 @@ export class AuthService {
       map(response => generation === this.generation ? response : null),
       tap(response => {
         if (!response) return;
+        if (!this.staff(response.user)) {this.endSession(); return;}
         this.storeTokens(response, persistent);
         this.currentUser.set(response.user); this.isAuthenticated.set(true); this.scheduleTokenRefresh();
       }),
@@ -94,7 +102,7 @@ export class AuthService {
   getCurrentUser(): Observable<User> {
     const token = this.getToken();
     return this.http.get<User>(`${this.API_URL}/me`).pipe(tap(user => {
-      if (token && this.getToken() === token) { this.currentUser.set(user); this.isAuthenticated.set(true); }
+      if (token && this.getToken() === token) { if(!this.staff(user)){this.endSession();return;} this.currentUser.set(user); this.isAuthenticated.set(true); }
     }));
   }
   updateProfile(data: Partial<User>): Observable<User> {
@@ -118,6 +126,7 @@ export class AuthService {
   resetPassword(token: string, password: string): Observable<any> {
     return this.http.post(`${this.API_URL}/reset-password`, { token, newPassword: password });
   }
+  private staff(user:User):boolean {return user.roles?.some(role=>['SUPER_ADMIN','ADMIN','MODERATEUR','REPRESENTANT_UNIVERSITAIRE'].includes(role)) ?? false;}
   hasRole(role: string): boolean { return this.user()?.roles?.includes(role) ?? false; }
   hasAnyRole(roles: string[]): boolean { return roles.some(role => this.hasRole(role)); }
   hasPermission(permission: string): boolean { return this.user()?.permissions?.includes(permission) ?? false; }

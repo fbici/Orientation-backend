@@ -52,3 +52,15 @@ Le compte accepte les numéros internationaux précédés de `+` et de l’indic
 Vérification courante : `npm run build:prod` réussi après correction de l’aide téléphone du profil. Les avertissements existants restent le budget CSS du layout et le module CommonJS `sockjs-client`. Les 86 tests de la campagne précédente ne sont pas comptés comme une nouvelle exécution.
 
 Les e-mails transactionnels reprennent maintenant la marque mobile lavande/violette et son vrai logo transparent, via le renderer Spring et Brevo. Les secrets et l’envoi restent exclusivement côté serveur. Cette évolution ne constitue pas une nouvelle refonte Angular ni une nouvelle exécution de ses 86 tests historiques.
+
+## Corrections critiques du backoffice
+
+Accès au layout et à ses enfants réservé aux équipes autorisées, connexion Web candidat refusée sans conserver les jetons, anciens liens de vérification orientés vers une page candidat dédiée. Les contrôles Spring restent la frontière de sécurité ; modifier le cache navigateur ne donne pas de permissions serveur. Les comptes super administrateurs conservent leurs droits globaux effectifs, sans changement manuel du compte de production.
+
+Les formulaires reprennent maintenant le fond lavande, une carte centrée, le vrai logo transparent, des champs arrondis et des boutons violets, en conservant les animations et leur réduction système. La police Material Symbols est servie dans `assets/fonts/` avec sa licence Apache : les icônes d’action ne dépendent plus de Google Fonts. La police de texte conserve son fallback local. Les actions gardent leurs handlers et confirmations, avec titres/labels accessibles. Les listes partagent une pagination responsive avec intervalle de résultats, première/dernière page, état courant, ellipses et verrouillage pendant chargement. La recherche documentaire qui ne fournit pas de total garde une navigation précédente/suivante sans total inventé.
+
+Le catalogue des facultés expose les entités officiellement documentées, leurs sources/pages et le filtre correspondant. Les universités proposées suivent le pays et toutes les pages ; une réponse ancienne ne remplace pas le choix du pays courant. Les associations et données antérieures restent accessibles. Les rattachements sans implantation documentée n’affichent pas de ville inventée.
+
+Validation courante : **94 tests ChromeHeadless réussis** et **build production réussi**. Avertissements inchangés : budget CSS du layout et `sockjs-client` CommonJS. Les aperçus navigateur locaux utilisent une session et des réponses synthétiques, sans accès administrateur de production. Les compteurs métier sont maintenant fournis par les requêtes PostgreSQL du backend ; aucun score arbitraire ne remplace une mesure absente. La recette manuelle complète du backoffice sur Render reste distincte des tests locaux.
+
+Le badge fixe « Opérationnel » a également été remplacé par l’état réel des mises à jour en direct, avec actualisation manuelle disponible lorsque la connexion temps réel est absente. Les statuts du catalogue sont libellés en français.

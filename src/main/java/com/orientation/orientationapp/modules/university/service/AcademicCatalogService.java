@@ -75,11 +75,11 @@ public class AcademicCatalogService {
    "phone",u.getPhone(),"email",u.getEmail(),"website",u.getWebsite(),"foundedYear",u.getFoundedYear(),
    "description",u.getDescription(),"sourceUrl",u.getSourceUrl(),"tenantId",u.getTenantId());
   if(entity instanceof Campus c) return row("id",c.getId(),"name",c.getName(),"universityId",c.getUniversity().getId(),
-   "universityName",c.getUniversity().getName(),"cityId",c.getCity().getId(),"cityName",c.getCity().getName(),
+   "universityName",c.getUniversity().getName(),"cityId",c.getCity()==null?null:c.getCity().getId(),"cityName",c.getCity()==null?null:c.getCity().getName(),
    "address",c.getAddress(),"phone",c.getPhone(),"main",c.getMain(),"active",c.getActive());
   if(entity instanceof Faculty f) return row("id",f.getId(),"name",f.getName(),"code",f.getCode(),"campusId",f.getCampus().getId(),
    "campusName",f.getCampus().getName(),"universityId",f.getCampus().getUniversity().getId(),
-   "universityName",f.getCampus().getUniversity().getName(),"description",f.getDescription(),"active",f.getActive());
+   "universityName",f.getCampus().getUniversity().getName(),"description",f.getDescription(),"active",f.getActive(),"registrySourceUrl",f.getRegistrySourceUrl(),"registrySourcePage",f.getRegistrySourcePage(),"registrySourceEdition",f.getRegistrySourceEdition(),"registryEntityKind",f.getRegistryEntityKind());
   if(entity instanceof Program p) return row("id",p.getId(),"name",p.getName(),"code",p.getCode(),"facultyId",p.getFaculty().getId(),
    "facultyName",p.getFaculty().getName(),"campusId",p.getFaculty().getCampus().getId(),
    "universityId",p.getFaculty().getCampus().getUniversity().getId(),"universityName",p.getFaculty().getCampus().getUniversity().getName(),
@@ -121,6 +121,7 @@ public class AcademicCatalogService {
     predicates.add(cb.like(cb.lower(root.get("name")),"%"+f.getSearch().strip().toLowerCase(Locale.ROOT).replace("%","\\%").replace("_","\\_")+"%",'\\'));
    }
    if(f.getCountryId()!=null) predicates.add(cb.equal(university.get("country").get("id"),f.getCountryId()));
+   if(kind.equals("faculties") && Boolean.TRUE.equals(f.getRegistryOnly())) predicates.add(cb.isNotNull(root.get("registrySourceUrl")));
    if(f.getCityId()!=null && !kind.equals("scholarships")) predicates.add(cb.equal(university.get("city").get("id"),f.getCityId()));
    if(f.getUniversityId()!=null && !kind.equals("scholarships")) predicates.add(cb.equal(university.get("id"),f.getUniversityId()));
    if(f.getCampusId()!=null && kind.equals("faculties")) predicates.add(cb.equal(root.get("campus").get("id"),f.getCampusId()));
@@ -195,8 +196,8 @@ public class AcademicCatalogService {
   Campus c=id==null?new Campus():campus(id);
   if(id!=null) access.write(c.getUniversity().getTenantId(),"UNIVERSITY_UPDATE");
   var u=university(r.universityId());access.write(u.getTenantId(),"UNIVERSITY_UPDATE");
-  var city=found(cities.findById(r.cityId()));
-  if(!city.getCountry().getId().equals(u.getCountry().getId())) throw invalid("Campus city must belong to the university country");
+  var city=r.cityId()==null?null:found(cities.findById(r.cityId()));
+  if(city!=null && !city.getCountry().getId().equals(u.getCountry().getId())) throw invalid("Campus city must belong to the university country");
   c.setUniversity(u);c.setCity(city);c.setName(r.name().strip());c.setAddress(r.address());c.setPhone(r.phone());
   c.setMain(Boolean.TRUE.equals(r.main()));c.setActive(r.active()==null||r.active());
   c.setVerified(false);invalidate(id,"CAMPUS");

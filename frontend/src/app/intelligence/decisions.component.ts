@@ -61,7 +61,7 @@ export interface DecisionView {id:string;kind:string;computedAt:string;profileCh
  <table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Profil</th><th>Actions</th></tr></thead><tbody>
  @for(row of history();track row.id){<tr><td>{{row.computedAt|date:'short'}}</td><td>{{row.kind}}</td>
  <td>{{row.profileChanged?'Modifié depuis le calcul':'Version conservée'}}<br>{{row.sourceCurrent?'Sources encore actives':'Sources historiques ou indéterminées'}}</td><td>
- <button class="btn btn-ghost" (click)="result.set(row)">Détails</button>
+ <button class="btn btn-ghost btn-icon" (click)="result.set(row)" aria-label="Détails" title="Détails"><span class="material-symbols-rounded" aria-hidden="true">visibility</span></button>
  <button class="btn btn-secondary" (click)="download(row.id,'pdf')">PDF</button>
  <button class="btn btn-secondary" (click)="download(row.id,'csv')">CSV</button>
  <button class="btn btn-secondary" (click)="download(row.id,'excel')">XLSX</button>

@@ -12,7 +12,7 @@ public final class CatalogRequests {
   @Size(max=500) String website,@Min(1) Integer foundedYear,@Size(max=20000) String description,
   @Size(max=500) String sourceUrl) {}
  public record CampusWrite(@NotBlank @Size(max=200) String name,@NotNull UUID universityId,
-  @NotNull UUID cityId,@Size(max=500) String address,@Size(max=20) String phone,Boolean main,Boolean active) {}
+  UUID cityId,@Size(max=500) String address,@Size(max=20) String phone,Boolean main,Boolean active) {}
  public record FacultyWrite(@NotBlank @Size(max=200) String name,@NotNull UUID campusId,
   @Size(max=20) String code,@Size(max=20000) String description,Boolean active) {}
  public record ProgramWrite(@NotBlank @Size(max=200) String name,@NotNull UUID facultyId,

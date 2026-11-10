@@ -1,15 +1,18 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { backofficeGuard } from './core/guards/backoffice.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
+  {path: 'mobile-access', loadComponent: () => import('./auth/mobile-access.component').then(m=>m.MobileAccessComponent)},
   {
     path: 'auth',
     loadChildren: () => import('./auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, backofficeGuard],
+    canActivateChild: [backofficeGuard],
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
     children: [
       { path: 'campuses', loadComponent: () => import('./catalog/catalog.component').then(m => m.CatalogComponent), data: {resource:'campuses',kind:'CAMPUS',title:'Campus'} },

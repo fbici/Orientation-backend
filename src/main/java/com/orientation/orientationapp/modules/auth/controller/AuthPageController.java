@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 /** Explicit public HTML pages; REST verification and protected API routes stay unchanged. */
 @RestController
 public class AuthPageController {
-    @GetMapping(value={"/auth/login","/auth/register","/auth/verify-email","/auth/forgot-password","/auth/reset-password"},produces=MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value={"/mobile-access","/auth/login","/auth/register","/auth/verify-email","/auth/forgot-password","/auth/reset-password"},produces=MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<Resource> page() {
         Resource index = new ClassPathResource("static/index.html");
         if(!index.exists()) return ResponseEntity.notFound().build();

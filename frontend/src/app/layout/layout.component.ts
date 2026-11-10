@@ -1,3 +1,4 @@
+import {RealtimeService} from '../core/services/realtime.service';
 import { Component, signal, computed, HostListener, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -61,7 +62,7 @@ interface NavSection {
             <div class="search"><span class="material-symbols-rounded search-icon">search</span><input class="search-input" type="text" placeholder="Rechercher…" [(ngModel)]="q"></div>
           </div>
           <div class="topbar-right">
-            <div class="topbar-pill online"><span class="dot green" style="animation:pulse 2s infinite"></span> Opérationnel</div>
+            <div class="topbar-pill" [class.online]="realtime.connectionStatus()"><span class="dot" [style.background]="realtime.connectionStatus() ? 'var(--green-500)' : 'var(--n-400)'"></span> {{realtime.connectionStatus() ? 'Mises à jour en direct' : 'Actualisation manuelle'}}</div>
 
             <!-- Notifications -->
             <button class="btn btn-ghost btn-icon topbar-icon-btn" (click)="toggleNotifPanel()">
@@ -218,7 +219,8 @@ export class LayoutComponent implements OnInit {
   constructor(
     public auth: AuthService,
     public notifSvc: NotificationService,
-    private router: Router
+    private router: Router,
+    public realtime: RealtimeService
   ) {}
 
   ngOnInit(): void {

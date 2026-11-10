@@ -369,6 +369,57 @@ class FoundationsIntegrationTest {
     }
 
 
+    @Test void officialPublicFacultiesAreAssociatedWithoutInventingLocationsOrPublishingData() throws Exception {
+        assertEquals(66,jdbc.queryForObject("select count(*) from faculties where registry_source_url is not null and not deleted",Integer.class));
+        assertEquals(40,jdbc.queryForObject("select count(*) from faculties f join campuses c on c.id=f.campus_id join universities u on u.id=c.university_id where f.registry_source_url is not null and u.short_name='UAC'",Integer.class));
+        assertEquals(0,jdbc.queryForObject("select count(*) from faculties f join campuses c on c.id=f.campus_id join universities u on u.id=c.university_id join countries p on p.id=u.country_id where f.registry_source_url is not null and p.code<>'BEN'",Integer.class));
+        assertTrue(jdbc.queryForObject("select count(*) from campuses where city_id is null and not verified",Integer.class)>0);
+        var session=login(superUser);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/faculties").param("size","100").param("registryOnly","true")
+            .header("Authorization","Bearer "+session.getAccessToken()))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.totalElements").value(66));
+    }
+
+    @Test void mobileCodeVerificationCommitsWrongAttemptsThenVerifiesOnceWithoutOpeningSession() throws Exception {
+        String address=java.util.UUID.randomUUID()+"@example.test";
+        var tenantCode=environment.getProperty("app.registration.tenant-code","DEFAULT");
+        tenants.findByCode(tenantCode).orElseGet(()->{var created=tenant("Mobile registration");created.setCode(tenantCode);return tenants.saveAndFlush(created);});
+        var received=new java.util.concurrent.atomic.AtomicReference<String>();
+        org.mockito.Mockito.doNothing().when(emailProvider).requireConfigured();
+        org.mockito.Mockito.doAnswer(invocation->{received.set(invocation.getArgument(2));return null;}).when(emailProvider)
+            .sendVerificationCode(org.mockito.ArgumentMatchers.eq(address),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString());
+        try {
+            String payload=json.writeValueAsString(java.util.Map.of("email",address,"firstName","Mobile","lastName","Fixture","password",password));
+            var result=mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/mobile/register").contentType("application/json").content(payload))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isAccepted())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.accessToken").doesNotExist()).andReturn();
+            assertNotNull(received.get());assertTrue(received.get().matches("[0-9]{6}"));
+            String id=json.readTree(result.getResponse().getContentAsString()).path("challengeId").asText();
+            String wrong=received.get().equals("000000")?"000001":"000000";
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/mobile/verify-email").contentType("application/json")
+                .content(json.writeValueAsString(java.util.Map.of("challengeId",id,"code",wrong))))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+            assertEquals(1,jdbc.queryForObject("select attempts from email_verification_challenges where id=?",Integer.class,java.util.UUID.fromString(id)));
+            assertFalse(Boolean.TRUE.equals(users.findByEmail(address).orElseThrow().getEmailVerified()));
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/mobile/verify-email").contentType("application/json")
+                .content(json.writeValueAsString(java.util.Map.of("challengeId",id,"code",received.get()))))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
+            assertTrue(Boolean.TRUE.equals(users.findByEmail(address).orElseThrow().getEmailVerified()));
+            assertEquals(0,jdbc.queryForObject("select count(*) from refresh_tokens where user_id=?",Integer.class,users.findByEmail(address).orElseThrow().getId()));
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/mobile/verify-email").contentType("application/json")
+                .content(json.writeValueAsString(java.util.Map.of("challengeId",id,"code",received.get()))))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+            var candidateSession=authentication.login(com.orientation.orientationapp.modules.auth.dto.request.LoginRequest.builder().email(address).password(password).build(),"127.0.0.1","isolated-fixture");
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/backoffice/dashboard")
+                .header("Authorization","Bearer "+candidateSession.getAccessToken()))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isForbidden());
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/admin/users")
+                .header("Authorization","Bearer "+candidateSession.getAccessToken()))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isForbidden());
+        } finally {org.mockito.Mockito.reset(emailProvider);}
+    }
+
     @Autowired com.orientation.orientationapp.docintel.document.service.DocumentService documentService;
     @Autowired com.orientation.orientationapp.storage.service.StorageService storage;
     private com.orientation.orientationapp.docintel.document.entity.Document document(

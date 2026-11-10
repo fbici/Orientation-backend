@@ -23,6 +23,7 @@ public class DashboardResponse {
     @Builder
     public static class KpiSummary {
         private long totalCandidates;
+        private Long totalUniversities;
         private Long totalRecommendations;
         private Long totalGuidesImported;
         private Long totalDocumentsOcr;

@@ -63,7 +63,7 @@ export const ACADEMIC_FIELDS: Record<string, AcademicField[]> = {
   CAMPUS: [
     name,
     field("universityId", "Université", "select", true, "universities"),
-    city,
+    { ...city, required:false },
     field("address", "Adresse"),
     field("phone", "Téléphone"),
     field("main", "Campus principal", "checkbox"),

@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../core/services/notification.service';
@@ -5,7 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule],
+  imports: [PaginationComponent,CommonModule],
   template: `
     <div class="anim-fade-up">@if(notifSvc.error()){<div class="api-error" role="alert">{{notifSvc.error()}} <button class="btn btn-secondary" (click)="notifSvc.load(notifSvc.page())">Reessayer</button></div>}
       <div class="page-header">
@@ -54,7 +55,7 @@ import { NotificationService } from '../../core/services/notification.service';
           }
         </div>
       </div>
-    <div class="table-pagination"><button class="btn btn-secondary" [disabled]="notifSvc.loading() || notifSvc.page()===0" (click)="notifSvc.load(notifSvc.page()-1)">Precedent</button><span>Page {{notifSvc.page()+1}} - {{notifSvc.total()}} notifications</span><button class="btn btn-secondary" [disabled]="notifSvc.loading() || (notifSvc.page()+1)*20>=notifSvc.total()" (click)="notifSvc.load(notifSvc.page()+1)">Suivant</button></div></div>
+    <app-pagination [page]="notifSvc.page()" [total]="notifSvc.total()" [loading]="notifSvc.loading()" (pageChange)="notifSvc.load($event)" /></div>
   `,
   styles: [`
     :host{display:block}

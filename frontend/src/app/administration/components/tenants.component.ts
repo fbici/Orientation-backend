@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { ModalComponent } from '../../shared/components/modal.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
 
 @Component({
-  selector: 'app-tenants', standalone: true, imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
+  selector: 'app-tenants', standalone: true, imports: [PaginationComponent,CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
     <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}
       <div class="page-header">
@@ -38,7 +39,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
         }
       </div>
     </div>
-<div class="table-pagination"><button class="btn btn-secondary" [disabled]="loading() || page===0" (click)="page=page-1;load()">Precedent</button><span>Page {{page+1}} - {{total()}} resultats</span><button class="btn btn-secondary" [disabled]="loading() || (page+1)*20>=total()" (click)="page=page+1;load()">Suivant</button></div>
+<app-pagination [page]="page" [total]="total()" [loading]="loading()" (pageChange)="page=$event;load()" />
     <app-modal [open]="showForm()" [title]="editId() ? 'Modifier' : 'Nouveau tenant'" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
       <div class="form-group"><label class="form-label">Nom *</label><input type="text" class="form-input" [(ngModel)]="form.name"></div>
       <div class="form-group"><label class="form-label">Code *</label><input type="text" class="form-input" [(ngModel)]="form.code" placeholder="ex: orient-bj"></div>

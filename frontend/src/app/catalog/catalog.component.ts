@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../shared/components/pagination.component';
 import { Component, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -12,7 +13,7 @@ import { ConfirmDialogComponent } from "../shared/components/confirm-dialog.comp
 @Component({
   selector: "app-academic-catalog",
   standalone: true,
-  imports: [
+  imports: [PaginationComponent,
     CommonModule,
     FormsModule,
     RouterLink,
@@ -45,6 +46,7 @@ import { ConfirmDialogComponent } from "../shared/components/confirm-dialog.comp
           name="country"
           aria-label="Pays"
           [(ngModel)]="countryId"
+          (ngModelChange)="countryChanged()"
         >
           <option value="">Tous les pays</option>
           @for (c of countries; track c.id) {
@@ -118,6 +120,9 @@ import { ConfirmDialogComponent } from "../shared/components/confirm-dialog.comp
             }
           </select>
         }
+        @if(resource === "faculties") {
+          <label class="form-check"><input type="checkbox" name="registryOnly" [(ngModel)]="registryOnly" /> Entités documentées uniquement</label>
+        }
         <button class="btn btn-secondary">Rechercher</button>
       </div>
     </form>
@@ -150,8 +155,11 @@ import { ConfirmDialogComponent } from "../shared/components/confirm-dialog.comp
                 </td>
                 <td>
                   <span class="badge badge-gray">{{
-                    r.verificationStatus
+                    r.verificationStatus === 'VALIDATED' ? 'Vérifié' : 'À revoir'
                   }}</span>
+                  @if(r.registrySourceUrl){
+                    <p><a [href]="r.registrySourceUrl" target="_blank" rel="noopener noreferrer">Source officielle · {{r.registrySourceEdition}} · p. {{r.registrySourcePage}}</a></p>
+                  }
                   @if (resource === "scholarships") {
                     <p>
                       Candidatures :
@@ -166,14 +174,14 @@ import { ConfirmDialogComponent } from "../shared/components/confirm-dialog.comp
                   }
                 </td>
                 <td>
-                  <button class="btn btn-secondary btn-sm" (click)="edit(r)">
-                    Modifier
+                  <button class="btn btn-secondary btn-sm" (click)="edit(r)" title="Modifier" aria-label="Modifier">
+                    <span class="material-symbols-rounded" aria-hidden="true">edit</span>
                   </button>
-                  <button class="btn btn-ghost btn-sm" (click)="source(r)">
-                    Sources
+                  <button class="btn btn-ghost btn-sm" (click)="source(r)" title="Sources" aria-label="Sources">
+                    <span class="material-symbols-rounded" aria-hidden="true">source</span>
                   </button>
-                  <button class="btn btn-ghost btn-sm" (click)="toDisable = r">
-                    Désactiver
+                  <button class="btn btn-ghost btn-sm" (click)="toDisable = r" title="Désactiver" aria-label="Désactiver">
+                    <span class="material-symbols-rounded" aria-hidden="true">block</span>
                   </button>
                 </td>
               </tr>
@@ -186,22 +194,7 @@ import { ConfirmDialogComponent } from "../shared/components/confirm-dialog.comp
         </table>
       </div>
     }
-    <div class="page-header-actions">
-      <button
-        class="btn btn-secondary"
-        [disabled]="page === 0 || loading()"
-        (click)="page = page - 1; load()"
-      >
-        Précédent</button
-      ><span>Page {{ page + 1 }} · {{ total }} éléments</span
-      ><button
-        class="btn btn-secondary"
-        [disabled]="(page + 1) * 20 >= total || loading()"
-        (click)="page = page + 1; load()"
-      >
-        Suivant
-      </button>
-    </div>
+    <app-pagination [page]="page" [total]="total" [loading]="loading()" (pageChange)="page=$event;load()" />
     <p>
       <a routerLink="/documents"
         >Valider et publier depuis un document source</a
@@ -271,6 +264,7 @@ export class CatalogComponent implements OnInit {
   language = "";
   studyField = "";
   universityId = "";
+  registryOnly = true;
   status = "";
   years: any[] = [];
   universities: any[] = [];
@@ -308,12 +302,7 @@ export class CatalogComponent implements OnInit {
         next: (r) => (this.years = r),
         error: () => this.error.set("Années indisponibles."),
       });
-    this.api
-      .reference("universities")
-      .subscribe({
-        next: (r) => (this.universities = r.content),
-        error: () => this.error.set("Universités indisponibles."),
-      });
+    this.loadUniversityChoices();
     this.api
       .getCountries()
       .subscribe({
@@ -321,6 +310,14 @@ export class CatalogComponent implements OnInit {
         error: () => this.error.set("Impossible de charger les pays."),
       });
   }
+  private choicesRevision=0;
+  loadUniversityChoices() {
+    const revision=++this.choicesRevision;
+    this.universities=[];
+    this.api.allUniversityChoices(this.countryId).subscribe({next:rows=>{if(revision===this.choicesRevision)this.universities=rows;},
+      error:()=>{if(revision===this.choicesRevision)this.error.set('Universités indisponibles. Réessayez.');}});
+  }
+  countryChanged(){this.universityId='';this.page=0;this.loadUniversityChoices();this.load();}
   load() {
     this.loading.set(true);
     this.error.set("");
@@ -333,6 +330,7 @@ export class CatalogComponent implements OnInit {
         language: this.language,
         studyField: this.studyField,
         universityId: this.universityId,
+        registryOnly: this.resource === "faculties" ? this.registryOnly : undefined,
         status: this.status,
       })
       .subscribe({

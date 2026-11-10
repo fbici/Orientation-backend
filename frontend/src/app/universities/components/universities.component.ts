@@ -1,3 +1,4 @@
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
 @Component({
   selector: 'app-universities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
+  imports: [PaginationComponent,CommonModule, FormsModule, RouterLink, ModalComponent, ConfirmDialogComponent],
   template: `
     <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}
       <div class="page-header">
@@ -70,16 +71,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
             </table>
           }
         </div>
-        @if (totalPages() > 1) {
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--n-100)">
-            <span style="font-size:.8125rem;color:var(--n-500)">{{ total() }} résultats</span>
-            <div style="display:flex;gap:4px">
-              <button class="btn btn-ghost btn-sm btn-icon" [disabled]="page()===0" (click)="page.set(page()-1);load()"><span class="material-symbols-rounded" style="font-size:18px">chevron_left</span></button>
-              <span style="font-size:.8125rem;color:var(--n-600);padding:5px 12px">{{ page()+1 }} / {{ totalPages() }}</span>
-              <button class="btn btn-ghost btn-sm btn-icon" [disabled]="page()>=totalPages()-1" (click)="page.set(page()+1);load()"><span class="material-symbols-rounded" style="font-size:18px">chevron_right</span></button>
-            </div>
-          </div>
-        }
+        <app-pagination [page]="page()" [total]="total()" [loading]="loading()" (pageChange)="page.set($event);load()" />
       </div>
     </div>
 

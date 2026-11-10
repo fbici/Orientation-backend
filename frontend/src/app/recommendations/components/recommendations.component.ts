@@ -45,7 +45,7 @@ interface Diagnostic {
               <td>{{ r.score === null ? 'Non calculee' : (r.score | number:'1.0-2') + ' /100' }}</td>
               <td>{{ r.dataCoverage | number:'1.0-2' }}%</td>
               <td>{{ r.computedAt | date:'short' }}</td>
-              <td><button class="btn btn-ghost" (click)="selected.set(r)">Details</button></td>
+              <td><button class="btn btn-ghost btn-icon" (click)="selected.set(r)" aria-label="Details" title="Details"><span class="material-symbols-rounded" aria-hidden="true">visibility</span></button></td>
             </tr>
           } @empty { <tr><td colspan="6">Aucun resultat pour ce candidat.</td></tr> }
           </tbody></table>

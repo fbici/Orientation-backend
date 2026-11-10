@@ -83,7 +83,7 @@ import { ApiService } from "../../core/services/api.service";
       </div>
     }
     @if (searched) {
-      <div class="page-header-actions">
+      <div class="pagination-bar">
         <button
           class="btn btn-secondary"
           [disabled]="page === 0 || busy()"

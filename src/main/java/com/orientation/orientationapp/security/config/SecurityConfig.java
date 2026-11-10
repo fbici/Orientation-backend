@@ -47,11 +47,12 @@ public class SecurityConfig {
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST,"/auth/google").permitAll()
                 .requestMatchers("/auth/register").permitAll()
+                .requestMatchers(HttpMethod.POST,"/auth/mobile/register","/auth/mobile/verify-email","/auth/mobile/resend-code").permitAll()
                 .requestMatchers("/auth/refresh").permitAll()
                 .requestMatchers("/auth/forgot-password").permitAll()
                 .requestMatchers("/auth/reset-password").permitAll()
                 .requestMatchers("/auth/verify").permitAll()
-                .requestMatchers(HttpMethod.GET, "/auth/verify-email").permitAll()
+                .requestMatchers(HttpMethod.GET, "/auth/verify-email","/mobile-access").permitAll()
                 .requestMatchers("/locations/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -69,6 +70,7 @@ public class SecurityConfig {
 
                 // Admin only
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/backoffice/**").hasAnyRole("ADMIN","SUPER_ADMIN","MODERATEUR","REPRESENTANT_UNIVERSITAIRE")
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()

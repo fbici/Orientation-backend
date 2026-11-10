@@ -17,9 +17,13 @@ public class RegistrationService {
     private final UserRepository users;private final TenantRepository tenants;
     private final RoleRepository roles;private final CandidateRepository candidates;
     private final PasswordEncoder encoder;private final AccountRecoveryService recovery;private final EmailService email;
+    private final EmailVerificationCodeService codes;
     @Value("${app.registration.tenant-code:DEFAULT}") private String publicTenant;
     @Transactional
-    public void register(RegisterRequest request) {
+    public void register(RegisterRequest request) { register(request,false); }
+    @Transactional
+    public java.util.UUID registerMobile(RegisterRequest request) {return register(request,true);}
+    private java.util.UUID register(RegisterRequest request,boolean mobile) {
         String normalizedPhone=phones.normalize(request.getPhone());
         email.requireConfigured();
         if(request.getTenantCode()!=null && !publicTenant.equalsIgnoreCase(request.getTenantCode()))
@@ -27,11 +31,13 @@ public class RegistrationService {
         if(request.getPassword().getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72)
             throw new BusinessException("Password exceeds 72 bytes","INVALID_PASSWORD");
         if(users.countAllByEmail(request.getEmail())>0) {
-            users.findByEmail(request.getEmail())
+            var existing=users.findByEmail(request.getEmail())
                 .filter(u -> !Boolean.TRUE.equals(u.getEmailVerified()) && Boolean.TRUE.equals(u.getEnabled())
                     && u.getTenant()!=null && publicTenant.equalsIgnoreCase(u.getTenant().getCode()))
-                .ifPresent(recovery::verificationEmail);
-            return;
+                ;
+            if(mobile) return existing.map(codes::issue).orElseGet(java.util.UUID::randomUUID);
+            existing.ifPresent(recovery::verificationEmail);
+            return java.util.UUID.randomUUID();
         }
         Tenant tenant=tenants.findByCode(publicTenant).filter(t -> Boolean.TRUE.equals(t.getActive()))
             .orElseThrow(() -> new BusinessException("Public registration is not configured","REGISTRATION_UNAVAILABLE"));
@@ -43,6 +49,8 @@ public class RegistrationService {
         users.saveAndFlush(user);
         Candidate candidate=new Candidate();candidate.setEmail(user.getEmail());candidate.setFirstName(user.getFirstName());
         candidate.setLastName(user.getLastName());candidate.setPhone(user.getPhone());candidate.setUser(user);candidate.setTenant(tenant);
-        candidates.saveAndFlush(candidate);recovery.verificationEmail(user);
+        candidates.saveAndFlush(candidate);
+        if(mobile) return codes.issue(user);
+        recovery.verificationEmail(user);return java.util.UUID.randomUUID();
     }
 }
