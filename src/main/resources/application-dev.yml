@@ -25,10 +25,11 @@ app:
     allowed-headers: "*"
     allow-credentials: true
     max-age: 3600
-  # SendGrid (mettre la vraie clé API pour envoyer les emails)
-  sendgrid:
-    api-key: ${SENDGRID_API_KEY:}
-    from-email: ${SENDGRID_FROM_EMAIL:noreply@orientia.com}
-    enabled: ${SENDGRID_ENABLED:false}
+  # Brevo (utiliser une nouvelle cle API et un expediteur verifie hors Git)
+  brevo:
+    api-key: ${BREVO_API_KEY:}
+    from-email: ${BREVO_FROM_EMAIL:}
+    enabled: ${BREVO_ENABLED:false}
+    sender-name: ${BREVO_SENDER_NAME:Orientia}
 server:
   address: 0.0.0.0

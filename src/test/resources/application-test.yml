@@ -16,6 +16,8 @@ spring:
     enabled: false
 
 app:
+  brevo:
+    enabled: false
   jwt:
     secret: test-secret-key-for-unit-tests-only-minimum-256-bits-long-for-hs256
     expiration: 900000

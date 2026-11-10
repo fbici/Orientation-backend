@@ -72,7 +72,8 @@ app:
   notifications:
     admin-email: ${ADMIN_NOTIFICATION_EMAIL:adminorientia@gmail.com}
     admin-email-enabled: ${ADMIN_NOTIFICATIONS_EMAIL_ENABLED:true}
-  sendgrid:
-    api-key: ${SENDGRID_API_KEY:}
-    from-email: ${SENDGRID_FROM_EMAIL:}
-    enabled: ${SENDGRID_ENABLED:false}
+  brevo:
+    api-key: ${BREVO_API_KEY:}
+    from-email: ${BREVO_FROM_EMAIL:}
+    enabled: ${BREVO_ENABLED:true}
+    sender-name: ${BREVO_SENDER_NAME:Orientia}

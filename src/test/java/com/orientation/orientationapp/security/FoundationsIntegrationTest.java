@@ -62,6 +62,9 @@ class FoundationsIntegrationTest {
     @Autowired com.orientation.orientationapp.modules.auth.repository.RefreshTokenRepository refreshTokens;
     @Autowired com.orientation.orientationapp.modules.auth.repository.AccountTokenRepository accountTokens;
     @Autowired com.orientation.orientationapp.modules.auth.service.AuthenticationService authentication;
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+    com.orientation.orientationapp.modules.auth.service.EmailService emailProvider;
+    @Autowired org.springframework.core.env.Environment environment;
     @Autowired com.orientation.orientationapp.modules.auth.service.AccountRecoveryService recovery;
     @Autowired com.orientation.orientationapp.modules.auth.service.impl.RefreshTokenServiceImpl sessions;
     @Autowired com.orientation.orientationapp.security.service.ResourceAccess access;
@@ -297,6 +300,72 @@ class FoundationsIntegrationTest {
             mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/forgot-password")
                 .contentType("application/json").content(json.writeValueAsString(java.util.Map.of("email",address))))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isServiceUnavailable());
+    }
+
+
+    @Test void registrationRollsBackAfterProviderFailureAndCanBeRetriedWithoutSigningIn() throws Exception {
+        // The mocked facade never sends an email. PostgreSQL remains the isolated
+        // F1 database enforced by this class; HTTP-provider acceptance is tested
+        // separately in EmailServiceTest.
+        String address=java.util.UUID.randomUUID()+"@example.test";
+        String tenantCode=environment.getProperty("app.registration.tenant-code","DEFAULT");
+        var publicTenant=tenants.findByCode(tenantCode).orElseGet(()->{
+            var created=tenant("Registration");created.setCode(tenantCode);
+            return tenants.saveAndFlush(created);
+        });
+        assertTrue(Boolean.TRUE.equals(publicTenant.getActive()));
+        String request=json.writeValueAsString(java.util.Map.of(
+            "email",address,"firstName","Registration","lastName","Fixture","password",password));
+        var failedOwner=new java.util.concurrent.atomic.AtomicReference<java.util.UUID>();
+        org.mockito.Mockito.doNothing().when(emailProvider).requireConfigured();
+        org.mockito.Mockito.doAnswer(invocation->{
+            java.util.UUID owner=jdbc.queryForObject("select id from users where email=?",java.util.UUID.class,address);
+            failedOwner.set(owner);
+            assertEquals(1,jdbc.queryForObject("select count(*) from candidates where user_id=?",Integer.class,owner));
+            assertEquals(1,jdbc.queryForObject("select count(*) from account_tokens where user_id=?",Integer.class,owner));
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "Email delivery unavailable; no delivery is confirmed");
+        }).when(emailProvider).sendVerificationEmail(
+            org.mockito.ArgumentMatchers.eq(address),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString());
+        try {
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/register")
+                .contentType("application/json").content(request))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isServiceUnavailable())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.message")
+                    .value("Email delivery unavailable; no delivery is confirmed"));
+            assertNotNull(failedOwner.get(),"The provider failed after user, candidate and token were inserted");
+            assertEquals(0,jdbc.queryForObject("select count(*) from users where email=?",Integer.class,address));
+            assertEquals(0,jdbc.queryForObject("select count(*) from candidates where email=?",Integer.class,address));
+            assertEquals(0,jdbc.queryForObject("select count(*) from account_tokens where user_id=?",Integer.class,failedOwner.get()));
+            assertEquals(0,jdbc.queryForObject("select count(*) from refresh_tokens where user_id=?",Integer.class,failedOwner.get()));
+
+            // Restore only the mocked verification operation, then retry exactly
+            // the same registration payload without creating an app session.
+            org.mockito.Mockito.doNothing().when(emailProvider).sendVerificationEmail(
+                org.mockito.ArgumentMatchers.eq(address),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString());
+            var accepted=mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/register")
+                .contentType("application/json").content(request))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isAccepted())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.accessToken").doesNotExist())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.refreshToken").doesNotExist())
+                .andReturn();
+            assertNull(accepted.getRequest().getSession(false));
+            var registered=users.findByEmail(address).orElseThrow();
+            assertEquals(publicTenant.getId(),registered.getTenant().getId());
+            assertFalse(Boolean.TRUE.equals(registered.getEmailVerified()));
+            assertEquals(1,jdbc.queryForObject("select count(*) from users where email=?",Integer.class,address));
+            assertEquals(1,jdbc.queryForObject("select count(*) from candidates where user_id=? and not verified",Integer.class,registered.getId()));
+            assertEquals(1,jdbc.queryForObject("select count(*) from account_tokens where user_id=? and purpose='VERIFY_EMAIL' and not consumed",Integer.class,registered.getId()));
+            assertEquals(0,jdbc.queryForObject("select count(*) from refresh_tokens where user_id=?",Integer.class,registered.getId()));
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/auth/me"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isUnauthorized());
+            org.mockito.Mockito.verify(emailProvider,org.mockito.Mockito.times(2)).sendVerificationEmail(
+                org.mockito.ArgumentMatchers.eq(address),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString());
+        } finally {
+            // Preserve real disabled-provider behavior for every other test.
+            org.mockito.Mockito.reset(emailProvider);
+        }
     }
 
 

@@ -52,6 +52,8 @@ jobs:
           cp -R frontend/dist/orientation-backoffice/browser/. src/main/resources/static/
       - name: Verify and package with isolated PostgreSQL
         env:
+          # No real email during CI; provider tests inject their own mock.
+          BREVO_ENABLED: 'false'
           F1_TEST_DB_PASSWORD: ci-isolated-fixture-only
           TEST_PG_PORT: ${{ job.services.postgres.ports[5432] }}
         run: >-
