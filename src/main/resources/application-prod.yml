@@ -42,16 +42,19 @@ server:
   servlet:
     context-path: /
 
-# Logging reduit en production
+# Rendre les etapes du demarrage visibles dans les journaux Render.
 logging:
   level:
-    root: WARN
-    com.orientation.orientationapp: WARN
+    root: INFO
+    com.orientation.orientationapp: INFO
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
 
 # CORS
 app:
+  google:
+    enabled: ${GOOGLE_ENABLED:true}
+    web-client-id: ${GOOGLE_WEB_CLIENT_ID:1048361062873-j7dmfajmue27jhbs1ms7jmbpnpa5pcp3.apps.googleusercontent.com}
   base-url: ${APP_BASE_URL}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
