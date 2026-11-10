@@ -12,12 +12,13 @@ import lombok.RequiredArgsConstructor;
 import java.time.Instant;
 @Service @RequiredArgsConstructor @Transactional
 public class AccountProfileService {
+    private final InternationalPhoneService phones;
     private final jakarta.persistence.EntityManager entityManager;
     private final ResourceAccess access;private final UserRepository users;
     private final PasswordEncoder encoder;private final RefreshTokenService sessions;
     public UserInfo update(String first,String last,String phone) {
         var user=users.lockById(access.current().getId()).orElseThrow(ResourceAccess::denied);
-        user.setFirstName(first);user.setLastName(last);user.setPhone(phone);
+        user.setFirstName(first);user.setLastName(last);user.setPhone(phones.normalize(phone));
         return AuthenticationServiceImpl.userInfo(users.save(user));
     }
     public void password(ChangePasswordRequest request) {

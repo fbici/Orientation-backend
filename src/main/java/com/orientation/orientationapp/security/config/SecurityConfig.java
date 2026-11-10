@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").denyAll()
                 .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST,"/auth/google").permitAll()
                 .requestMatchers("/auth/register").permitAll()
                 .requestMatchers("/auth/refresh").permitAll()
                 .requestMatchers("/auth/forgot-password").permitAll()

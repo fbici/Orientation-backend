@@ -17,7 +17,7 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain)
             throws ServletException,IOException {
         String path=request.getServletPath();
-        if (!"POST".equals(request.getMethod()) || !java.util.Set.of("/auth/login","/auth/register",
+        if (!"POST".equals(request.getMethod()) || !java.util.Set.of("/auth/login","/auth/google","/auth/register",
                 "/auth/forgot-password","/auth/refresh").contains(path)) { chain.doFilter(request,response); return; }
         long now=Instant.now().getEpochSecond();
         if (windows.size()>10000) windows.entrySet().removeIf(e -> now-e.getValue().start()>=900);

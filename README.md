@@ -34,7 +34,7 @@ npm test -- --watch=false --browsers=ChromeHeadless
 
 Java **21** requis. Le profil local doit utiliser une base de développement dédiée et des variables privées ; aucun secret n'est commité. Les tests d'intégration PostgreSQL F1 exigent `-Df1.jdbc.url=jdbc:postgresql://127.0.0.1:PORT/orientia_f1`, un schéma neuf `-Df1.jdbc.schema=SCHEMA_ISOLE` et `F1_TEST_DB_PASSWORD` dans l'environnement. OCR réel : `-Df2.tesseract=CHEMIN_TESSERACT -Df2.tessdata=CHEMIN_TESSDATA`. Les tests SendGrid restent simulés ; fixer `SENDGRID_ENABLED=false` pour la recette isolée. Ne jamais substituer une connexion Render à ces paramètres.
 
-La suite complète finale a obtenu **219 tests / 37 suites, aucun échec, erreur ou test ignoré**, avec PostgreSQL privé 18.4 et un schéma vierge. Le registre final des 117 identités, la validation Hibernate/Flyway et les réponses API avec ville inconnue sont couverts. Le serveur PostgreSQL de test a été arrêté proprement après la campagne ; aucune base de production n’a été modifiée manuellement. Angular : **86 tests réussis**, build production réussi. Les avertissements connus concernent le budget CSS du layout et le module CommonJS sockjs-client. Le succès local PostgreSQL 18.4 n'est pas une certification de prise en charge par Flyway : sa version annonce une plage testée jusqu'à 17. PostgreSQL **16** est la cible Render et CI.
+La suite complète finale a obtenu **229 tests / 40 suites, aucun échec, erreur ou test ignoré**, puis 9 tests unitaires ciblés réussis après ajout de deux régressions (231 tests dans les rapports cumulés), avec PostgreSQL privé 18.4 et un schéma vierge. Le registre final des 117 identités, la validation Hibernate/Flyway et les réponses API avec ville inconnue sont couverts. Le serveur PostgreSQL de test a été arrêté proprement après la campagne ; aucune base de production n’a été modifiée manuellement. Angular : **86 tests réussis** et build production lors de la campagne précédente ; la campagne courante est précisée dans son README. Les avertissements connus concernent le budget CSS du layout et le module CommonJS sockjs-client. Le succès local PostgreSQL 18.4 n'est pas une certification de prise en charge par Flyway : sa version annonce une plage testée jusqu'à 17. PostgreSQL **16** est la cible Render et CI.
 
 ## Production Render
 
@@ -61,6 +61,8 @@ Le Dockerfile compile Angular avec Node 22 (`npm ci`, `npx ng build --configurat
 | `SPRING_DATASOURCE_URL` | JDBC PostgreSQL réel, sans identifiants dans l'URL |
 | `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` | Identifiants de la nouvelle base, hors Git |
 | `JWT_SECRET` | Nouvelle valeur aléatoire d'au moins 32 octets ; ne jamais réutiliser l'ancien défaut |
+| `GOOGLE_ENABLED` | Défaut false ; true seulement après configuration du client Web et livraison du nouveau backend |
+| `GOOGLE_WEB_CLIENT_ID` | Identifiant OAuth public Application Web, audience identique dans Flutter ; aucun secret client pour ce flux natif |
 | `APP_BASE_URL` | `https://orientation-backend-d0ys.onrender.com` |
 | `CORS_ALLOWED_ORIGINS` | Origines HTTPS exactes, séparées par virgule, sans joker avec credentials |
 | `SENDGRID_ENABLED`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL` | Activation, nouvelle clé privée Mail Send et expéditeur vérifié |
@@ -79,9 +81,9 @@ JDBC attendu : `jdbc:postgresql://HOST_INTERNE:5432/BASE?sslmode=require`, avec 
 
 ### Flyway et bootstrap
 
-Les migrations existantes V1–V82 incluent V63.1 : **83 scripts historiques**, conservés depuis le déploiement propre. V83 ajoute le registre béninois et rend `universities.city_id` facultatif ; **84 scripts au total**. Les campus conservent leur ville obligatoire.
+Les migrations existantes V1–V82 incluent V63.1 : **83 scripts historiques**, conservés depuis le déploiement propre. V83 ajoute le registre béninois et rend `universities.city_id` facultatif ; **84 scripts avec V83**. V84 ajoute uniquement les identités Google externes et leurs contraintes : **85 scripts au total**. Les campus conservent leur ville obligatoire.
 
-Sur une base vierge, Flyway exécute dans l'ordre, puis Hibernate valide. Sur la base existante à 83 migrations, seul V83 doit s'ajouter. Conserver `flyway.enabled=true`, `baseline-on-migrate=false`, `clean-disabled=true`, `ddl-auto=validate`, `sql.init.mode=never`. V1 exige les droits nécessaires pour uuid-ossp/pgcrypto ; V74 exige PostgreSQL 15 minimum. Ne pas modifier les anciennes migrations, ni utiliser `clean`, `repair`, `baseline` ou `outOfOrder` pour masquer un conflit de checksums.
+Sur une base vierge, Flyway exécute dans l'ordre, puis Hibernate valide. Sur une base existante à 83 migrations, V83 puis V84 doivent s'ajouter ; si V83 est déjà appliquée, seule V84 reste à exécuter. Conserver `flyway.enabled=true`, `baseline-on-migrate=false`, `clean-disabled=true`, `ddl-auto=validate`, `sql.init.mode=never`. V1 exige les droits nécessaires pour uuid-ossp/pgcrypto ; V74 exige PostgreSQL 15 minimum. Ne pas modifier les anciennes migrations, ni utiliser `clean`, `repair`, `baseline` ou `outOfOrder` pour masquer un conflit de checksums.
 
 Le premier administrateur est créé ponctuellement avec bootstrap explicite et mot de passe robuste 16–72 caractères, <=72 octets UTF-8, majuscule/minuscule/chiffre/symbole. Le bootstrap refuse d'écraser un compte existant. Le service actuel est déjà initialisé : laisser bootstrap désactivé et retirer son mot de passe des variables.
 
@@ -105,13 +107,25 @@ Destinataire : **adminorientia@gmail.com**. Contact public : **lestudioviral@gma
 
 Les tests couvrent 202, 400/401/429/500, IO/interruption, paramètres, liens, après commit/rollback, rôle/compte/tenant, désactivation et saturation. Ils n'envoient aucun e-mail réel. Une acceptation SendGrid ne prouve pas une réception finale. Une clé neuve, un expéditeur vérifié et une recette explicitement autorisée restent nécessaires pour confirmer la délivrabilité.
 
-## Google OAuth
+## Google Android et identité serveur
 
-Identifiant Android public fourni : `1048361062873-9p9jrn2umec435bddqen2epn6fur93d8.apps.googleusercontent.com`. Il n'est pas utilisé artificiellement comme client Web. **Aucun flux Google fonctionnel n'est livré.** Un client Application Web et une implémentation serveur testée restent à ajouter.
+Le flux natif est implémenté : Flutter utilise `google_sign_in`, transmet son jeton d'identité par POST `/auth/google` avec `{idToken}`, et reçoit la paire JWT/refresh et le profil Orientia habituels. L'endpoint est public mais soumis au limiteur des tentatives d'authentification. Il reste **désactivé par défaut**, avec réponse 503 explicite si la configuration est absente. Aucun e-mail SendGrid n'est envoyé par la création Google.
 
-Architecture retenue : Authorization Code + PKCE S256, state/nonce, validation OIDC serveur (signature, issuer, audience, expiration), identité stable issuer/sub, aucune liaison automatique par seul e-mail, consentement et réauthentification pour lier un compte, rôle CANDIDAT sans élévation, contrôle des comptes désactivés/tenants et URI exactes. Aucun token dans l'URL : échange court à usage unique puis POST, cookie de corrélation HttpOnly/Secure/SameSite=Lax et expiration du handshake. La chaîne JWT reste indépendante.
+`GoogleIdentityVerifier` utilise la bibliothèque officielle Google Java 2.9.2 : signature RSA avec clés Google, issuer Google, audience `GOOGLE_WEB_CLIENT_ID`, présence et validité de l'expiration/date d'émission, e-mail vérifié et subject non vide. Les jetons malformés sont refusés ; une indisponibilité de vérification ne crée pas de session. Les jetons Google, mots de passe et corps fournisseur ne sont pas journalisés ni enregistrés.
 
-Variables proposées pour une implémentation future : `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `GOOGLE_ENABLED` ; **elles ne sont pas consommées actuellement**. URI proposée `/login/oauth2/code/google` non encore implémentée : ne pas la présenter comme prête. Références : [Google OIDC](https://developers.google.com/identity/openid-connect/openid-connect), [Spring OAuth2 Login](https://docs.spring.io/spring-security/reference/servlet/oauth2/login/core.html).
+L'identité stable est le couple issuer/subject dans `auth_external_identities` (migration additive V84). Aucun rattachement par simple égalité d'e-mail : si un compte existe déjà sans cette identité, réponse 409 `GOOGLE_ACCOUNT_EXISTS` et connexion par mot de passe. Une nouvelle identité crée uniquement un utilisateur CANDIDAT et son profil, avec mot de passe aléatoire inconnu ; aucune élévation de rôle. Comptes, tenant et organisation doivent rester actifs. Les JWT et refresh reprennent les contrôles existants. La liaison explicite à un compte existant n'est pas implémentée.
+
+Client **Android** fourni : `1048361062873-9p9jrn2umec435bddqen2epn6fur93d8.apps.googleusercontent.com`, package `com.orientia.orientia`, associé au SHA-1 du certificat dans Google Cloud. **Il manque encore le client de type Application Web dans le même projet Google Cloud.** Même pour l'application Android, son identifiant Web sert d'audience serveur (`serverClientId`) ; il ne remplace pas le client Android package/certificat. Fournir le même identifiant public à Render via `GOOGLE_WEB_CLIENT_ID` et à Flutter via `--dart-define=GOOGLE_WEB_CLIENT_ID=...`, puis fixer `GOOGLE_ENABLED=true` après déploiement du code et application de V84. Aucun secret OAuth client ni URI de redirection Web n'est demandé pour ce flux natif.
+
+Tests : signatures cryptographiques éphémères, refus de signature étrangère/audience/issuer/expiration/claims manquants/e-mail non vérifié ; sur PostgreSQL isolé, nouvelle identité, rôle candidat, session réelle/refresh, subject stable, refus de liaison par e-mail et compte désactivé. L'identité fournisseur est simulée dans les tests d'intégration ; ils ne prouvent pas une connexion Google réelle sur appareil ou Render.
+
+Le bouton Google du **backoffice Web** reste désactivé : le parcours navigateur Authorization Code/PKCE/state/nonce et son callback ne sont pas implémentés. Ne pas annoncer `/login/oauth2/code/google` comme disponible. Références : [plugin Google Android](https://pub.dev/packages/google_sign_in_android), [vérification Google côté serveur](https://developers.google.com/identity/sign-in/android/backend-auth).
+
+## Numéros internationaux
+
+Inscription et modification du compte passent par `InternationalPhoneService` (Google libphonenumber 9.0.43). Numéro facultatif ; s'il est fourni, indicatif international `+` obligatoire, validation des métadonnées de tous les pays et normalisation E.164. Numéros nationaux ambigus, extensions et formats invalides sont refusés avec une erreur française. Les valeurs antérieures ne sont pas converties en masse. Les autres numéros de catalogue ne sont pas arbitrairement réécrits.
+
+Au Bénin, dix chiffres nationaux avec préfixe `01` depuis le 30 novembre 2024, donc `+229 01 XX XX XX XX`. Les tests couvrent le plan actuel et refusent l'ancien numéro à huit chiffres, ainsi que France, États-Unis, Nigeria, Brésil et Inde. La validation ne vérifie ni existence ni propriété de la ligne ; aucun OTP SMS n'est ajouté. [ARCEP Bénin](https://web.arcep.bj/passage-des-numero-a-10-chiffre/), [métadonnées Google](https://github.com/google/libphonenumber/releases).
 
 ## Sécurité, vérifications historiques et limites
 

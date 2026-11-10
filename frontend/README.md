@@ -35,7 +35,7 @@ La refonte Web blanche a remplacé Auth Experience 2.0 sombre : formulaire centr
 
 Le 10 novembre, un navigateur neuf sur `https://orientation-backend-d0ys.onrender.com/auth/login` a affiché cette version en 1440×1000 et 390×844, avec logos chargés et sans débordement. Ce contrôle public ne valide pas les actions administrateur privées. La nouvelle référence violette fournie pour les **trois écrans mobiles** est implémentée dans Flutter ; elle ne prétend pas avoir refondu l'ensemble des écrans Angular authentifiés.
 
-Les assets de marque sont dans `src/assets/brand/`. Le logo appartient au projet ; le G provient des ressources Google ([règles officielles](https://developers.google.com/identity/branding-guidelines)). Aucune clé Google ou SendGrid n'est dans Angular. Le client fourni étant Android, le flux Google Web reste désactivé avec explication ; un client Web et une implémentation OIDC serveur sont encore requis.
+Les assets de marque sont dans `src/assets/brand/`. Le logo appartient au projet ; le G provient des ressources Google ([règles officielles](https://developers.google.com/identity/branding-guidelines)). Aucune clé Google ou SendGrid n'est dans Angular. Le client fourni étant Android, le flux Google Web reste désactivé avec explication ; le parcours navigateur Authorization Code/PKCE et son callback restent à implémenter. Le nouveau flux natif Android POST `/auth/google` ne constitue pas une connexion Google navigateur ; son activation attend encore un client Application Web et `GOOGLE_ENABLED=true`, comme décrit dans le README backend.
 
 ## Bénin, contacts et validation
 
@@ -44,3 +44,9 @@ Le registre MESRS 2025–2026 est importé par la migration backend V83 : fiches
 Contact public : `lestudioviral@gmail.com`. Notifications administratives : `adminorientia@gmail.com`, traitées côté Spring/SendGrid selon les règles du README backend.
 
 Dernière validation exécutée : **86 tests ChromeHeadless réussis et build production réussi**, dont la transmission d'une ville inconnue comme null. Avertissements connus : budget CSS du layout et sockjs-client CommonJS. Les 42 puis 67 et 85 tests des campagnes antérieures restent des résultats historiques. Des captures précédentes étaient réalisées avec des réponses synthétiques locales ; elles ne prouvent pas une recette fonctionnelle de production. Aucun import ni modification de données de production n'a été effectué pour ces contrôles.
+
+## Téléphone du profil
+
+Le compte accepte les numéros internationaux précédés de `+` et de l’indicatif. Spring revalide et normalise avec libphonenumber ; le champ facultatif vide reste accepté. Le format béninois actuel est `+229 01 XX XX XX XX` (dix chiffres nationaux), sans limiter les autres pays. Aucun SMS de vérification n’est envoyé.
+
+Vérification courante : `npm run build:prod` réussi après correction de l’aide téléphone du profil. Les avertissements existants restent le budget CSS du layout et le module CommonJS `sockjs-client`. Les 86 tests de la campagne précédente ne sont pas comptés comme une nouvelle exécution.

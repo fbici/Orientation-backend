@@ -13,12 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 @Service @RequiredArgsConstructor
 public class RegistrationService {
+    private final InternationalPhoneService phones;
     private final UserRepository users;private final TenantRepository tenants;
     private final RoleRepository roles;private final CandidateRepository candidates;
     private final PasswordEncoder encoder;private final AccountRecoveryService recovery;private final EmailService email;
     @Value("${app.registration.tenant-code:DEFAULT}") private String publicTenant;
     @Transactional
     public void register(RegisterRequest request) {
+        String normalizedPhone=phones.normalize(request.getPhone());
         email.requireConfigured();
         if(request.getTenantCode()!=null && !publicTenant.equalsIgnoreCase(request.getTenantCode()))
             throw new BusinessException("Public registration does not allow this tenant","INVALID_REGISTRATION_TENANT");
@@ -35,7 +37,7 @@ public class RegistrationService {
             .orElseThrow(() -> new BusinessException("Public registration is not configured","REGISTRATION_UNAVAILABLE"));
         Role role=roles.findByCode("CANDIDAT").orElseThrow(() -> new IllegalStateException("Candidate role is not configured"));
         User user=new User();user.setEmail(request.getEmail());user.setPassword(encoder.encode(request.getPassword()));
-        user.setFirstName(request.getFirstName());user.setLastName(request.getLastName());user.setPhone(request.getPhone());
+        user.setFirstName(request.getFirstName());user.setLastName(request.getLastName());user.setPhone(normalizedPhone);
         user.setTenant(tenant);user.setStatus(CandidateStatus.ACTIVE);user.setEmailVerified(false);
         UserRole membership=new UserRole();membership.setUser(user);membership.setRole(role);user.getUserRoles().add(membership);
         users.saveAndFlush(user);

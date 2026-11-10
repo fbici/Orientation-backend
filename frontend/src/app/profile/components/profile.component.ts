@@ -62,7 +62,7 @@ import { AuthService } from '../../core/services/auth.service';
               <div class="form-group"><label class="form-label">Prénom</label><input type="text" class="form-input" [(ngModel)]="firstName"></div>
               <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" [(ngModel)]="lastName"></div>
               <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" [value]="auth.user()?.email" disabled style="opacity:.6"></div>
-              <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" [(ngModel)]="phone" placeholder="+229 XX XX XX XX"></div>
+              <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" [(ngModel)]="phone" placeholder="+229 01 XX XX XX XX" aria-describedby="phone-format"><small id="phone-format">Facultatif : + et indicatif international, tous pays.</small></div>
             </div>
 
             <div class="divider"></div>
