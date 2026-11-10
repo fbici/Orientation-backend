@@ -1,0 +1,1177 @@
+{
+  "source": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+  "edition": "2025-2026",
+  "institutions": [
+    {
+      "name": "Centre International de Formation à l’Expertise Comptable",
+      "shortName": "CIFEC",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole de Formation des Enseignants du Secondaire - SAPIENTIA",
+      "shortName": "SAPIENTIA",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure d’Administration et d’Economie",
+      "shortName": "ESAE",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure d’Enseignement Professionnel - LE BERGER",
+      "shortName": "ESEP LE BERGER",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure d’Entrepreneuriat et de la Prospérité",
+      "shortName": "ESPERANZA",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure d’Expertise Comptable",
+      "shortName": "ESEC",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure d’Ingénierie Sainte Marie Stella",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Génie Civil VERECHAGUINE A.K.",
+      "shortName": "ESGC",
+      "type": "PRIVATE",
+      "page": 73,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Génie Télécoms et TIC - Ecce Homo",
+      "shortName": "ESGTIC",
+      "type": "PRIVATE",
+      "page": 74,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Gestion d’Informatique et des Sciences",
+      "shortName": "ESGIS",
+      "type": "PRIVATE",
+      "page": 74,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Gestion SERENA",
+      "shortName": "SERENA",
+      "type": "PRIVATE",
+      "page": 74,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Management",
+      "shortName": "ESM",
+      "type": "PRIVATE",
+      "page": 74,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Technologie et de Gestion",
+      "shortName": "ESTG",
+      "type": "PRIVATE",
+      "page": 74,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des Métiers des Energies Renouvelables",
+      "shortName": "ESMER",
+      "type": "PRIVATE",
+      "page": 74,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Jean Michel Le Faucon",
+      "shortName": "ESJMF",
+      "type": "PRIVATE",
+      "page": 75,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole supérieure Sainte Félicité",
+      "shortName": "ESSF",
+      "type": "PRIVATE",
+      "page": 75,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole PIGIER BENIN",
+      "shortName": "PIGIER",
+      "type": "PRIVATE",
+      "page": 75,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Haute Ecole de Commerce et de Management",
+      "shortName": "HECM",
+      "type": "PRIVATE",
+      "page": 76,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Haute Ecole de Gestion et de Journalisme de Bohicon",
+      "shortName": "HEGJ",
+      "type": "PRIVATE",
+      "page": 76,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut International de Management",
+      "shortName": "IIM",
+      "type": "PRIVATE",
+      "page": 76,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Jean Paul II de Philosophie et de Sciences Humaines",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 76,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur d’Expertise et Gestion",
+      "shortName": "ISEG",
+      "type": "PRIVATE",
+      "page": 76,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Communication et de Gestion",
+      "shortName": "ISCG",
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Formation des Educateurs Spécialisés Laura Vicuña",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Management Adonaï",
+      "shortName": "ISM Adonaï",
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Management et de Technologies Saint SALOMON",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur des Métiers de l’Audiovisuel",
+      "shortName": "ISMA",
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur Golden Academy",
+      "shortName": "ISGA",
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur Saint Paul de Tarse",
+      "shortName": "ISSPT",
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire de Sciences Economiques et Biologiques Appliquées",
+      "shortName": "IUSEBA",
+      "type": "PRIVATE",
+      "page": 77,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire MathiFinEco",
+      "shortName": "IUM",
+      "type": "PRIVATE",
+      "page": 78,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire Panafricain",
+      "shortName": "IUP",
+      "type": "PRIVATE",
+      "page": 78,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire Les COURS SONOU",
+      "shortName": "LCS",
+      "type": "PRIVATE",
+      "page": 78,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "IRGIB-AFRICA UNIVERSITY",
+      "shortName": "IRGIB-AFRICA",
+      "type": "PRIVATE",
+      "page": 79,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "POLYTECH ADA - Ecole Polytechnique des Génies",
+      "shortName": "POLYTECH ADA",
+      "type": "PRIVATE",
+      "page": 79,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université Africaine de Technologie et de Management",
+      "shortName": "UATM-GASA",
+      "type": "PRIVATE",
+      "page": 79,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université Catholique d’Afrique de l’Ouest",
+      "shortName": "UCAO",
+      "type": "PRIVATE",
+      "page": 80,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université Polytechnique Internationale Obiang Nguema Mbasogo",
+      "shortName": "UPI-ONM",
+      "type": "PRIVATE",
+      "page": 80,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université Protestante de l’Afrique de l’Ouest",
+      "shortName": "UPAO",
+      "type": "PRIVATE",
+      "page": 80,
+      "section": "agrement_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "African School Of Economics",
+      "shortName": "ASE",
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "ASSANA-FORMATION",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Centre d’Etudes Touristique de l’Agence Africaine de Tourisme",
+      "shortName": "CET AAT-IPAAM",
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Centre de Formation Professionnelle aux Métiers des Médias",
+      "shortName": "CFPMM",
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Centre de Formation Professionnelle et de Perfectionnement",
+      "shortName": "CFPP",
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Centre de Formation Touristique et Hôtelière",
+      "shortName": "CFTH",
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Centre International Universitaire des Meilleurs",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Classes Préparatoires Audacia",
+      "shortName": "CP-A",
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole de Commerce de Lyon Campus Bénin",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 82,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole de Techniciens Supérieurs du Bénin",
+      "shortName": "ECOTES",
+      "type": "PRIVATE",
+      "page": 83,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Internationale de Théâtre du Bénin",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 83,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Polytechnique Universitaire des métiers d’Avenirs",
+      "shortName": "EPUMA",
+      "type": "PRIVATE",
+      "page": 83,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Professionnelle Salésienne St Jean",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 83,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Commerce et d’Administration des Entreprises",
+      "shortName": "ESCAE",
+      "type": "PRIVATE",
+      "page": 84,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Polytechnique",
+      "shortName": "ESP",
+      "type": "PRIVATE",
+      "page": 83,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Gestion et de Technologie",
+      "shortName": "ESGT",
+      "type": "PRIVATE",
+      "page": 84,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Techniques Industrielles et de Management",
+      "shortName": "ESTIM",
+      "type": "PRIVATE",
+      "page": 85,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des cadres du funéraire",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 85,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des Cadres et Techniciens",
+      "shortName": "ESCT",
+      "type": "PRIVATE",
+      "page": 85,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des Ingénieurs Géomètres Topographes",
+      "shortName": "ESIGT",
+      "type": "PRIVATE",
+      "page": 85,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des Sciences et Technologies de Lokossa",
+      "shortName": "ESST-L",
+      "type": "PRIVATE",
+      "page": 85,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des Techniques d’Administration et de Gestion",
+      "shortName": "ESTAG",
+      "type": "PRIVATE",
+      "page": 86,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure des Technologies Avancées et de Management",
+      "shortName": "ESTAM",
+      "type": "PRIVATE",
+      "page": 86,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Panafricaine de Management Appliqué",
+      "shortName": "ESPAM",
+      "type": "PRIVATE",
+      "page": 86,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Polytechnique Le Pharaon",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 86,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure pour la Formation et le Recyclage d’Enseignants",
+      "shortName": "ESFRE",
+      "type": "PRIVATE",
+      "page": 87,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Privée des Sciences Agronomiques Kigani Dada de Kpessou",
+      "shortName": "ESPSA/K.D-K",
+      "type": "PRIVATE",
+      "page": 87,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Saint-Louis d’Afrique",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 87,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure Universitaire St Clements and Commonwealth",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 87,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "EPS LA CITE",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 88,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "ESFAM-BENIN",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 88,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Haute Ecole d’Industrie et de Management HEIM WELDIOS",
+      "shortName": "HEIM WELDIOS",
+      "type": "PRIVATE",
+      "page": 88,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Haute Ecole de Gestion et de Technologie",
+      "shortName": "HEGT",
+      "type": "PRIVATE",
+      "page": 89,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Haute Ecole des Métiers Techniques",
+      "shortName": "HECOMET",
+      "type": "PRIVATE",
+      "page": 89,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Haute Ecole du Numérique et des Sciences des Affaires",
+      "shortName": "HENSA",
+      "type": "PRIVATE",
+      "page": 89,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Houdégbé North American University",
+      "shortName": "HNAUB",
+      "type": "PRIVATE",
+      "page": 89,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Africain Ibn Batouta",
+      "shortName": "IAIB",
+      "type": "PRIVATE",
+      "page": 90,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut CERCO",
+      "shortName": "CERCO",
+      "type": "PRIVATE",
+      "page": 90,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut de Formations Avancées",
+      "shortName": "IFA TOSSI",
+      "type": "PRIVATE",
+      "page": 90,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Interafricain de formation en Gestion, informatique et tourisme",
+      "shortName": "IIFGIT",
+      "type": "PRIVATE",
+      "page": 90,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut International de Finance, Management et d’Expertise Comptable",
+      "shortName": "IIFMEC",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Polytechnique LE CITOYEN",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Polytechnique Paul Hazoume",
+      "shortName": "IPPH",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Régional de Formation Professionnelle",
+      "shortName": "IRFP",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Régional Supérieur des Beaux Arts, de la Culture et de la Communication",
+      "shortName": "IRSBAC COM",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Formation Professionnelle",
+      "shortName": "ISFOP",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Formation Professionnelle et d’Appui à la Sécurité Economique",
+      "shortName": "IS FOPASE",
+      "type": "PRIVATE",
+      "page": 92,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Génie-Civil et de Gestion",
+      "shortName": "ISGG",
+      "type": "PRIVATE",
+      "page": 92,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de l’Afrique de l’Ouest",
+      "shortName": "ISAO",
+      "type": "PRIVATE",
+      "page": 92,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Mathématiques de la Décision",
+      "shortName": "ISMADE",
+      "type": "PRIVATE",
+      "page": 92,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur HCUB",
+      "shortName": "HCUB",
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur la Nouvelle Espérance",
+      "shortName": "ISNE",
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur NOTRE Dame d’Afrique",
+      "shortName": "ISNDA",
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire Africain du Bénin",
+      "shortName": "IUAB",
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire Courage",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire de Bohicon",
+      "shortName": "IUBO",
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire de Langue et des Sciences",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire des Métiers d’Avenir",
+      "shortName": "IUMA",
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire des Sciences et Techniques AJAVON Sébastien",
+      "shortName": "IUST-AS",
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire du Bénin",
+      "shortName": "IUB",
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire du Professorat et de Management",
+      "shortName": "IUPM",
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire EDEXCEL",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire le Grand Berger du Bénin",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 94,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire Saints Adrien et Anselme",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 95,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire ULTIME des Sciences et Technologies",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 95,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire West African Union",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 95,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "La Nouvelle Ecole des Métiers",
+      "shortName": "LaNEM",
+      "type": "PRIVATE",
+      "page": 96,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Pinnacle African Institute",
+      "shortName": null,
+      "type": "PRIVATE",
+      "page": 96,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "POMA",
+      "shortName": "POMA",
+      "type": "PRIVATE",
+      "page": 96,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université d’Abomey-Calavi",
+      "shortName": "UAC",
+      "type": "PUBLIC",
+      "page": null,
+      "section": "universites_publiques",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université de Parakou",
+      "shortName": "UP",
+      "type": "PUBLIC",
+      "page": null,
+      "section": "universites_publiques",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université Nationale des Sciences, Technologies, Ingénierie et Mathématiques",
+      "shortName": "UNSTIM",
+      "type": "PUBLIC",
+      "page": null,
+      "section": "universites_publiques",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Université Nationale d’Agriculture",
+      "shortName": "UNA",
+      "type": "PUBLIC",
+      "page": null,
+      "section": "universites_publiques",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Ecole Supérieure de Journalisme et de communication",
+      "shortName": "ESJC/UAFPJ",
+      "type": "PRIVATE",
+      "page": 84,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur Agro Pastoral de Biotechnologie et de l’Environnement",
+      "shortName": "ISAPAB",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur de Communication et d’Organisation et de Management",
+      "shortName": "ISCOM",
+      "type": "PRIVATE",
+      "page": 91,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Supérieur des Sciences de l’Information et de la Communication",
+      "shortName": "ISSIC",
+      "type": "PRIVATE",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    },
+    {
+      "name": "Institut Universitaire d’Enseignement Professionnel Spécialisé dans les Métiers de l’Agriculture de Govié",
+      "shortName": "IUEP",
+      "type": "OTHER",
+      "page": 93,
+      "section": "ouverture_2025",
+      "sourceUrl": "https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf",
+      "edition": "2025-2026",
+      "verified": false
+    }
+  ],
+  "classificationNote": "Les identités et les types sont à revoir. IUEP Govié reste OTHER, sans déduire son statut juridique de sa présence dans une annexe."
+}

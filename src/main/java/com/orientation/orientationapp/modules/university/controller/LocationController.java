@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 @RestController
 @RequestMapping("/locations")
 @RequiredArgsConstructor

@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public final class CatalogRequests {
  private CatalogRequests() {}
  public record UniversityWrite(@NotBlank @Size(max=200) String name,@Size(max=50) String shortName,
-  @NotNull UUID countryId,@NotNull UUID cityId,@Size(max=30) String type,UniversityStatus status,
+  @NotNull UUID countryId,UUID cityId,@Size(max=30) String type,UniversityStatus status,
   @Size(max=500) String address,@Size(max=20) String phone,@Email @Size(max=255) String email,
   @Size(max=500) String website,@Min(1) Integer foundedYear,@Size(max=20000) String description,
   @Size(max=500) String sourceUrl) {}

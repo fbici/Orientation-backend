@@ -70,7 +70,7 @@ public class AcademicCatalogService {
  private Map<String,Object> viewData(Object entity) {
   if(entity instanceof University u) return row("id",u.getId(),"name",u.getName(),"shortName",u.getShortName(),
    "countryId",u.getCountry().getId(),"countryName",u.getCountry().getName(),"country",ref(u.getCountry(),u.getCountry().getName()),
-   "cityId",u.getCity().getId(),"cityName",u.getCity().getName(),"city",ref(u.getCity(),u.getCity().getName()),
+   "cityId",u.getCity()==null?null:u.getCity().getId(),"cityName",u.getCity()==null?null:u.getCity().getName(),"city",u.getCity()==null?null:ref(u.getCity(),u.getCity().getName()),
    "type",u.getInstitutionType(),"status",u.getStatus(),"active",u.getActive(),"address",u.getAddress(),
    "phone",u.getPhone(),"email",u.getEmail(),"website",u.getWebsite(),"foundedYear",u.getFoundedYear(),
    "description",u.getDescription(),"sourceUrl",u.getSourceUrl(),"tenantId",u.getTenantId());
@@ -181,8 +181,8 @@ public class AcademicCatalogService {
   String permission=id==null?"UNIVERSITY_CREATE":"UNIVERSITY_UPDATE";
   University u=id==null?new University():university(id);
   if(id==null){u.setTenantId(owner==null?access.create(permission):owner);access.write(u.getTenantId(),permission);}else access.write(u.getTenantId(),permission);
-  var country=found(countries.findById(r.countryId()));var city=found(cities.findById(r.cityId()));
-  if(!city.getCountry().getId().equals(country.getId())) throw invalid("City does not belong to the selected country");
+  var country=found(countries.findById(r.countryId()));var city=r.cityId()==null?null:found(cities.findById(r.cityId()));
+  if(city!=null && !city.getCountry().getId().equals(country.getId())) throw invalid("City does not belong to the selected country");
   if(r.type()!=null && !Set.of("PUBLIC","PRIVATE","OTHER").contains(r.type())) throw invalid("University type must be PUBLIC, PRIVATE or OTHER");
   u.setName(r.name().strip());u.setShortName(r.shortName());u.setCountry(country);u.setCity(city);u.setInstitutionType(r.type());
   u.setStatus(r.status()==null?UniversityStatus.PENDING:r.status());u.setActive(u.getStatus()==UniversityStatus.ACTIVE);

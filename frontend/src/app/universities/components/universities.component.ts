@@ -14,7 +14,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
   template: `
     <div class="anim-fade-up">@if(error()){<div class="api-error" role="alert">{{error()}}</div>}
       <div class="page-header">
-        <div><h1>Universités</h1><p>Gestion des universités et établissements</p></div>
+        <div><h1>Universités</h1><p>Universités publiques et établissements privés · Bénin et monde</p></div>
         <div class="page-header-actions">
           <button class="btn btn-primary" (click)="openCreate()"><span class="material-symbols-rounded">add</span>Ajouter</button>
         </div>
@@ -83,7 +83,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       </div>
     </div>
 
-    <p>Les fiches créées ou modifiées restent à revoir avant publication depuis un guide source.</p>
+    <p>Les fiches créées ou modifiées restent à revoir avant publication depuis un guide source. Le registre MESRS 2025-2026 apporte des identités à vérifier : il ne certifie pas les agréments actuels de leurs formations.</p>
     <!-- Create/Edit Modal -->
     <app-modal [open]="showForm()" [title]="formTitle()" size="600px" [confirmLoading]="saving()" (close)="showForm.set(false)" (confirm)="save()">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
@@ -107,7 +107,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Ville *</label>
+          <label class="form-label">Ville (si connue)</label>
           <select class="form-input" [(ngModel)]="form.cityId" [disabled]="!form.countryId">
             <option value="">
               {{ form.countryId ? 'Sélectionner une ville...' : "Sélectionnez d'abord un pays" }}
@@ -277,14 +277,15 @@ export class UniversitiesComponent implements OnInit {
   }
 
   save(): void {
-    if (!this.form.name || !this.form.countryId || !this.form.cityId) {
+    if (!this.form.name || !this.form.countryId) {
       this.toast.warning('Veuillez remplir les champs obligatoires.');
       return;
     }
     this.saving.set(true);
+    const payload = { ...this.form, cityId: this.form.cityId || null };
     const call = this.editId()
-      ? this.api.updateUniversity(this.editId()!, this.form)
-      : this.api.createUniversity(this.form);
+      ? this.api.updateUniversity(this.editId()!, payload)
+      : this.api.createUniversity(payload);
     call.subscribe({
       next: () => {
         this.saving.set(false);

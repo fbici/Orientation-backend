@@ -31,6 +31,25 @@ class FoundationsIntegrationTest {
         assertEquals(1,jdbc.queryForObject("select count(*) from information_schema.columns where table_schema=current_schema() and table_name='knowledge_nodes' and column_name='embedding'",Integer.class));
     }
 
+    @Test void beninRegistryKeepsUnknownCitiesAndEditorialReviewWithoutDuplicatingSeeds() throws Exception {
+        String source="https://enseignementsuperieur.gouv.bj/uploads/document_actualite/07ccfec01c103dab63756ab2b15455be.pdf";
+        assertEquals(117,jdbc.queryForObject("select count(*) from universities where source_url=? and tenant_id is null",Integer.class,source));
+        assertEquals(4,jdbc.queryForObject("select count(*) from universities where source_url=? and institution_type='PUBLIC'",Integer.class,source));
+        assertEquals(112,jdbc.queryForObject("select count(*) from universities where source_url=? and institution_type='PRIVATE'",Integer.class,source));
+        assertEquals(0,jdbc.queryForObject("select count(*) from universities where source_url=? and verified",Integer.class,source));
+        assertTrue(jdbc.queryForObject("select count(*) from universities where source_url=? and city_id is null",Integer.class,source)>100);
+        var session=login(superUser);
+        var institution=jdbc.queryForObject("select id from universities where short_name='UNSTIM' and tenant_id is null",java.util.UUID.class);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/universities/"+institution)
+            .header("Authorization","Bearer "+session.getAccessToken()))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.shortName").value("UNSTIM"))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.cityId").doesNotExist());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/locations/cities")
+            .header("Authorization","Bearer "+session.getAccessToken()))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
+    }
+
     @Autowired com.orientation.orientationapp.modules.auth.repository.UserRepository users;
     @Autowired com.orientation.orientationapp.modules.auth.repository.RoleRepository roles;
     @Autowired com.orientation.orientationapp.modules.auth.repository.TenantRepository tenants;

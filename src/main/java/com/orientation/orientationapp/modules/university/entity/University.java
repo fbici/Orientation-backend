@@ -36,8 +36,8 @@ public class University extends BaseEntity {
     @JoinColumn(name = "country_id", nullable = false, foreignKey = @ForeignKey(name = "fk_university_country"))
     private Country country;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "city_id", nullable = false, foreignKey = @ForeignKey(name = "fk_university_city"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id", foreignKey = @ForeignKey(name = "fk_university_city"))
     private City city;
 
     @Column(length = 500)
