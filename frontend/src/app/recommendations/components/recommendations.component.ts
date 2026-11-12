@@ -1,3 +1,5 @@
+import {CandidatePickerComponent} from '../../shared/components/candidate-picker.component';
+import {PaginationComponent} from '../../shared/components/pagination.component';
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,13 +22,12 @@ interface Diagnostic {
 }
 @Component({
   selector: 'app-recommendations', standalone: true,
-  imports: [CommonModule, FormsModule, ModalComponent],
+  imports: [CommonModule, FormsModule, ModalComponent, CandidatePickerComponent, PaginationComponent],
   template: `
     <div class="anim-fade-up">
       <div class="page-header"><div><h1>Recommandations</h1><p>Diagnostics des calculs depuis le profil confirme du candidat</p></div></div>
       <div class="card" style="margin-bottom:22px"><div class="card-body">
-        <label class="form-label" for="candidate-id">Identifiant du candidat</label>
-        <input id="candidate-id" class="form-input" [(ngModel)]="candidateId" placeholder="UUID du candidat">
+        <app-candidate-picker [(value)]="candidateId" (valueChange)="page=0;recommendations.set([]);total.set(0)" />
         <p>La confirmation du candidat ne constitue pas une certification officielle. Un score de compatibilite ne garantit pas une admission.</p>
         <button class="btn btn-secondary" (click)="load()" [disabled]="loading()">Consulter</button>
         <button class="btn btn-primary" (click)="generate()" [disabled]="loading()">Recalculer depuis le profil enregistre</button>
@@ -49,8 +50,7 @@ interface Diagnostic {
             </tr>
           } @empty { <tr><td colspan="6">Aucun resultat pour ce candidat.</td></tr> }
           </tbody></table>
-          <button class="btn btn-secondary" (click)="changePage(-1)" [disabled]="page === 0 || loading()">Precedent</button>
-          <button class="btn btn-secondary" (click)="changePage(1)" [disabled]="(page + 1) * 20 >= total() || loading()">Suivant</button>
+          <app-pagination [page]="page" [total]="total()" [loading]="loading()" (pageChange)="page=$event;load()" />
         </div>
       </div>
     </div>

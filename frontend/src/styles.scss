@@ -214,3 +214,32 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 .auth-submit{height:56px;border-radius:28px;background:linear-gradient(120deg,#953be9,#5d11b4);font-size:16px;box-shadow:0 8px 20px #7725d828}
 .auth-submit-indicator{border-radius:50%;width:36px;height:36px}.auth-google{border-radius:24px}
 @media(max-width:600px){.table-pagination,.pagination-bar{padding:16px;justify-content:center}.auth-layout{padding:20px 14px}.auth-panel{padding:28px 20px}}
+
+
+/* Signed-in administration: consistent rhythm, accessible controls and empty states. */
+.content {
+  .page-header { margin-bottom: 28px; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .card { margin-bottom: 24px; }
+  .card-body { line-height: 1.65; }
+  .card-body > p { margin: 0 0 18px; color: var(--n-600, #596579); }
+  .card-body > .form-label { display: block; margin-top: 20px; margin-bottom: 8px; }
+  .card-body > .form-input { margin-bottom: 16px; }
+  .card-body > .btn { margin: 4px 10px 14px 0; }
+  .form-input { min-height: 46px; }
+  input[type=file] { display: block; width: 100%; padding: 24px; margin: 12px 0 20px; background: #f8faff; border: 1px dashed #a5b4d0; border-radius: 14px; }
+  input[type=file]::file-selector-button { border: 0; padding: 12px 18px; border-radius: 9px; background: #e7edff; color: #2347a2; font-weight: 600; margin-right: 16px; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--brand); width: 18px; height: 18px; vertical-align: middle; margin-right: 8px; }
+  .data-table td { padding-top: 18px; padding-bottom: 18px; }
+  .data-table td[colspan] { text-align: center; padding: 48px 24px; color: var(--n-500, #68758b); background: #fcfdff; }
+  .data-table td .btn + .btn { margin-left: 8px; }
+  .pagination-bar { border: 1px solid #e5eaf2; border-radius: 14px; padding: 16px 20px; margin-top: 12px; font-size: 14px; flex-wrap: wrap; gap: 12px; }
+  .decision-tools { background: #f8faff; padding: 24px; border-radius: 16px; border: 1px solid #e7ecf6; margin: 22px 0; }
+  .decision-tools h2 { margin: 0 0 20px; font-size: 18px; }
+  .decision-tools .form-label { display: block; margin: 20px 0 8px; }
+  .decision-tools .btn { margin: 12px 10px 16px 0; }
+  .decision-tools p { color: #68758b; font-size: 14px; }
+  .analytics-empty { text-align: center; max-width: 740px; margin: 24px auto; padding: 44px 24px; }
+  .analytics-empty .material-symbols-rounded { font-size: 42px; padding: 20px; color: var(--brand); background: #edf2ff; border-radius: 24px; margin-bottom: 20px; }
+  .analytics-empty h2 { margin-bottom: 16px; }
+}
+@media(max-width: 700px) { .content .decision-tools { padding: 16px; } .content .card-body { padding: 20px; } }

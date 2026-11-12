@@ -1,20 +1,21 @@
-import {Component,signal} from '@angular/core';
+import {ProgramPickerComponent} from '../shared/components/program-picker.component';
+import {CandidatePickerComponent} from '../shared/components/candidate-picker.component';
+import {PaginationComponent} from '../shared/components/pagination.component';
+import {Component,Input,signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ApiService} from '../core/services/api.service';
 import {finalize,Observable,switchMap} from 'rxjs';
 export interface DecisionView {id:string;kind:string;computedAt:string;profileChanged:boolean;sourceCurrent?:boolean;result:unknown;}
 @Component({
- selector:'app-decisions',standalone:true,imports:[CommonModule,FormsModule],
+ selector:'app-decisions',standalone:true,imports:[CommonModule,FormsModule,CandidatePickerComponent,PaginationComponent,ProgramPickerComponent],
  template:`
  <div class="anim-fade-up">
- <div class="page-header"><div><h1>Aide à la décision</h1><p>Simulations, comparaisons, bourses et rapports du candidat autorisé</p></div></div>
+ <div class="page-header"><div><h1>{{reportsOnly ? "Rapports et exports" : "Aide à la décision"}}</h1><p>{{reportsOnly ? "Retrouvez les décisions enregistrées et téléchargez leurs résultats." : "Comparez des formations et explorez les possibilités du candidat."}}</p></div></div>
  <div class="card"><div class="card-body">
- <label class="form-label" for="decision-candidate">Identifiant candidat</label>
- <input id="decision-candidate" class="form-input" [(ngModel)]="candidateId" (ngModelChange)="resetContext()" placeholder="UUID du candidat">
+ <app-candidate-picker [(value)]="candidateId" (valueChange)="resetContext()" />
  <p>Compatibilité calculée, sans classement officiel ni garantie d'admission. Les simulations conservent le profil confirmé.</p>
- <label class="form-label" for="decision-programs">Programmes à comparer (2 à 6 UUID séparés par une virgule)</label>
- <input id="decision-programs" class="form-input" [(ngModel)]="programIds">
+ @if(!reportsOnly){<section class="decision-tools"><h2>Explorer une hypothèse</h2><app-program-picker [(value)]="programIds" />
  <button class="btn btn-secondary" (click)="compare()" [disabled]="busy()">Comparer</button>
  <button class="btn btn-secondary" (click)="funding()" [disabled]="busy()">Évaluer les bourses</button>
  <label class="form-label" for="decision-average">Moyenne hypothétique dans le barème confirmé</label>
@@ -24,6 +25,7 @@ export interface DecisionView {id:string;kind:string;computedAt:string;profileCh
  <input id="decision-question" class="form-input" maxlength="2000" [(ngModel)]="question">
  <button class="btn btn-secondary" (click)="ask()" [disabled]="busy()">Interroger</button>
  <p>Pour une simulation ou une comparaison, l'assistant utilise les paramètres explicites renseignés ci-dessus.</p>
+ </section>}
  @if(error()){<p role="alert">{{error()}}</p>}
  @if(busy()){<p role="status">Chargement…</p>}
  </div></div>
@@ -67,11 +69,11 @@ export interface DecisionView {id:string;kind:string;computedAt:string;profileCh
  <button class="btn btn-secondary" (click)="download(row.id,'excel')">XLSX</button>
  </td></tr>}@empty{<tr><td colspan="4">Aucun résultat chargé.</td></tr>}
  </tbody></table>
- <button class="btn btn-secondary" (click)="page=page-1;load()" [disabled]="page===0||busy()">Précédent</button>
- <button class="btn btn-secondary" (click)="page=page+1;load()" [disabled]="(page+1)*20>=total()||busy()">Suivant</button>
+ <app-pagination [page]="page" [total]="total()" [loading]="busy()" (pageChange)="page=$event;load()" />
  </div></div></div>`
 })
 export class DecisionsComponent {
+ @Input() reportsOnly=false;
  candidateId='';programIds='';average:number|null=null;question='';kind='SIMULATION';page=0;
  busy=signal(false);error=signal('');result=signal<unknown>(null);history=signal<DecisionView[]>([]);total=signal(0);
  private session:string|null=null;

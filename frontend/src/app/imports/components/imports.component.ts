@@ -30,7 +30,7 @@ import { ApiService } from "../../core/services/api.service";
       <label class="form-label">Données à importer</label
       ><select class="form-input" [(ngModel)]="type">
         @for (t of types; track t) {
-          <option [value]="t">{{ t }}</option>
+          <option [value]="t">{{ labels[t] }}</option>
         }
       </select>
       <label class="form-label">Fichier</label
@@ -107,6 +107,7 @@ import { ApiService } from "../../core/services/api.service";
   </div>`,
 })
 export class ImportsComponent implements OnInit {
+  labels: Record<string,string> = {UNIVERSITIES:"Universités",FACULTIES:"Facultés et écoles",PROGRAMS:"Formations",SCHOLARSHIPS:"Bourses"};
   type = "UNIVERSITIES";
   types = ["UNIVERSITIES", "FACULTIES", "PROGRAMS", "SCHOLARSHIPS"];
   file: File | null = null;
@@ -131,7 +132,7 @@ export class ImportsComponent implements OnInit {
     });
   }
   upload() {
-    if (!this.file) return;
+    if (!this.file || this.busy()) return;
     if (this.file.size > 2097152) {
       this.error.set("Taille maximale : 2 Mo.");
       return;

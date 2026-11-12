@@ -130,6 +130,7 @@ export class ApiService {
   getCandidates(page = 0, size = 20): Observable<PageResponse<any>> {
     return this.http.get<PageResponse<any>>(`${this.b}/candidates`, { params: this.p(page, size) });
   }
+  searchCandidates(q:string):Observable<any[]> {return this.http.get<any[]>(`${this.b}/candidates/search`,{params:{q}});}
   getCandidate(id: string): Observable<any> { return this.http.get(`${this.b}/candidates/${id}`); }
 
   // ── Recommendations ──

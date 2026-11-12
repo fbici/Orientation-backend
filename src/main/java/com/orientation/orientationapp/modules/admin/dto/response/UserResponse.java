@@ -26,5 +26,7 @@ public class UserResponse {
     private boolean mfaEnabled;
     private Instant lastLoginAt;
     private Instant createdAt;
+    private Instant deletionRequestedAt;
+    private Instant purgeAfter;
     private List<String> roles;
 }

@@ -200,3 +200,96 @@ Les filtres pays/université restent génériques et les choix d’université c
 Déploiement : publier d’abord le backend contenant V85/V86, laisser Flyway appliquer uniquement les migrations manquantes, vérifier le bon commit Live et `/actuator/health`, puis utiliser le mobile 1.4.0. Aucun e-mail réel, compte de production, test administrateur connecté de production ni modification de base de production n’a été effectué pour cette campagne. Le succès de la suite locale ne prouve pas une recette exhaustive de toutes les fonctionnalités en production.
 
 Après la correction du logo e-mail indépendant de Render : **57 tests ciblés e-mail/code réussis**, zéro échec, après la campagne complète de 278 tests. Le PNG public figé a été vérifié HTTP 200 et signature PNG ; aucune livraison ni aucun rendu Gmail/Outlook réel n’est revendiqué. L’APK 1.4.0 a été observé sur le Samsung : animation du logo puis connexion.
+
+
+### Diagnostic du timeout Render Free — 10 novembre 2026
+
+Le propriétaire confirme Docker, instance Free, sans `JAVA_TOOL_OPTIONS` ni `JDK_JAVA_OPTIONS`. Le journal fourni confirme la connexion PostgreSQL 16, la validation des 87 migrations et l’application réussie de V85/V86. La dernière étape visible est Hibernate ; aucune ligne Tomcat démarré/Started ni erreur explicite de mémoire ne précède le timeout. Le port `${PORT}` et l’adresse `0.0.0.0` sont déjà configurés : aucune modification de port ou réparation Flyway n’est justifiée par ces traces.
+
+Le [plan Free Render](https://render.com/docs/compute-plans) dispose de 0,1 CPU et 512 MB. Java 21 local, avec `-XX:MaxRAM=512m -XX:ActiveProcessorCount=1`, choisit un tas maximum de 128 Mio et Serial GC. Cette mesure locale ne relève pas les options effectives du conteneur Render.
+
+Comparaison du JAR publié en profil prod, Java 21, PostgreSQL privé sur loopback et schéma neuf dédié, e-mails/Google/bootstrap désactivés :
+
+| Tas maximum | Santé HTTP 200 UP | Pauses GC consignées | Erreur mémoire |
+| --- | --- | --- | --- |
+| 128 Mio | 66,0 s | 214 | Aucune |
+| 256 Mio | 51,0 s | 194 | Aucune |
+
+Les deux processus ont terminé l’initialisation Hibernate. Le premier passage a appliqué les migrations, le second les a seulement validées ; les temps ne constituent donc pas un benchmark strict. Windows local, un processeur déclaré à Java : ni quota CPU de 0,1 ni limite globale du conteneur à 512 MB reproduits. La mémoire native totale et la charge OCR n’ont pas été mesurées. Aucune garantie de fonctionnement dans 512 MB ne peut être déduite de ces tests. Java et le cluster PostgreSQL privés ont été arrêtés après contrôle.
+
+Proposition expliquée, **non appliquée** : essai Render avec `JAVA_TOOL_OPTIONS=-Xms16m -Xmx256m -XX:+ExitOnOutOfMemoryError -Xlog:gc`. Le tas maximum serait doublé, sans allouer toute la mémoire du conteneur à Java ; la mémoire native et l’OCR doivent encore tenir dans le budget restant. L’option de sortie rend une saturation du tas explicite ; les journaux GC permettent de repérer des collectes répétées. Contrôler CPU/RAM, Tomcat/Started et la santé avant de conclure. En cas de dépassement mémoire ou de CPU durablement saturé, un plan doté de davantage de ressources doit être envisagé avec le propriétaire. Aucun changement JVM, Dockerfile, variable Render, déploiement ou push effectué pendant ce diagnostic.
+
+
+## Fonctions mobiles et cycle de suppression — 11 novembre 2026
+
+Lot local non publié. Aucune base de production, variable Render ou configuration JVM modifiée. Les écrans Flutter validés restent inchangés ; le rapport mobile et sa matrice de 30 modules sont dans le README du dépôt mobile.
+
+### Contrats corrigés
+
+- `GET /auth/me` et les réponses `UserInfo` incluent `phone`, même nul, pour éviter l’effacement involontaire du numéro lors de l’édition du profil.
+- Les erreurs `BusinessException` exposent leur `code` en plus du message. L’inscription mobile refuse explicitement les adresses désactivées (`ACCOUNT_INACTIVE`) et en attente d’effacement (`ACCOUNT_DELETION_PENDING`), avant tout envoi de code. L’issue neutre des adresses déjà actives est conservée. Cette distinction explicite de disponibilité est un choix produit demandé ; aucune identité ni raison de suspension n’est renvoyée.
+- Les critères d’admission sont ordonnés par priorité puis identifiant afin de parcourir plusieurs pages sans ordre instable.
+- L’action administrative historique `DELETE /admin/users/{id}` conserve sa sémantique de suspension. Le backoffice dit désormais « Désactiver l’accès » et « compte conservé », plutôt que « utilisateur supprimé ». Les demandes personnelles affichent leur date d’effacement ; la modification/réactivation ordinaire de ces comptes est refusée.
+
+### Suppression personnelle après 30 jours
+
+La durée de **30 jours a été explicitement validée**. Nouvelle migration **V87** : `candidate_deletion_requests(user_id, requested_at, purge_after)`, avec contrainte de délai minimal. Aucun compte inactif existant n’est ajouté automatiquement à cette table ; aucun effacement rétroactif n’est déduit d’une désactivation.
+
+`POST /auth/me/deletion-request` exige le rôle candidat, un dossier propre au compte, `confirmation: "SUPPRIMER"` et soit `currentPassword`, soit `googleIdToken`. Un jeton Google est vérifié puis comparé à l’identité fournisseur déjà liée au même utilisateur ; l’e-mail seul n’autorise jamais cette opération. Un compte ayant aussi un rôle de personnel est exclu. La route est incluse dans la limitation des tentatives d’authentification. Réponse : `purgeAfter` et message de confirmation.
+
+La transaction réserve une seule échéance (un nouvel essai ne repart pas à zéro), désactive le compte, révoque les sessions et les clés API, et consomme les jetons de récupération/vérification. La date n’est pas une promesse de disponibilité du service à cette minute : l’adresse n’est libérée qu’après l’effacement réussi.
+
+`CandidateErasureJob` traite au plus 25 demandes échues par passage, une minute après démarrage puis chaque heure. `app.account-erasure.enabled` / `APP_ACCOUNT_ERASURE_ENABLED` permet de désactiver le job (activé par défaut ; désactivé dans les tests d’intégration). Sur Render Free, le traitement reprend au réveil du service. Surveiller les journaux `Candidate erasure completed` et `needs retry/review` ; ils donnent seulement l’identifiant technique et la catégorie d’erreur, sans e-mail, mot de passe ni jeton.
+
+`CandidateErasureService` verrouille une demande échue, vérifie que le compte est désactivé et non administratif, puis traite les lignes personnelles, y compris celles masquées par le soft delete : dossier, relevés/analyses, recommandations, décisions/conversations, documents privés et leurs enfants, sessions, identités Google, jetons, profil utilisateur, appartenances et traces structurées liées. Les fichiers sont validés par le service de stockage et contrôlés contre des références partagées. Les documents publiés/partagés ou en traitement bloquent la purge automatique pour revue ; aucune donnée de catalogue partagée n’est supprimée pour satisfaire cette demande.
+
+Les contraintes SQL sont vérifiées avant la suppression des fichiers. Si un fichier ou une contrainte bloque l’opération, la transaction ne libère pas l’adresse. La suppression de fichiers est idempotente pour permettre une reprise après un échec partiel ; elle ne bénéficie pas d’un rollback physique. Ne pas présenter une demande en erreur comme effacée. Les sauvegardes externes, copies d’e-mails déjà livrées et éventuelles archives hors stockage applicatif nécessitent leur propre politique de conservation ; ce lot ne purge pas ces systèmes.
+
+### Validation et déploiement ultérieur
+
+Campagne locale complète : **289 tests recensés, 286 réussis et 3 OCR ignorés**, aucun échec, Flyway et Hibernate validés sur un schéma PostgreSQL privé neuf. Elle inclut le refus des comptes inactifs sans défi fictif, l’absence de purge avant 30 jours, la révocation des sessions, l’effacement de fichiers/documents/transcripts/conversations, la préservation d’un autre candidat et le refus d’un fichier partagé. Aucun e-mail réel ni accès à une base de production.
+
+Backoffice : build production réussi et **96 tests réussis**, dont les libellés de suspension, l’absence de double envoi et le blocage d’une nouvelle désactivation pendant une demande personnelle. Les avertissements CSS du layout et CommonJS de `sockjs-client` préexistent à ce changement.
+
+Avant publication : relire la migration et la politique de conservation, publier backend/backoffice avant l’APK mobile 1.4.1+8, puis recetter avec un compte de test autorisé. Ne pas lancer de purge manuelle sur les anciens comptes inactifs : ils ne portent pas de consentement/date de demande. Les commandes de test existantes restent disponibles ; les tests PostgreSQL exigent `f1.jdbc.url` strictement en boucle locale vers `orientia_f1`, un schéma neuf `f1.jdbc.schema` et `F1_TEST_DB_PASSWORD` fourni uniquement dans l’environnement local. Aucun push ni déploiement effectué par ce lot.
+
+Dernière revalidation après les ajustements administratifs, le tri des critères et les contrôles Google : **54 tests réussis, zéro échec ni test ignoré** (`FoundationsIntegrationTest` 38, `AcademicWorkflowIntegrationTest` 7, `BackofficeContractsTest` 5, `RegistrationAvailabilityTest` 3, `AuthRateLimitTest` 1). Nouveau schéma privé distinct, cluster arrêté à la fin.
+
+Contrôle final de confidentialité : `CandidateDeletionRequestTest`, **1 test réussi**, vérifie le masquage du mot de passe et du jeton Google dans la représentation de diagnostic de la nouvelle requête. L’APK mobile **1.4.1+8** est compilé ; package et version vérifiés, sans installation ni recette de compte production.
+
+
+## Interfaces métier — livraison du 12 novembre 2026
+
+Cette livraison regroupe les changements fonctionnels du 11 novembre et les corrections de présentation du 12 novembre. Les mentions « lot local non publié » des sections précédentes décrivent leur état avant cette livraison.
+
+### Mobile 1.4.2+9
+
+- Les cinq onglets Accueil, Explorer, Parcours, Assistant et Profil sont conservés. Une surface visuelle commune aux écrans métier harmonise fonds, cartes, champs, boutons, barres de titre et navigation ; les parcours d’entrée validés ne sont pas retouchés. Les 38 empreintes contrôlées de démarrage/authentification/thème d’entrée/assets sont identiques à leur état validé.
+- Explorer et Parcours disposent de cartes avec icônes, titres et descriptions. Les catalogues, recommandations, relevés, versions d’analyse et historique de décisions chargent progressivement leurs résultats. Les pages déjà reçues restent consultables ; les filtres/recherches repartent de la première page. Les étapes du formulaire académique conservent leurs boutons de progression.
+- Paramètres donne accès au compte, à la sécurité, à l’aide et aux informations légales. À propos mentionne « Créé par Le Studio Viral ». Éditeur confirmé : **SALAOU Souleyman**, propriétaire de la marque, sans numéro d’immatriculation déclaré. Contact : **lestudioviral@gmail.com**.
+- Les pages de confidentialité, conditions d’utilisation et informations sur l’éditeur décrivent les données, le service d’orientation, Render, Brevo, Google facultatif, la suppression après 30 jours et les demandes au support. **L’adresse professionnelle, les durées des journaux/sauvegardes et les modalités des transferts internationaux restent à compléter** ; aucun agrément ni conformité juridique n’est revendiqué. Référence consultée pour les droits : [APDP Bénin — protéger](https://archive.apdp.bj/proteger/).
+
+### Backoffice
+
+- Les recommandations et décisions utilisent une recherche de candidat par nom/e-mail (`GET /candidates/search`) plutôt qu’une saisie d’UUID. Les comparaisons sélectionnent les formations par leur nom depuis le catalogue existant, avec une limite de six.
+- Rapports affiche un mode dédié à l’historique et aux exports, sans formulaire de simulation. La navigation ne sélectionne plus simultanément Intelligence et Aide à la décision.
+- Les espacements des formulaires/actions, zones d’import, états vides et pagination sont harmonisés. Les noms des types d’import sont traduits. La pagination ne propose pas de navigation lorsqu’une seule page ou aucun résultat est disponible. Les outils de calcul utilisent la pagination partagée.
+- Les indicateurs non mesurés restent explicitement indisponibles. Aucune statistique, notification, fonctionnalité de favori ou capacité de modèle IA externe n’est inventée.
+
+### Vérifications
+
+- Flutter : **87 tests réussis** dans la suite complète finale ; **10 tests métier ciblés réussis**. Couverture ajoutée : accumulation des résultats sans pagination visible, remise à zéro lors d’une recherche, lecture des informations à 360 px avec texte agrandi, accès aux rubriques après défilement.
+- Angular : **98 tests réussis**, build production réussi. Deux avertissements conservés : budget CSS du layout et CommonJS `sockjs-client`.
+- Backend Java : aucun nouveau changement Java dans la phase de présentation. Les validations du lot fonctionnel restent celles documentées plus haut : 289 recensés dont 286 réussis/3 OCR ignorés, puis 54 tests ciblés et 1 test de masquage réussis.
+- Aperçus backoffice Rapports, Aide à la décision et Imports contrôlés dans Chrome local avec un compte synthétique et des réponses simulées. Ce contrôle ne valide pas les données ni les droits d’un compte de production.
+- Recherche de signatures de secrets sur les fichiers publiables : aucune clé Brevo/SendGrid/AWS ni clé privée détectée. Cette recherche par motifs ne constitue pas une preuve d’absence de tout secret possible.
+- Aucun e-mail réel, aucune modification de base de production, aucun changement JVM/variables Render. La recette métier avec un compte candidat autorisé et le contrôle sur téléphone restent distincts des tests locaux.
+
+Commandes mobile :
+
+```powershell
+flutter run --release --dart-define=APP_ENV=production --dart-define=ORIENTIA_API_URL=https://orientation-backend-d0ys.onrender.com
+flutter build apk --release --dart-define=APP_ENV=production --dart-define=ORIENTIA_API_URL=https://orientation-backend-d0ys.onrender.com
+```
+
+L’installation d’un nouvel APK est nécessaire pour voir les changements mobiles ; un push GitHub ne met pas à jour l’application déjà installée. Pour le backoffice, le push doit être suivi d’un déploiement Render réussi. Après publication, vérifier le commit Live et la santé du serveur avant de recetter les nouveaux parcours.

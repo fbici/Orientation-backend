@@ -17,6 +17,7 @@ public class BaseResponse<T> {
 
     private boolean success;
     private String message;
+    private String code;
     private T data;
     private LocalDateTime timestamp;
 

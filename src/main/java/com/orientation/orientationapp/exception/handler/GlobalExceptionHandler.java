@@ -41,9 +41,11 @@ public class GlobalExceptionHandler {
 
         log.error("Business error: {} - Path: {}", ex.getMessage(), request.getServletPath());
 
+        var body = BaseResponse.<Void>error(ex.getMessage());
+        body.setCode(ex.getCode());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error(ex.getMessage()));
+                .body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

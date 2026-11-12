@@ -16,6 +16,8 @@ public class UserInfo {
     private String firstName;
     private String lastName;
     private String fullName;
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
+    private String phone;
     private List<String> roles;
     private List<String> permissions;
     private UUID tenantId;

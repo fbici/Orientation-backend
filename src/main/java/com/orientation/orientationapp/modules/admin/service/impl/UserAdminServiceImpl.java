@@ -26,6 +26,11 @@ public class UserAdminServiceImpl implements UserAdminService {
     private final com.orientation.orientationapp.security.service.ResourceAccess access;
     private final com.orientation.orientationapp.modules.auth.service.RefreshTokenService sessions;
     private final PasswordEncoder passwordEncoder;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private void requireNoDeletion(User user) {
+        if(jdbc.queryForObject("SELECT count(*) FROM candidate_deletion_requests WHERE user_id=?",Integer.class,user.getId())>0)
+            throw new com.orientation.orientationapp.exception.BusinessException("Suppression demandée par le candidat : accès désactivé et effacement après 30 jours.","ACCOUNT_DELETION_PENDING");
+    }
 
     public UserResponse create(CreateUserRequest request) {
         access.require("USER_CREATE");
@@ -41,6 +46,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         access.sameTenant(user.getTenant().getId());
+        requireNoDeletion(user);
         access.tenant(request.getTenantId());
         if (!user.getEmail().equalsIgnoreCase(request.getEmail()))
             throw new com.orientation.orientationapp.exception.BusinessException("Email changes require verification","EMAIL_CHANGE_NOT_SUPPORTED");
@@ -62,13 +68,21 @@ public class UserAdminServiceImpl implements UserAdminService {
     public Page<UserResponse> list(UUID tenantId, String search, Pageable pageable) {
         access.require("USER_READ");
         UUID allowed=access.tenant(tenantId);
-        return userRepository.findAll((root,query,cb) -> {
+        var page=userRepository.findAll((root,query,cb) -> {
             var predicate=cb.equal(root.get("tenant").get("id"),allowed);
             if(search==null || search.isBlank()) return predicate;
             return cb.and(predicate,cb.or(cb.like(cb.lower(root.get("email")),"%"+search.toLowerCase()+"%"),
                 cb.like(cb.lower(root.get("firstName")),"%"+search.toLowerCase()+"%"),
                 cb.like(cb.lower(root.get("lastName")),"%"+search.toLowerCase()+"%")));
-        },pageable).map(this::mapToResponse);
+        },pageable);
+        var lifecycle=new java.util.HashMap<UUID,java.util.Map<String,Object>>();
+        if(!page.isEmpty()) {
+            var ids=page.getContent().stream().map(User::getId).toList();
+            new org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate(jdbc)
+                .queryForList("SELECT user_id,requested_at,purge_after FROM candidate_deletion_requests WHERE user_id IN (:ids)",java.util.Map.of("ids",ids))
+                .forEach(row -> lifecycle.put((UUID)row.get("user_id"),row));
+        }
+        return page.map(user -> mapToResponse(user,lifecycle.get(user.getId())));
     }
 
     public void deactivate(UUID id) {
@@ -76,6 +90,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         access.sameTenant(user.getTenant().getId());
+        requireNoDeletion(user);
         user.setEnabled(false);
         sessions.revokeAllUserTokens(user.getId());
         userRepository.save(user);
@@ -86,6 +101,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         access.sameTenant(user.getTenant().getId());
+        requireNoDeletion(user);
         user.setEnabled(true);
         userRepository.save(user);
     }
@@ -95,14 +111,21 @@ public class UserAdminServiceImpl implements UserAdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         access.sameTenant(user.getTenant().getId());
+        requireNoDeletion(user);
         user.setEnabled(false);
         sessions.revokeAllUserTokens(user.getId());
         userRepository.save(user);
     }
 
     private UserResponse mapToResponse(User user) {
+        var rows=jdbc.queryForList("SELECT requested_at,purge_after FROM candidate_deletion_requests WHERE user_id=?",user.getId());
+        return mapToResponse(user,rows.isEmpty()?null:rows.getFirst());
+    }
+    private UserResponse mapToResponse(User user,java.util.Map<String,Object> lifecycle) {
         return UserResponse.builder()
                 .id(user.getId())
+                .deletionRequestedAt(lifecycle==null?null:((java.sql.Timestamp)lifecycle.get("requested_at")).toInstant())
+                .purgeAfter(lifecycle==null?null:((java.sql.Timestamp)lifecycle.get("purge_after")).toInstant())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

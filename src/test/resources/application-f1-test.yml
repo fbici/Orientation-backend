@@ -28,6 +28,8 @@ logging:
     root: WARN
     org.hibernate.SQL: WARN
 app:
+  account-erasure:
+    enabled: false
   jwt:
     secret: f1-test-only-signing-material-not-for-any-real-environment-0123456789
     expiration: 900000

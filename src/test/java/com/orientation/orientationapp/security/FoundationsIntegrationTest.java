@@ -24,6 +24,127 @@ class FoundationsIntegrationTest {
     }
     @Autowired JdbcTemplate jdbc;
     @Autowired MockMvc mvc;
+    @Test void inactiveAndDeletedAddressesNeverReceiveMobileChallenges() throws Exception {
+        a.setEnabled(false);users.saveAndFlush(a);
+        b.setDeleted(true);users.saveAndFlush(b);
+        for (var user:java.util.List.of(a,b)) {
+            var payload=java.util.Map.of("email",user.getEmail().toUpperCase(java.util.Locale.ROOT),"password",password,"firstName","Test","lastName","Candidate");
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/mobile/register")
+                .contentType("application/json").content(json.writeValueAsString(payload)))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.code").value("ACCOUNT_INACTIVE"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.challengeId").doesNotExist());
+            assertEquals(0,jdbc.queryForObject("select count(*) from email_verification_challenges where user_id=?",Integer.class,user.getId()));
+        }
+    }
+    @Test void personalAccountReturnsPhoneForSafeEditing() throws Exception {
+        a.setPhone("+2290197000000");users.saveAndFlush(a);
+        var session=login(a);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/auth/me")
+            .header("Authorization","Bearer "+session.getAccessToken()))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.phone").value(a.getPhone()));
+    }
+    @Autowired com.orientation.orientationapp.modules.auth.service.CandidateErasureService erasure;
+    private void requestDeletion(com.orientation.orientationapp.modules.auth.dto.response.LoginResponse session) throws Exception {
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/me/deletion-request")
+            .header("Authorization","Bearer "+session.getAccessToken()).contentType("application/json")
+            .content(json.writeValueAsString(java.util.Map.of("confirmation","SUPPRIMER","currentPassword",password))))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.purgeAfter").isNotEmpty());
+    }
+    private void makeDeletionDue(java.util.UUID id) {
+        jdbc.update("UPDATE candidate_deletion_requests SET requested_at=now()-interval '31 days',purge_after=now()-interval '1 day' WHERE user_id=?",id);
+    }
+    @Test void deletionRequiresOwnCandidateIdentityAndExplicitConfirmation() throws Exception {
+        var session=login(a);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/me/deletion-request")
+            .header("Authorization","Bearer "+session.getAccessToken()).contentType("application/json")
+            .content(json.writeValueAsString(java.util.Map.of("confirmation","SUPPRIMER","currentPassword","incorrect-password"))))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.code").value("DELETION_IDENTITY_REQUIRED"));
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM candidate_deletion_requests WHERE user_id=?",Integer.class,a.getId()));
+        assertTrue(users.findById(a.getId()).orElseThrow().getEnabled());
+        var admin=login(adminA);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/me/deletion-request")
+            .header("Authorization","Bearer "+admin.getAccessToken()).contentType("application/json")
+            .content(json.writeValueAsString(java.util.Map.of("confirmation","SUPPRIMER","currentPassword",password))))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isForbidden());
+    }
+    @Test void pendingDeletionRevokesSessionsAndReservesEmailForAtLeastThirtyDays() throws Exception {
+        var session=login(a);requestDeletion(session);
+        assertFalse(erasure.eraseDue(a.getId()));
+        assertTrue(jdbc.queryForObject("SELECT purge_after>=requested_at+interval '30 days' FROM candidate_deletion_requests WHERE user_id=?",Boolean.class,a.getId()));
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/auth/me").header("Authorization","Bearer "+session.getAccessToken()))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isUnauthorized());
+        assertThrows(com.orientation.orientationapp.modules.auth.service.impl.InvalidRefreshException.class,()->authentication.refreshToken(renewal(session.getRefreshToken())));
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/mobile/register").contentType("application/json")
+            .content(json.writeValueAsString(java.util.Map.of("email",a.getEmail(),"password",password,"firstName","Test","lastName","Candidate"))))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.code").value("ACCOUNT_DELETION_PENDING"));
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM email_verification_challenges WHERE user_id=?",Integer.class,a.getId()));
+    }
+    @Test void dueErasureDeletesPrivateChildrenFilesAndAddressButPreservesOtherCandidates() throws Exception {
+        var doc=document(a);var other=document(b);var session=login(a);
+        jdbc.update("INSERT INTO doc_document_pages(document_id,page_number,raw_text) VALUES (?,1,'synthetic private OCR')",doc.getId());
+        var year=jdbc.queryForObject("SELECT id FROM academic_years LIMIT 1",java.util.UUID.class);
+        var transcript=java.util.UUID.randomUUID();
+        jdbc.update("INSERT INTO transcripts(id,candidate_id,academic_year_id,title) VALUES (?,?,?,'synthetic personal transcript')",transcript,ca.getId(),year);
+        jdbc.update("INSERT INTO transcript_analyses(transcript_id,analysis_version,analyzed_at,review_payload) VALUES (?,'1',now(),'{}'::jsonb)",transcript);
+        var chat=java.util.UUID.randomUUID();
+        jdbc.update("INSERT INTO decision_records(id,candidate_id,candidate_version,actor_id,kind,payload) VALUES (?,?,0,?,'CHAT_SESSION','{}')",chat,ca.getId(),a.getId());
+        jdbc.update("INSERT INTO decision_records(candidate_id,candidate_version,actor_id,kind,parent_id,payload) VALUES (?,0,?,'CHAT_MESSAGE',?,'{}')",ca.getId(),a.getId(),chat);
+        requestDeletion(session);makeDeletionDue(a.getId());assertTrue(erasure.eraseDue(a.getId()));
+        assertEquals(0,users.countAllByEmail(a.getEmail()));
+        for(String table:java.util.List.of("users","candidates","doc_documents")) {
+            var id=table.equals("users")?a.getId():table.equals("candidates")?ca.getId():doc.getId();
+            assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM "+table+" WHERE id=?",Integer.class,id));
+        }
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM transcripts WHERE id=?",Integer.class,transcript));
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM decision_records WHERE candidate_id=?",Integer.class,ca.getId()));
+        assertFalse(storage.exists(doc.getStoredFileName()));assertTrue(storage.exists(other.getStoredFileName()));
+        assertEquals(1,users.countAllByEmail(b.getEmail()));assertFalse(erasure.eraseDue(a.getId()));
+    }
+    @Test void administrativeSuspensionNeverBecomesAutomaticErasure() {
+        a.setEnabled(false);users.saveAndFlush(a);
+        assertFalse(erasure.eraseDue(a.getId()));assertEquals(1,users.countAllByEmail(a.getEmail()));
+    }
+    @Test void erasureRefusesSharedFilesAndKeepsAddressReserved() throws Exception {
+        var doc=document(a);var shared=document(b);
+        shared.setStoredFileName(doc.getStoredFileName());documents.saveAndFlush(shared);
+        requestDeletion(login(a));makeDeletionDue(a.getId());
+        assertThrows(IllegalStateException.class,()->erasure.eraseDue(a.getId()));
+        assertEquals(1,users.countAllByEmail(a.getEmail()));assertTrue(storage.exists(doc.getStoredFileName()));
+        assertFalse(users.findById(a.getId()).orElseThrow().getEnabled());
+    }
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    com.orientation.orientationapp.modules.auth.service.GoogleIdentityVerifier deletionGoogle;
+    @Test void googleDeletionMustMatchTheLinkedSubjectOfTheCurrentCandidate() throws Exception {
+        String own="own-"+a.getId(),other="other-"+b.getId();
+        jdbc.update("INSERT INTO auth_external_identities(issuer,subject,user_id) VALUES ('https://accounts.google.com',?,?)",own,a.getId());
+        jdbc.update("INSERT INTO auth_external_identities(issuer,subject,user_id) VALUES ('https://accounts.google.com',?,?)",other,b.getId());
+        org.mockito.Mockito.when(deletionGoogle.verify("other-token")).thenReturn(new com.orientation.orientationapp.modules.auth.service.GoogleIdentityVerifier.Identity(other,b.getEmail(),"Other","Candidate"));
+        org.mockito.Mockito.when(deletionGoogle.verify("own-token")).thenReturn(new com.orientation.orientationapp.modules.auth.service.GoogleIdentityVerifier.Identity(own,a.getEmail(),"Own","Candidate"));
+        var session=login(a);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/me/deletion-request")
+            .header("Authorization","Bearer "+session.getAccessToken()).contentType("application/json")
+            .content(json.writeValueAsString(java.util.Map.of("confirmation","SUPPRIMER","googleIdToken","other-token"))))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+        assertTrue(users.findById(a.getId()).orElseThrow().getEnabled());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/me/deletion-request")
+            .header("Authorization","Bearer "+session.getAccessToken()).contentType("application/json")
+            .content(json.writeValueAsString(java.util.Map.of("confirmation","SUPPRIMER","googleIdToken","own-token"))))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
+        assertFalse(users.findById(a.getId()).orElseThrow().getEnabled());assertTrue(users.findById(b.getId()).orElseThrow().getEnabled());
+    }
+    @Test void administratorSeesDeletionDeadlineButCannotReactivateThePendingAccount() throws Exception {
+        requestDeletion(login(a));
+        identity(adminA,"ROLE_ADMIN","USER_READ","USER_UPDATE");
+        var view=userAdmin.getById(a.getId());assertNotNull(view.getDeletionRequestedAt());assertNotNull(view.getPurgeAfter());
+        assertThrows(com.orientation.orientationapp.exception.BusinessException.class,()->userAdmin.reactivate(a.getId()));
+        assertFalse(users.findById(a.getId()).orElseThrow().getEnabled());
+    }
+    @Autowired com.orientation.orientationapp.modules.admin.service.UserAdminService userAdmin;
     @Test void allMigrationsAndHibernateValidateOnIsolatedPostgres() {
         assertTrue(jdbc.queryForObject("select count(*) from flyway_schema_history where success",Integer.class)>=68);
         assertNotNull(jdbc.queryForObject("select to_regclass('bo_notifications')::text",String.class));

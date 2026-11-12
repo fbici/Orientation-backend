@@ -25,6 +25,12 @@ public class RegistrationService {
     public java.util.UUID registerMobile(RegisterRequest request) {return register(request,true);}
     private java.util.UUID register(RegisterRequest request,boolean mobile) {
         String normalizedPhone=phones.normalize(request.getPhone());
+        // Do not issue a fictitious mobile challenge for a disabled/deleted account.
+        // This explicit unavailable-address outcome is a product decision; it reveals no deletion reason.
+        if(mobile && users.countDeletionByEmail(request.getEmail())>0)
+            throw new BusinessException("La suppression de ce compte a été demandée. L’adresse reste réservée pendant 30 jours et jusqu’à la fin de l’effacement. Aucun code n’a été envoyé.","ACCOUNT_DELETION_PENDING");
+        if(mobile && users.countInactiveByEmail(request.getEmail())>0)
+            throw new BusinessException("Cette adresse est associée à un compte désactivé. Une nouvelle inscription avec cette adresse est indisponible. Aucun code n’a été envoyé. Contactez le support Orientia.","ACCOUNT_INACTIVE");
         email.requireConfigured();
         if(request.getTenantCode()!=null && !publicTenant.equalsIgnoreCase(request.getTenantCode()))
             throw new BusinessException("Public registration does not allow this tenant","INVALID_REGISTRATION_TENANT");

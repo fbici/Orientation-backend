@@ -88,7 +88,7 @@ public class AdmissionRuleService {
    var owner=guide.get("orientationGuide").get("tenantId");
    if(!global)tests.add(tenant==null?cb.isNull(owner):cb.or(cb.isNull(owner),cb.equal(owner,tenant)));
    return cb.and(tests.toArray(jakarta.persistence.criteria.Predicate[]::new));
-  },PageRequest.of(page,size,Sort.by("priority").ascending())).map(this::view);
+  },PageRequest.of(page,size,Sort.by("priority").ascending().and(Sort.by("id")))).map(this::view);
  }
  public Map<String,Object> get(UUID id) {
   var c=found(criteria.findById(id));scope.read(c.getGuideVersion().getOrientationGuide().getTenantId());

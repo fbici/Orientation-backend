@@ -79,7 +79,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         List<Role> roles=user.getUserRoles().stream().map(UserRole::getRole)
                 .filter(r -> Boolean.TRUE.equals(r.getActive()) && !Boolean.TRUE.equals(r.getDeleted())).toList();
         return UserInfo.builder().id(user.getId()).email(user.getEmail()).firstName(user.getFirstName())
-                .lastName(user.getLastName()).fullName(user.getFullName())
+                .lastName(user.getLastName()).fullName(user.getFullName()).phone(user.getPhone())
                 .roles(roles.stream().map(Role::getCode).toList())
                 .permissions(roles.stream().flatMap(r -> r.getRolePermissions().stream()).map(RolePermission::getPermission)
                     .filter(p -> Boolean.TRUE.equals(p.getActive()) && !Boolean.TRUE.equals(p.getDeleted()))

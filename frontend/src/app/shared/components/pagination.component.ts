@@ -1,11 +1,11 @@
 import {Component,Input,Output,EventEmitter} from '@angular/core';
 @Component({selector:'app-pagination',standalone:true,template:`
 <div class="pagination-bar"><span role="status">{{start}}–{{end}} sur {{total}} résultats</span>
- <nav aria-label="Pagination"><button type="button" class="btn btn-ghost btn-icon" aria-label="Première page" title="Première page" [disabled]="loading||page<=0" (click)="go(0)"><span class="material-symbols-rounded" aria-hidden="true">first_page</span></button>
+ @if(total > size){<nav aria-label="Pagination"><button type="button" class="btn btn-ghost btn-icon" aria-label="Première page" title="Première page" [disabled]="loading||page<=0" (click)="go(0)"><span class="material-symbols-rounded" aria-hidden="true">first_page</span></button>
  <button type="button" class="btn btn-ghost btn-icon" aria-label="Page précédente" title="Page précédente" [disabled]="loading||page<=0" (click)="go(page-1)"><span class="material-symbols-rounded" aria-hidden="true">chevron_left</span></button>
  @for(p of pages;track $index){@if(p===null){<span aria-hidden="true">…</span>}@else{<button type="button" class="btn btn-sm" [class.btn-primary]="p===page" [class.btn-ghost]="p!==page" [attr.aria-current]="p===page?'page':null" [attr.aria-label]="'Page '+(p+1)" [disabled]="loading" (click)="go(p)">{{p+1}}</button>}}
  <button type="button" class="btn btn-ghost btn-icon" aria-label="Page suivante" title="Page suivante" [disabled]="loading||page>=count-1" (click)="go(page+1)"><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button>
- <button type="button" class="btn btn-ghost btn-icon" aria-label="Dernière page" title="Dernière page" [disabled]="loading||page>=count-1" (click)="go(count-1)"><span class="material-symbols-rounded" aria-hidden="true">last_page</span></button></nav></div>`})
+ <button type="button" class="btn btn-ghost btn-icon" aria-label="Dernière page" title="Dernière page" [disabled]="loading||page>=count-1" (click)="go(count-1)"><span class="material-symbols-rounded" aria-hidden="true">last_page</span></button></nav>}</div>`})
 export class PaginationComponent {
  @Input() page=0;@Input() total=0;@Input() size=20;@Input() loading=false;
  @Output() pageChange=new EventEmitter<number>();

@@ -37,7 +37,7 @@ interface NavSection {
               @if (!collapsed()) { <div class="nav-group-label">{{ sec.title }}</div> }
               @for (item of sec.items; track item.route) {
                 @if (!item.roles || auth.hasAnyRole(item.roles)) {
-                  <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" class="nav-link" [attr.data-tip]="collapsed() ? item.label : null">
+                  <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' || item.route === '/intelligence' }" class="nav-link" [attr.data-tip]="collapsed() ? item.label : null">
                     <span class="nav-link-icon material-symbols-rounded">{{ item.icon }}</span>
                     @if (!collapsed()) { <span class="nav-link-text">{{ item.label }}</span> }
                     @if (item.route === '/notifications' && notifSvc.unreadCount() > 0 && !collapsed()) {

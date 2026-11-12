@@ -1,4 +1,4 @@
 import {Component} from '@angular/core';
 import {DecisionsComponent} from '../../intelligence/decisions.component';
-@Component({selector:'app-reports',standalone:true,imports:[DecisionsComponent],template:'<app-decisions />'})
+@Component({selector:'app-reports',standalone:true,imports:[DecisionsComponent],template:'<app-decisions [reportsOnly]="true" />'})
 export class ReportsComponent {}

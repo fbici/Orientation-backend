@@ -4,7 +4,7 @@ import {ApiService} from '../../core/services/api.service';
 @Component({selector:'app-analytics',standalone:true,imports:[CommonModule],template:`
 <div class="anim-fade-up"><div class="page-header"><div><h1>Analytique</h1><p>Disponibilité des indicateurs mesurés</p></div>
 <button class="btn btn-secondary" (click)="load()">Actualiser</button></div>
-<div class="card"><div class="card-body">
+<div class="card"><div class="card-body analytics-empty"><span class="material-symbols-rounded" aria-hidden="true">insights</span><h2>Des indicateurs fondés sur des données réelles</h2>
 @if(error()){<p role="alert">{{error()}}</p>}@else{<p>{{message()}}</p>}
 <p>Les taux d'admission, de satisfaction et les classements ne sont pas calculés sans données d'observation vérifiées.</p>
 </div></div></div>`})

@@ -41,10 +41,10 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
                     <td style="font-size:.8125rem;color:var(--n-600)">{{ u.email }}</td>
                     <td><span class="badge" [class]="roleClass(u)">{{ u.roles?.[0] || 'N/A' }}</span></td>
                     <td style="font-size:.8125rem">{{ u.tenantName || u.tenant?.name || '—' }}</td>
-                    <td><div style="display:flex;align-items:center;gap:6px"><span class="dot" [class]="u.enabled !== false ? 'green' : 'gray'"></span><span style="font-size:.8125rem">{{ u.enabled !== false ? 'Actif' : 'Inactif' }}</span></div></td>
+                    <td><div style="display:flex;align-items:center;gap:6px"><span class="dot" [class]="u.enabled !== false ? 'green' : 'gray'"></span><span style="font-size:.8125rem">{{ u.purgeAfter ? 'Suppression demandée' : u.enabled !== false ? 'Actif' : 'Suspendu' }}</span></div>@if(u.purgeAfter){<small>Effacement à partir du {{u.purgeAfter | date:'dd/MM/yyyy'}}</small>}</td>
                     <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="openEdit(u)" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
-                      <button class="btn btn-ghost btn-icon btn-sm" (click)="confirmDel(u)" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">delete</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" [disabled]="!!u.purgeAfter" (click)="openEdit(u)" aria-label="Modifier"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
+                      <button class="btn btn-ghost btn-icon btn-sm" [disabled]="u.enabled === false || !!u.purgeAfter" (click)="confirmDel(u)" aria-label="Desactiver"><span class="material-symbols-rounded" style="font-size:18px;color:var(--red-500)">person_off</span></button>
                     </div></td>
                   </tr>
                 } @empty { <tr><td colspan="6" style="text-align:center;padding:48px;color:var(--n-400)">Aucun utilisateur</td></tr> }
@@ -68,7 +68,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       </div>
     </app-modal>
 
-    <app-confirm-dialog [open]="showDel()" title="Supprimer l&#39;utilisateur" [message]="deleteMsg()" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
+    <app-confirm-dialog [open]="showDel()" title="Désactiver l’accès" [message]="deleteMsg()" [loading]="deleting()" (close)="showDel.set(false)" (confirm)="doDel()"></app-confirm-dialog>
   `,
   styles: [`.spinner{width:32px;height:32px;border:3px solid var(--n-200);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}@keyframes spin{to{transform:rotate(360deg)}}`]
 })
@@ -116,11 +116,12 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  confirmDel(u: any): void { this.delTarget.set(u); this.showDel.set(true); }
+  confirmDel(u: any): void { if(u.enabled === false || u.purgeAfter) return; this.delTarget.set(u); this.showDel.set(true); }
   doDel(): void {
+    if(this.deleting() || !this.delTarget() || this.delTarget()?.purgeAfter) return;
     this.deleting.set(true);
     this.api.deleteUser(this.delTarget()?.id).subscribe({
-      next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Utilisateur supprimé.'); this.load(); },
+      next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Accès désactivé. Le compte est conservé.'); this.load(); },
       error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); }
     });
   }
@@ -128,5 +129,5 @@ export class UsersComponent implements OnInit {
   initials(u: any): string { return `${(u.firstName?.[0]||'').toUpperCase()}${(u.lastName?.[0]||'').toUpperCase()}`; }
   avatarColor(u: any): string { const h = (u.email||'').split('').reduce((a:number,c:string) => a + c.charCodeAt(0), 0); return this.colors[h % this.colors.length]; }
   roleClass(u: any): string { const r = u.roles?.[0]; if (r === 'SUPER_ADMIN') return 'badge-danger'; if (r === 'ADMIN') return 'badge-warning'; return 'badge-primary'; }
-  deleteMsg(): string { const u = this.delTarget(); return `Supprimer "${u?.firstName || ''} ${u?.lastName || ''}" ?`; }
+  deleteMsg(): string { const u = this.delTarget(); return `Désactiver l’accès de "${u?.firstName || ''} ${u?.lastName || ''}" ? Son compte et son adresse e-mail seront conservés. Cette action ne déclenche pas la suppression personnelle à 30 jours.`; }
 }
