@@ -1,5 +1,40 @@
 # Orientia — backend et backoffice
 
+## Correction du parcours de publication — 16 novembre 2026
+
+Le formulaire explique désormais les prérequis du bouton Publier : métadonnées, faits validés et sélection. Une action rejoint la revue des faits. La sélection globale ne prend que les faits validés non publiés, dans la limite de 500 ; une désélection reste conservée au rechargement. Les dates inversées et sélections périmées sont bloquées et les doubles envois ignorés. La validation humaine et les autorisations serveur restent obligatoires. Cette correction ne publie aucun guide automatiquement.
+
+Validation : 23 tests Angular ciblés (revue, publication, références, administration et HTTP) réussis ; build production réussi avec les avertissements CSS/CommonJS préexistants. La correction de désactivation administrative est incluse. Le propriétaire a explicitement demandé le déploiement de ce lot le 16 novembre. La disponibilité Render doit être contrôlée après push ; un push réussi ne prouve pas un déploiement réussi.
+
+
+## Livraison 1 — catalogue et administration (16 novembre 2026)
+
+### Traçabilité du guide jusqu’au mobile
+
+1. Le traitement documentaire persiste les pages et les faits extraits. `READY_REVIEW` signifie que l’extraction est disponible pour revue, et non que le catalogue est publié.
+2. `GET /documents/{id}/review` retourne état, tenant, version source, faits et pages. La revue requiert le rôle ADMIN/SUPER_ADMIN, `DOCUMENT_READ` et l’accès au document.
+3. `PUT /documents/{id}/extractions/{factId}` vérifie la version du fait, les valeurs et les droits `GUIDE_UPDATE` (et `RULE_EDIT` pour les critères). Les faits publiés sont immuables. `VALIDATED` reste distinct de la publication.
+4. `POST /documents/{id}/publish` requiert `GUIDE_PUBLISH`, un accès en écriture au document, des faits validés par un humain de la version source courante, un pays et une année. `GUIDE_CREATE` est également requis à la première création du guide.
+5. `AcademicPublicationService` écrit dans une transaction universités, campus, facultés, formations, bourses et règles selon leur type. Les parents doivent être publiés avant leurs enfants. Il marque les entités validées, rattache les faits à la version du guide et à l’année, puis indexe leurs sources. Le tenant reste celui du document : aucune publication globale implicite.
+6. Le document devient `PARTIALLY_PUBLISHED` ou `PUBLISHED`. Une publication partielle ne rend visibles que les éléments effectivement publiés. Un fait documentaire générique ne devient pas automatiquement une université.
+7. `AcademicCatalogService` filtre les entités non validées pour les candidats et limite la visibilité aux entités publiques ou de leur tenant. `GuideCatalogueService` exige une version ACTIVE reliée à une version documentaire, avec le même contrôle de périmètre.
+8. Flutter appelle le catalogue à la racine de l’URL Render, transmet page/size/filtres, attend une page JSON avec `content`, puis affiche les éléments. Une structure JSON incorrecte déclenche une erreur ; elle n’est pas convertie en catalogue vide.
+
+Le propriétaire a confirmé le 16 novembre 2026 que le guide est toujours READY_REVIEW. Ses extractions ne sont donc pas encore publiées. Les tenants de production ne sont pas accessibles dans le dépôt. La recette précédente sur Samsung confirme un catalogue vide et un profil académique chargé. La preuve complète publication → Samsung reste donc en attente de vérification de l’état courant dans le backoffice ; aucune publication, migration ou modification PostgreSQL de production n’a été effectuée.
+
+### Administration
+
+Le bouton de suspension Angular appelle désormais `PATCH /admin/users/{id}/deactivate` avec un corps vide, au lieu de `DELETE /admin/users/{id}`. La confirmation existante est conservée. Les tests vérifient la méthode, l’URL, l’absence de DELETE, la prévention du double envoi et l’affichage d’un refus sans faux succès. Le backend conserve ADMIN/SUPER_ADMIN, USER_UPDATE, le contrôle du tenant et l’interdiction de réactiver/modifier une suppression personnelle en attente.
+
+La création reste non implémentée : `UserAdminServiceImpl.create` ne persiste aucun utilisateur. Les modifications de rôle ne sont pas traitées par la mise à jour des coordonnées. L’interface reste explicite sur ces limites. Proposition compatible à valider : compléter le service de création existant avec validation du tenant, unicité normalisée de l’e-mail, invitation/vérification et transaction ; définir ensuite un contrat explicite d’affectation des rôles avec permission dédiée, protection du dernier super administrateur et audit. Ne pas réutiliser la modification des coordonnées pour accorder silencieusement des privilèges. Aucun rôle privilégié n’a été attribué.
+
+Les opérations administratives appartiennent au backoffice Angular ; elles ne sont pas ajoutées au mobile candidat.
+
+### Limites de validation
+
+Tests Angular ciblés : 11 réussis. Build production Angular réussi, avec avertissements de budget CSS et CommonJS. Tests backend BackofficeContractsTest : 5 réussis sous Java 21 ; la tentative initiale sous Java 25 avait échoué sur Mockito. Flutter : 102 tests réussis et analyse statique sans problème. Le résultat de l’APK est consigné dans le README mobile. Les tests d’intégration de publication existants (`AcademicWorkflowIntegrationTest`) exigent PostgreSQL local isolé ; leur présence ne vaut pas une exécution pendant cette livraison. Aucun push ni redéploiement n’est autorisé automatiquement.
+
+
 Plateforme d'orientation universitaire et de recherche de bourses, d'abord pour le Bénin, puis ouverte aux autres pays. Spring Boot 3.4.3, Java 21, PostgreSQL, Flyway/JPA, JWT ; backoffice Angular 19 dans `frontend/`. Dépôt : [Orientation-backend](https://github.com/fbici/Orientation-backend), branche `main`. Documentation consolidée le 10 novembre 2026.
 
 **Ce README est la documentation de référence backend.** Le README de `frontend/` couvre Angular ; celui du dépôt mobile couvre Flutter. Toute évolution met à jour ces fichiers : ne plus créer de rapports de sprint, récapitulatifs ou fichiers PREUVES. Les anciens rapports ont été consolidés puis supprimés ; Git conserve leur historique. Les scripts et les données sources utiles restent des fichiers techniques.
@@ -288,8 +323,41 @@ Cette livraison regroupe les changements fonctionnels du 11 novembre et les corr
 Commandes mobile :
 
 ```powershell
-flutter run --release --dart-define=APP_ENV=production --dart-define=ORIENTIA_API_URL=https://orientation-backend-d0ys.onrender.com
-flutter build apk --release --dart-define=APP_ENV=production --dart-define=ORIENTIA_API_URL=https://orientation-backend-d0ys.onrender.com
+flutter run --release --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://orientation-backend-d0ys.onrender.com
+flutter build apk --release --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://orientation-backend-d0ys.onrender.com
 ```
 
 L’installation d’un nouvel APK est nécessaire pour voir les changements mobiles ; un push GitHub ne met pas à jour l’application déjà installée. Pour le backoffice, le push doit être suivi d’un déploiement Render réussi. Après publication, vérifier le commit Live et la santé du serveur avant de recetter les nouveaux parcours.
+
+
+### Diagnostic du guide et contrôle des réponses API — 13 novembre 2026
+
+Le propriétaire indique que `Guide d'information 2026-2027.pdf` (116 pages)
+est au statut `READY_REVIEW`. Ce statut correspond à une extraction terminée
+en attente de revue humaine, et non à une publication. Les informations doivent
+être vérifiées et validées, puis publiées avec leur année académique et leurs
+rattachements. Le nom du PDF ne définit pas à lui seul l'année de publication.
+La publication n'a pas été déclenchée pendant ce diagnostic.
+
+Le backoffice explique désormais les étapes restantes pour `READY_REVIEW`,
+`VALIDATED` et `PARTIALLY_PUBLISHED`. Après publication, la visibilité doit encore
+être contrôlée pour le compte candidat et son périmètre d'accès ; ce contrôle
+en production n'a pas été réalisé. Un compte de test est disponible selon le
+propriétaire, sans identifiant secret communiqué ni session utilisée.
+
+Côté Flutter, une réponse paginée sans tableau `content` déclenche maintenant
+une erreur de format au lieu d'afficher silencieusement un catalogue vide. Un
+tableau vide valide reste accepté. Les 12 tests du fichier
+`test/models_repository_test.dart` passent. La compilation Angular passe avec
+les avertissements existants de budget CSS du layout et de module CommonJS
+sockjs-client. Ces résultats ne constituent pas une recette de production.
+
+La configuration directe de Flutter utilise `API_BASE_URL` ;
+`ORIENTIA_API_URL` est une variable d'entrée du script d'assistance Android.
+La production utilise la racine HTTPS Render, sans ajout de `/api/v1`.
+Les commandes de ce README ont été corrigées en conséquence.
+
+Cette étape couvre le premier diagnostic demandé avant l'intégration majeure
+des maquettes. La matrice complète des écrans, la recette candidat, les autres
+corrections API et le nouvel APK restent à réaliser. Aucun push, déploiement,
+envoi d'e-mail ou changement de données de production n'a été effectué.

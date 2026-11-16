@@ -210,6 +210,7 @@ export class ApiService {
   getUser(id: string): Observable<any> { return this.http.get(`${this.b}/admin/users/${id}`); }
   createUser(data: any): Observable<any> { return this.http.post(`${this.b}/admin/users`, data); }
   updateUser(id: string, data: any): Observable<any> { return this.http.put(`${this.b}/admin/users/${id}`, data); }
+  deactivateUser(id: string): Observable<any> { return this.http.patch(`${this.b}/admin/users/${id}/deactivate`, {}); }
   deleteUser(id: string): Observable<any> { return this.http.delete(`${this.b}/admin/users/${id}`); }
 
   // ── Admin: Roles ──

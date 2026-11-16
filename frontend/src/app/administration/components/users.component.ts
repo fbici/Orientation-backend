@@ -120,7 +120,7 @@ export class UsersComponent implements OnInit {
   doDel(): void {
     if(this.deleting() || !this.delTarget() || this.delTarget()?.purgeAfter) return;
     this.deleting.set(true);
-    this.api.deleteUser(this.delTarget()?.id).subscribe({
+    this.api.deactivateUser(this.delTarget()?.id).subscribe({
       next: () => { this.deleting.set(false); this.showDel.set(false); this.toast.success('Accès désactivé. Le compte est conservé.'); this.load(); },
       error: (e) => { this.deleting.set(false); this.toast.error(e.error?.message || 'Erreur.'); }
     });

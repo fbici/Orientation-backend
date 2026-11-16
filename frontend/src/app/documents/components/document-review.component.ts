@@ -34,6 +34,30 @@ import { AcademicFieldsComponent } from "../../catalog/academic-fields.component
           État : <strong>{{ r.status }}</strong> · Source version
           {{ r.sourceVersion }} · {{ r.pageCount || 0 }} page(s)
         </p>
+        @if (r.status === "READY_REVIEW") {
+          <div role="status" class="alert alert-info">
+            <strong>Extraction terminée — validation nécessaire</strong>
+            <p>Les informations extraites ne sont pas encore publiées dans le
+              catalogue de l’application. Vérifiez les passages sources et les
+              rattachements, validez les informations, puis utilisez la section
+              « Publication des informations validées » ci-dessous.</p>
+          </div>
+        }
+        @if (r.status === "VALIDATED") {
+          <div role="status" class="alert alert-info">
+            <strong>Revue terminée — publication nécessaire</strong>
+            <p>La validation seule ne publie pas les informations. Sélectionnez
+              les éléments à publier et leur année académique dans la section
+              de publication ci-dessous.</p>
+          </div>
+        }
+        @if (r.status === "PARTIALLY_PUBLISHED") {
+          <div role="status" class="alert alert-info">
+            <strong>Publication partielle</strong>
+            <p>Seules les informations marquées « publié » ont rejoint le
+              catalogue. Les autres restent à vérifier ou à publier.</p>
+          </div>
+        }
         <small>Empreinte : {{ r.checksum }}</small>
         @if (r.processingError) {
           <p role="alert">{{ r.processingError }}</p>
@@ -93,7 +117,7 @@ import { AcademicFieldsComponent } from "../../catalog/academic-fields.component
             </button>
           }
         </section>
-        <section>
+        <section id="review-facts">
           <div class="card card-body">
             <h2>Informations extraites</h2>
             <p>
@@ -178,7 +202,19 @@ import { AcademicFieldsComponent } from "../../catalog/academic-fields.component
           }
         </section>
       </div>
-      <section class="card card-body" style="margin-top:24px">
+      <section class="card card-body" style="margin-top:24px" id="publication">
+        <p role="status">{{ publishableFacts().length }} information(s) validée(s) à publier · {{ chosen.size }} sélectionnée(s)</p>
+        @if (publicationIssue()) {
+          <div class="alert alert-info" id="publication-help" role="status">{{ publicationIssue() }}</div>
+        }
+        @if (publishableFacts().length === 0) {
+          <button class="btn btn-secondary" [disabled]="busy()" (click)="reviewNext()">Vérifier une information extraite</button>
+        } @else {
+          <div class="page-header-actions">
+            <button class="btn btn-secondary" [disabled]="busy()" (click)="chooseAll()">Sélectionner les informations validées</button>
+            <button class="btn btn-ghost" [disabled]="busy()" (click)="chosen.clear()">Tout désélectionner</button>
+          </div>
+        }
         <h2>Publication des informations validées</h2>
         <p>
           Seuls les éléments cochés, validés et leurs références publiées seront
@@ -246,7 +282,8 @@ import { AcademicFieldsComponent } from "../../catalog/academic-fields.component
         <button
           class="btn btn-primary"
           style="margin-top:16px"
-          [disabled]="busy() || chosen.size === 0"
+          [disabled]="busy() || !!publicationIssue()"
+          aria-describedby="publication-help"
           (click)="publish()"
         >
           Publier {{ chosen.size }} information(s)
@@ -332,17 +369,15 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
       next: (r) => {
         this.review.set(r);
         this.publication.guideTitle ||= r.title;
-        this.chosen = new Set(
-          r.facts
-            .filter((f: any) => f.status === "VALIDATED" && !f.publishedAt)
-            .map((f: any) => f.id),
-        );
+        const eligible = new Set(this.publishableFacts().map((f: any) => f.id));
+        this.chosen = new Set([...this.chosen].filter(id => eligible.has(id)));
         this.preview();
       },
       error: (e) => this.fail(e),
     });
   }
   process() {
+    if (this.busy()) return;
     this.busy.set(true);
     this.error.set("");
     this.api.processDocument(this.id).subscribe({
@@ -389,6 +424,7 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
     );
   }
   decide(status: string) {
+    if (this.busy() || !this.selected || this.selected.publishedAt) return;
     this.busy.set(true);
     this.error.set("");
     this.api
@@ -403,6 +439,8 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
         next: (f) => {
           this.busy.set(false);
           this.selected = f;
+          if (f.status === "VALIDATED" && !f.publishedAt) this.chosen.add(f.id);
+          else this.chosen.delete(f.id);
           this.message.set("Décision enregistrée : " + f.status);
           this.load();
         },
@@ -410,6 +448,7 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
       });
   }
   add() {
+    if (this.busy() || !this.newPassage.trim()) return;
     this.busy.set(true);
     this.error.set("");
     this.api
@@ -432,18 +471,35 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
   toggle(id: string, yes: boolean) {
     yes ? this.chosen.add(id) : this.chosen.delete(id);
   }
+  publishableFacts(): any[] {
+    return (this.review()?.facts || []).filter((f: any) => f.status === "VALIDATED" && !f.publishedAt);
+  }
+  chooseAll() {
+    this.chosen = new Set(this.publishableFacts().slice(0, 500).map((f: any) => f.id));
+  }
+  reviewNext() {
+    const fact = (this.review()?.facts || []).find((f: any) => !f.publishedAt && f.status !== "REJECTED" && f.status !== "VALIDATED");
+    if (fact) this.select(fact);
+    document.getElementById('review-facts')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  publicationIssue(): string {
+    if (!this.publication.countryId || !this.publication.academicYearId || !this.publication.guideTitle?.trim() || !this.publication.effectiveDate)
+      return "Renseignez le pays, l’année, le titre et la date de validité.";
+    if (!this.publishableFacts().length)
+      return "Aucune information validée à publier. Vérifiez une information extraite et cliquez sur « Valider l’information ». Remplir les informations du guide ne valide pas ses extractions.";
+    if (!this.chosen.size) return "Cochez au moins une information validée à publier.";
+    const eligible = new Set(this.publishableFacts().map((f: any) => f.id));
+    if ([...this.chosen].some(id => !eligible.has(id))) return "La sélection contient une information qui n’est plus publiable. Rechargez la revue.";
+    if (this.chosen.size > 500) return "Sélectionnez au maximum 500 informations par publication.";
+    if (this.publication.expiryDate && this.publication.expiryDate < this.publication.effectiveDate)
+      return "La fin de validité doit être postérieure ou égale au début.";
+    return "";
+  }
   publish() {
-    if (
-      !this.publication.countryId ||
-      !this.publication.academicYearId ||
-      !this.publication.guideTitle?.trim() ||
-      !this.publication.effectiveDate
-    ) {
-      this.error.set(
-        "Renseignez le pays, l’année, le titre et la date de validité.",
-      );
-      return;
-    }
+    if (this.busy()) return;
+    const issue = this.publicationIssue();
+    if (issue) { this.error.set(issue); return; }
+    this.message.set("");
     this.busy.set(true);
     this.error.set("");
     const data = {

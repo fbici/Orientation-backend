@@ -1,4 +1,4 @@
-import { of, throwError, Observable } from "rxjs";
+import { of, throwError, Observable, Subject } from "rxjs";
 import { convertToParamMap } from "@angular/router";
 import { DocumentReviewComponent } from "./document-review.component";
 import {
@@ -42,6 +42,7 @@ describe("F2 human review decisions", () => {
       expiryDate: "",
       publisher: "",
     };
+    c.review.set({facts:[{id:"fact",status:"VALIDATED"}]});
     c.chosen.add("fact");
     api.publishDocument.and.returnValue(
       throwError(() => ({ error: { message: "Dependency not validated" } })),
@@ -50,6 +51,30 @@ describe("F2 human review decisions", () => {
     expect(c.error()).toBe("Dependency not validated");
     expect(c.message()).toBe("");
     expect(c.busy()).toBeFalse();
+  });
+  function metadata() {
+    Object.assign(c.publication,{countryId:'country',academicYearId:'year',guideTitle:'Guide',effectiveDate:'2026-01-01'});
+  }
+  it('explains why metadata alone cannot publish unreviewed extraction',()=>{
+    metadata();c.review.set({facts:[{id:'f',status:'TO_REVIEW'}]});c.publish();
+    expect(c.error()).toContain('Aucune information validée');expect(api.publishDocument).not.toHaveBeenCalled();
+  });
+  it('selects only validated unpublished facts and prevents duplicate publication',()=>{
+    metadata();c.review.set({facts:[{id:'f',status:'VALIDATED'},{id:'pending',status:'TO_REVIEW'},{id:'old',status:'VALIDATED',publishedAt:'date'}]});
+    c.chooseAll();expect([...c.chosen]).toEqual(['f']);
+    api.publishDocument.and.returnValue(new Subject());c.publish();c.publish();
+    expect(api.publishDocument).toHaveBeenCalledTimes(1);
+    expect(api.publishDocument.calls.mostRecent().args[1].factIds).toEqual(['f']);
+  });
+  it('rejects reversed dates and stale selections',()=>{
+    metadata();c.review.set({facts:[{id:'f',status:'VALIDATED'}]});c.chosen.add('f');
+    c.publication.expiryDate='2025-01-01';c.publish();expect(c.error()).toContain('fin de validité');
+    c.publication.expiryDate='';c.chosen.add('invalid');c.publish();expect(c.error()).toContain('plus publiable');
+    expect(api.publishDocument).not.toHaveBeenCalled();
+  });
+  it('does not reselect a deliberately unchecked fact on reload',()=>{
+    api.reviewDocument.and.returnValue(of({facts:[{id:'f',status:'VALIDATED'}],pages:[]}));c.load();
+    expect(c.chosen.size).toBe(0);
   });
   it("submits the opened fact version and leaves errors visible on conflict", () => {
     c.selected = { id: "fact", version: 7 };

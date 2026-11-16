@@ -9,4 +9,9 @@ describe('Administrative HTTP contracts',()=>{
  it('preserves search and the requested users page',()=>{api.getUsers(2,20,'Alice').subscribe();const r=http.expectOne(r=>r.url===environment.apiUrl+'/admin/users');expect(r.request.params.get('search')).toBe('Alice');expect(r.request.params.get('page')).toBe('2');r.flush({content:[],totalElements:0});});
  it('loads the real audit center endpoint',()=>{api.getActivityLogs(1,20).subscribe();const r=http.expectOne(r=>r.url===environment.apiUrl+'/backoffice/audit');expect(r.request.params.get('page')).toBe('1');r.flush({events:[],totalEvents:0,page:1,size:20});});
  it('does not truncate tenant navigation to the first page',()=>{api.getTenants(3,20).subscribe();const r=http.expectOne(r=>r.url===environment.apiUrl+'/admin/tenants');expect(r.request.params.get('page')).toBe('3');r.flush({content:[],totalElements:0});});
+ it('suspends through the existing PATCH contract, without deletion',()=>{
+  api.deactivateUser('candidate-id').subscribe();
+  const r=http.expectOne(environment.apiUrl+'/admin/users/candidate-id/deactivate');
+  expect(r.request.method).toBe('PATCH');expect(r.request.body).toEqual({});r.flush({success:true});
+ });
 });
