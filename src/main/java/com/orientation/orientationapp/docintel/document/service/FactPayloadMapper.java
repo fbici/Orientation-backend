@@ -89,11 +89,16 @@ public class FactPayloadMapper {
  private void references(Object request) {
   if(request instanceof UniversityWrite r) {
    if(countries.findById(r.countryId()).isEmpty())throw invalid("Country reference is unavailable");
-   var c=cities.findById(r.cityId()).orElseThrow(()->invalid("City reference is unavailable"));
-   if(!c.getCountry().getId().equals(r.countryId()))throw invalid("City and country differ");
+   if(r.cityId()!=null) {
+    var c=cities.findById(r.cityId()).orElseThrow(()->invalid("City reference is unavailable"));
+    if(!c.getCountry().getId().equals(r.countryId()))throw invalid("City and country differ");
+   }
   } else if(request instanceof CampusWrite r) {
-   var c=cities.findById(r.cityId()).orElseThrow(()->invalid("City reference is unavailable"));
-   if(r.universityId()!=null && !catalogue.university(r.universityId()).getCountry().getId().equals(c.getCountry().getId()))throw invalid("Campus city and university country differ");
+   var university=r.universityId()==null?null:catalogue.university(r.universityId());
+   if(r.cityId()!=null) {
+    var c=cities.findById(r.cityId()).orElseThrow(()->invalid("City reference is unavailable"));
+    if(university!=null && !university.getCountry().getId().equals(c.getCountry().getId()))throw invalid("Campus city and university country differ");
+   }
   } else if(request instanceof FacultyWrite r) {
    if(r.campusId()!=null)catalogue.campus(r.campusId());
   } else if(request instanceof ProgramWrite r) {

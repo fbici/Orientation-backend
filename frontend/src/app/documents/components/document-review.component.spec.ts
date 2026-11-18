@@ -1,3 +1,4 @@
+import { fakeAsync, tick } from "@angular/core/testing";
 import { of, throwError, Observable, Subject } from "rxjs";
 import { convertToParamMap } from "@angular/router";
 import { DocumentReviewComponent } from "./document-review.component";
@@ -27,6 +28,21 @@ describe("F2 human review decisions", () => {
     } as any);
     c.ngOnInit();
   });
+  it("reveals and focuses the editor after selecting a fact in a long list", fakeAsync(() => {
+    const editor = document.createElement('section'); editor.id = 'fact-editor'; editor.tabIndex = -1;
+    document.body.appendChild(editor);
+    const scroll = spyOn(editor, 'scrollIntoView');
+    try {
+      c.select({id:'last',kind:'UNIVERSITY',pageNumber:116,values:{name:'Source'},version:2});
+      tick();
+      expect(c.selected.id).toBe('last');
+      expect(c.values['name']).toBe('Source');
+      expect(scroll).toHaveBeenCalled();
+      expect(document.activeElement).toBe(editor);
+      c.busy.set(true); c.select({id:'other'});
+      expect(c.selected.id).toBe('last');
+    } finally { editor.remove(); c.ngOnDestroy(); }
+  }));
   it("refuses publication without required guide metadata", () => {
     c.chosen.add("fact");
     c.publish();

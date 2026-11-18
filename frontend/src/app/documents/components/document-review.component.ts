@@ -124,10 +124,13 @@ import { AcademicFieldsComponent } from "../../catalog/academic-fields.component
               Une validation confirme le sens du passage et les rattachements
               choisis. Le score OCR indique une qualité technique de lecture.
             </p>
+            <div role="group" aria-label="Informations à vérifier" style="max-height:320px;overflow-y:auto">
             @for (f of r.facts; track f.id) {
               <button
                 class="btn btn-ghost"
                 style="display:block;width:100%;text-align:left"
+                [attr.aria-pressed]="selected?.id === f.id"
+                [disabled]="busy()"
                 (click)="select(f)"
               >
                 {{ f.values.name || f.kind }} · p. {{ f.pageNumber }} ·
@@ -139,9 +142,11 @@ import { AcademicFieldsComponent } from "../../catalog/academic-fields.component
                 d'un passage exact.
               </p>
             }
+            </div>
           </div>
           @if (selected) {
-            <div class="card card-body" style="margin-top:16px">
+            <div id="fact-editor" tabindex="-1" class="card card-body" style="margin-top:16px;scroll-margin-top:90px">
+              @if (error()) { <div role="alert" class="alert alert-error">{{ error() }}</div> }
               <h3>Vérification · {{ selected.kind }}</h3>
               <blockquote style="white-space:pre-wrap">
                 {{ selected.passage }}
@@ -352,7 +357,9 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
     });
   }
   private previewRequest?: Subscription;
+  private editorScroll?: ReturnType<typeof setTimeout>;
   ngOnDestroy() {
+    clearTimeout(this.editorScroll);
     this.previewRequest?.unsubscribe();
     if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
   }
@@ -395,8 +402,15 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
     });
   }
   select(f: any) {
+    if (this.busy()) return;
     this.selected = f;
-    this.values = structuredClone(f.values);
+    this.values = structuredClone(f.values || {});
+    clearTimeout(this.editorScroll);
+    this.editorScroll = setTimeout(() => {
+      const editor = document.getElementById("fact-editor");
+      editor?.scrollIntoView({ behavior: "smooth", block: "start" });
+      editor?.focus({ preventScroll: true });
+    });
     this.editKind = f.kind;
     this.note = f.note || "";
     this.page = f.pageNumber;
@@ -480,7 +494,7 @@ export class DocumentReviewComponent implements OnInit, OnDestroy {
   reviewNext() {
     const fact = (this.review()?.facts || []).find((f: any) => !f.publishedAt && f.status !== "REJECTED" && f.status !== "VALIDATED");
     if (fact) this.select(fact);
-    document.getElementById('review-facts')?.scrollIntoView({behavior:'smooth',block:'start'});
+
   }
   publicationIssue(): string {
     if (!this.publication.countryId || !this.publication.academicYearId || !this.publication.guideTitle?.trim() || !this.publication.effectiveDate)

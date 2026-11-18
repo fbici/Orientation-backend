@@ -361,3 +361,7 @@ Cette étape couvre le premier diagnostic demandé avant l'intégration majeure
 des maquettes. La matrice complète des écrans, la recette candidat, les autres
 corrections API et le nouvel APK restent à réaliser. Aucun push, déploiement,
 envoi d'e-mail ou changement de données de production n'a été effectué.
+
+### 18 novembre 2026 — accès à la validation du guide
+La liste des extractions est bornée en hauteur. La sélection amène le focus au formulaire de revue et les erreurs restent visibles près des actions. Les villes facultatives ne bloquent plus la validation des universités et campus ; une ville renseignée reste contrôlée. Validation : 13 tests Angular documentaires, 2 tests FactPayloadMapperTest et 5 BackofficeContractsTest réussis ; build Angular production réussi. Aucun guide de production publié automatiquement.
+

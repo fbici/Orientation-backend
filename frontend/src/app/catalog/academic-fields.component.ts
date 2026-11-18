@@ -41,7 +41,7 @@ export const ACADEMIC_FIELDS: Record<string, AcademicField[]> = {
     name,
     field("shortName", "Sigle"),
     country,
-    city,
+    { ...city, required: false },
     field("type", "Type d'établissement", "select", false, undefined, [
       "PUBLIC",
       "PRIVATE",
