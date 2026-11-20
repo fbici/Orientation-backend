@@ -7,7 +7,14 @@ import java.util.*;
 @RestController @RequestMapping("/guides") @RequiredArgsConstructor
 public class OrientationGuideController {
  private final GuideCatalogueService catalogue;
+ private final com.orientation.orientationapp.modules.orientation.service.PublishedGuideReader reader;
  @GetMapping public Page<Map<String,Object>> list(@RequestParam(defaultValue="0")int page,@RequestParam(defaultValue="20")int size,@RequestParam(required=false)UUID countryId,@RequestParam(required=false)UUID academicYearId,@RequestParam(required=false)String search){return catalogue.list(page,size,countryId,academicYearId,search);}
  @GetMapping("/{id}") public Map<String,Object> get(@PathVariable UUID id){return catalogue.get(id);}
  @GetMapping("/{id}/versions") public List<Map<String,Object>> versions(@PathVariable UUID id){return catalogue.versions(id);}
+ @GetMapping(value="/{id}/versions/{versionId}/pages/{page}",produces="image/png")
+ public org.springframework.http.ResponseEntity<byte[]> page(@PathVariable UUID id,@PathVariable UUID versionId,@PathVariable int page) {
+  return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+   .contentType(org.springframework.http.MediaType.IMAGE_PNG).body(reader.page(id,versionId,page));
+ }
 }
+

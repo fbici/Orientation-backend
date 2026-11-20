@@ -365,3 +365,14 @@ envoi d'e-mail ou changement de données de production n'a été effectué.
 ### 18 novembre 2026 — accès à la validation du guide
 La liste des extractions est bornée en hauteur. La sélection amène le focus au formulaire de revue et les erreurs restent visibles près des actions. Les villes facultatives ne bloquent plus la validation des universités et campus ; une ville renseignée reste contrôlée. Validation : 13 tests Angular documentaires, 2 tests FactPayloadMapperTest et 5 BackofficeContractsTest réussis ; build Angular production réussi. Aucun guide de production publié automatiquement.
 
+
+### 20 novembre 2026 — lecture des guides publiés sur mobile
+L’API `/guides/{id}/versions/{versionId}/pages/{page}` fournit une page PNG du
+fichier original de la version publiée. Elle contrôle le périmètre du catalogue,
+le rattachement de la version, son état ACTIVE et la suppression du document.
+Les routes administratives des documents conservent leurs permissions.
+Le rendu vérifie l’empreinte, limite la taille et les dimensions et sérialise les
+rendus pour limiter les pics mémoire. Aucune clé ni URL de stockage n’est exposée.
+La lecture requiert que le fichier source soit encore disponible dans le stockage.
+Tests isolés : refus hors périmètre, mauvaise version, archive, document supprimé,
+fichier de la version publiée et rendu PDF synthétique. Aucun guide réel modifié.

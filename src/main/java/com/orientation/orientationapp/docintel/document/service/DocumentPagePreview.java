@@ -19,14 +19,17 @@ public class DocumentPagePreview {
  private final ResourceAccess access;
  public byte[] render(UUID id,int number) {
   access.require("DOCUMENT_READ");var d=documents.getById(id);
+  return renderSource(d.getStoredFileName(),d.getChecksum(),d.getMimeType(),number);
+ }
+ public synchronized byte[] renderSource(String filename,String checksum,String mimeType,int number) {
   if(number<1 || number>200)throw invalid();
   try {
-   var path=storage.load(d.getStoredFileName());
+   var path=storage.load(filename);
    if(java.nio.file.Files.size(path)>10*1024*1024)throw invalid();
    byte[] bytes=java.nio.file.Files.readAllBytes(path);
-   if(!PersistenceService.digestBytes(bytes).equals(d.getChecksum()))throw new ResponseStatusException(HttpStatus.CONFLICT,"Stored source checksum differs");
+   if(!PersistenceService.digestBytes(bytes).equals(checksum))throw new ResponseStatusException(HttpStatus.CONFLICT,"Stored source checksum differs");
    java.awt.image.BufferedImage image;
-   if(d.getMimeType().equals("application/pdf")) {
+   if("application/pdf".equals(mimeType)) {
     try(var pdf=Loader.loadPDF(bytes)) {
      if(pdf.isEncrypted() || number>pdf.getNumberOfPages() || pdf.getNumberOfPages()>200)throw invalid();
      var box=pdf.getPage(number-1).getCropBox();pixels(box.getWidth()*150/72.0,box.getHeight()*150/72.0);
